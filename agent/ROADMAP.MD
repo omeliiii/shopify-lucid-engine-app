@@ -43,6 +43,22 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 | Funzionalità Esportazione LUCID (XML) | ✅ Completato | Download da `/reports/:id/export/registry`. |
 | Funzionalità Esportazione CONAI/CITEO (CSV) | ✅ Completato | Download da `/reports/:id/export/registry` o `dual-system`. |
 
+### Fase 5: Miglioramenti e fix
+| Task | Stato | Note |
+| :--- | :--- | :--- |
+| Centralizzazione mock delle varie API e configurazione in .env |
+| Nella dashboard la distribuzione materiali deve essere un grafico a torta con dati veri restituiti dal backend |
+| Nella dashboard la lista degli ordini deve essere paginata e il Paese deve avere anche il colore della bandiera |
+| Nell'inventario imballaggi ci deve essere una sezione superiore con i suggerimenti dell'AI, con le box che mostrano l'immagine del packaging e il nome con i tasti elimina (che elimina il suggerimento), accetta (che accetta il suggerimento e lo aggiunge alla lista dei packaging) e modifica (che accetta il suggerimento ma apre il form di modifica con i dati) |
+| Nell'inventario imballaggi la lista dei packaging deve avere card con foto e nome e il tasto per eliminare o modificare l'imballaggio |
+| Nell'inventario imballaggi nel popup per l'aggiunta di un imballaggio ci devono essere tutti gli imballaggi standard censiti a db (API /packaging/types che torna i vari name, agnosticMaterial, defaultGsm, formulaType, defaultOverlapFactor, embedding), divisi per agnosticMaterial con i tasti accetta e modifica |
+| Regole di spedizione oltre a nome regola e numero massimo articoli devono avere numero minimo articoli, imballaggio secondario da selezionare come per l'inventario imballaggi, riempimento e priorità. Inoltre ci deve essere il tasto per modificare o eliminare una regola |
+| In report e dichiarazioni la tabella deve essere paginata e filtrabile per Paese e date |
+| In report e dichiarazioni i tasti download devono chiamare realmente le API per fare il download dei file |
+| Implementare i18n per tradurre l'app in italiano, inglese, francese e tedesco |
+| Migliorare UI/UX e layout generale |
+
+
 ## Note Generali
 * Usare **zod** per validare gli schema.
 * Gestire configurazione variabili d'ambiente (non cablate).
