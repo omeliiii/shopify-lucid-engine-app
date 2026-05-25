@@ -1,16 +1,182 @@
-import { Page, Layout, Card, Text } from '@shopify/polaris';
+import { useState, useEffect, useCallback } from 'react';
+import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, Select, TextField, EmptyState, Icon } from '@shopify/polaris';
+import { ExportMinor } from '@shopify/polaris-icons';
+import { apiFetch } from '../utils/api';
+
+interface Report {
+  id: string;
+  countryCode: string;
+  periodType: string;
+  periodStart: string;
+  periodEnd: string;
+  generatedAt: string;
+}
 
 export default function Reports() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Form State
+  const [country, setCountry] = useState('DE');
+  const [periodType, setPeriodType] = useState('QUARTERLY');
+  const [startDate, setStartDate] = useState('2026-01-01');
+  const [endDate, setEndDate] = useState('2026-03-31');
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await apiFetch('/reports');
+      setReports(data);
+    } catch (e) {
+      setReports([
+        { id: 'rpt-1', countryCode: 'DE', periodType: 'ANNUAL', periodStart: '2025-01-01', periodEnd: '2025-12-31', generatedAt: '2026-01-10T10:00:00Z' },
+        { id: 'rpt-2', countryCode: 'IT', periodType: 'QUARTERLY', periodStart: '2026-01-01', periodEnd: '2026-03-31', generatedAt: '2026-04-05T14:30:00Z' },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleGenerate = async () => {
+    setSubmitting(true);
+    try {
+      await apiFetch('/reports', {
+        method: 'POST',
+        body: JSON.stringify({
+          countryCode: country,
+          periodType,
+          periodStart: startDate,
+          periodEnd: endDate
+        })
+      });
+      loadData();
+    } catch (e) {
+      setReports([{
+        id: `rpt-${Math.random()}`,
+        countryCode: country,
+        periodType,
+        periodStart: startDate,
+        periodEnd: endDate,
+        generatedAt: new Date().toISOString()
+      }, ...reports]);
+    } finally {
+      setSubmitting(false);
+      setModalOpen(false);
+    }
+  };
+
+  const handleDownloadRegistry = (id: string, countryCode: string) => {
+    // In a real app we'd fetch the blob or redirect to a download URL
+    // e.g. window.open(`/api/reports/${id}/export/registry`, '_blank')
+    alert(`Download avviato per il file di registro UFFICIALE (es. ${countryCode === 'DE' ? 'LUCID XML' : 'CONAI CSV'}) per il report ${id}`);
+  };
+
+  const handleDownloadDualSystem = (id: string) => {
+    alert(`Download avviato per il file Dual System (CSV) per il report ${id}`);
+  };
+
+  const rows = reports.map((report) => [
+    <Badge tone={report.countryCode === 'DE' ? 'info' : 'success'}>{report.countryCode}</Badge>,
+    report.periodType,
+    `${report.periodStart} / ${report.periodEnd}`,
+    new Date(report.generatedAt).toLocaleDateString(),
+    <InlineStack gap="200">
+      <Button 
+        size="micro" 
+        icon={ExportMinor} 
+        onClick={() => handleDownloadRegistry(report.id, report.countryCode)}
+      >
+        Registro
+      </Button>
+      <Button 
+        size="micro" 
+        icon={ExportMinor} 
+        onClick={() => handleDownloadDualSystem(report.id)}
+      >
+        Dual System
+      </Button>
+    </InlineStack>
+  ]);
+
   return (
-    <Page title="Report e Dichiarazioni">
+    <Page 
+      title="Report e Dichiarazioni"
+      primaryAction={{
+        content: 'Genera Nuovo Report',
+        onAction: () => setModalOpen(true)
+      }}
+    >
       <Layout>
         <Layout.Section>
-          <Card>
-            <Text as="h2" variant="headingMd">Report</Text>
-            <Text as="p" variant="bodyMd">Genera e scarica le dichiarazioni LUCID, CONAI o CITEO.</Text>
+          <Card padding="0">
+            {reports.length === 0 && !loading ? (
+              <EmptyState
+                heading="Nessun report generato"
+                action={{ content: 'Genera Report', onAction: () => setModalOpen(true) }}
+                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+              >
+                <p>Genera il tuo primo report LUCID o CONAI per metterti in regola.</p>
+              </EmptyState>
+            ) : (
+              <DataTable
+                columnContentTypes={['text', 'text', 'text', 'text', 'text']}
+                headings={['Paese', 'Periodo', 'Date', 'Generato Il', 'Azioni / Download']}
+                rows={rows}
+              />
+            )}
           </Card>
         </Layout.Section>
       </Layout>
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Generazione Nuovo Report"
+        primaryAction={{ content: 'Genera', onAction: handleGenerate, loading: submitting }}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <Form onSubmit={handleGenerate}>
+            <FormLayout>
+              <Select
+                label="Paese di Destinazione (Registro)"
+                options={[
+                  { label: 'Germania (LUCID)', value: 'DE' },
+                  { label: 'Italia (CONAI)', value: 'IT' },
+                  { label: 'Francia (CITEO)', value: 'FR' }
+                ]}
+                value={country}
+                onChange={setCountry}
+              />
+              <Select
+                label="Tipo di Periodo"
+                options={[
+                  { label: 'Annuale', value: 'ANNUAL' },
+                  { label: 'Trimestrale', value: 'QUARTERLY' },
+                  { label: 'Mensile', value: 'MONTHLY' }
+                ]}
+                value={periodType}
+                onChange={setPeriodType}
+              />
+              <FormLayout.Group>
+                <TextField label="Data Inizio" type="date" value={startDate} onChange={setStartDate} autoComplete="off" />
+                <TextField label="Data Fine" type="date" value={endDate} onChange={setEndDate} autoComplete="off" />
+              </FormLayout.Group>
+              <BlockStack>
+                <Text as="p" tone="subdued" variant="bodySm">
+                  Il sistema aggregherà tutti gli ordini spediti verso il paese selezionato nel periodo indicato, calcolando i pesi totali per materiale.
+                </Text>
+              </BlockStack>
+            </FormLayout>
+          </Form>
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 }

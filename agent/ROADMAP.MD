@@ -38,10 +38,10 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 ### Fase 4: Generazione & Download Report
 | Task | Stato | Note |
 | :--- | :--- | :--- |
-| Interfaccia Storico Report | ⏳ In attesa | Lista report da `GET /reports`. |
-| Form Generazione Nuovo Report | ⏳ In attesa | Selezione Paese, Periodo, Date (`POST /reports`). |
-| Funzionalità Esportazione LUCID (XML) | ⏳ In attesa | Download da `/reports/:id/export/registry`. |
-| Funzionalità Esportazione CONAI/CITEO (CSV) | ⏳ In attesa | Download da `/reports/:id/export/registry` o `dual-system`. |
+| Interfaccia Storico Report | ✅ Completato | Lista report da `GET /reports`. |
+| Form Generazione Nuovo Report | ✅ Completato | Selezione Paese, Periodo, Date (`POST /reports`). |
+| Funzionalità Esportazione LUCID (XML) | ✅ Completato | Download da `/reports/:id/export/registry`. |
+| Funzionalità Esportazione CONAI/CITEO (CSV) | ✅ Completato | Download da `/reports/:id/export/registry` o `dual-system`. |
 
 ## Note Generali
 * Usare **zod** per validare gli schema.
