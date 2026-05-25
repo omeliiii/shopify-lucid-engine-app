@@ -32,6 +32,11 @@ export const MOCKS: Record<string, any> = {
     { id: '1', customName: 'Bustina Calzini Custom', material: 'PAPER', dimensions: '150x100x20 mm', weight: 7.92 },
     { id: '2', customName: 'Scatola Standard', material: 'COMPOSITE', dimensions: '300x200x100 mm', weight: 150 },
   ],
+  '/packaging/suggestions': [
+    { id: 'sugg-1', customName: 'Scatola Grande Eco', material: 'PAPER', dimensions: '400x300x200 mm', weight: 250, customLengthMm: 400, customWidthMm: 300, customHeightMm: 200 },
+    { id: 'sugg-2', customName: 'Busta Plastica Piccola', material: 'PLASTIC', dimensions: '250x350x5 mm', weight: 15, customLengthMm: 250, customWidthMm: 350, customHeightMm: 5 },
+    { id: 'sugg-3', customName: 'Tubo Postale', material: 'COMPOSITE', dimensions: '100x100x500 mm', weight: 80, customLengthMm: 100, customWidthMm: 100, customHeightMm: 500 }
+  ],
   '/products/mappings': [
     {
       id: '1',
