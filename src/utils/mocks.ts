@@ -37,6 +37,13 @@ export const MOCKS: Record<string, any> = {
     { id: 'sugg-2', customName: 'Busta Plastica Piccola', material: 'PLASTIC', dimensions: '250x350x5 mm', weight: 15, customLengthMm: 250, customWidthMm: 350, customHeightMm: 5 },
     { id: 'sugg-3', customName: 'Tubo Postale', material: 'COMPOSITE', dimensions: '100x100x500 mm', weight: 80, customLengthMm: 100, customWidthMm: 100, customHeightMm: 500 }
   ],
+  '/packaging/types': [
+    { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', defaultGsm: 400, formulaType: 'BOX' },
+    { id: 't2', name: 'Busta Imbottita', agnosticMaterial: 'PAPER', defaultGsm: 150, formulaType: 'MAILER' },
+    { id: 't3', name: 'Busta Polietilene', agnosticMaterial: 'PLASTIC', defaultGsm: 50, formulaType: 'MAILER' },
+    { id: 't4', name: 'Nastro Adesivo', agnosticMaterial: 'PLASTIC', defaultGsm: 30, formulaType: 'TAPE' },
+    { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', defaultGsm: 600, formulaType: 'TUBE' }
+  ],
   '/products/mappings': [
     {
       id: '1',

@@ -14,9 +14,19 @@ interface InventoryItem {
   customHeightMm?: number;
 }
 
+interface PackagingType {
+  id: string;
+  name: string;
+  agnosticMaterial: string;
+  defaultGsm?: number;
+  formulaType?: string;
+  defaultOverlapFactor?: number;
+}
+
 export default function Inventory() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [suggestions, setSuggestions] = useState<InventoryItem[]>([]);
+  const [standardTypes, setStandardTypes] = useState<PackagingType[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +48,8 @@ export default function Inventory() {
       setItems(data);
       const suggData = await apiFetch('/packaging/suggestions');
       setSuggestions(suggData);
+      const typesData = await apiFetch('/packaging/types');
+      setStandardTypes(typesData);
     } catch (e) {
       console.error("Failed to load inventory", e);
     } finally {
@@ -134,9 +146,9 @@ export default function Inventory() {
     if (!item.customLengthMm && item.dimensions) {
       const parts = item.dimensions.replace(' mm', '').split('x');
       if (parts.length === 3) {
-        setLength(parts[0]);
-        setWidth(parts[1]);
-        setHeight(parts[2]);
+        setLength(parts[0].trim());
+        setWidth(parts[1].trim());
+        setHeight(parts[2].trim());
       }
     } else {
       setLength(item.customLengthMm?.toString() || '');
@@ -149,6 +161,34 @@ export default function Inventory() {
     setEditingSuggestionId(null);
     setModalOpen(true);
   };
+
+  const handleAcceptType = async (type: PackagingType) => {
+    setSubmitting(true);
+    const bodyParams = {
+      customName: type.name,
+      material: type.agnosticMaterial,
+      customLengthMm: 0,
+      customWidthMm: 0,
+      customHeightMm: 0,
+      customWeightGrams: 0
+    };
+    try {
+      await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
+      setModalOpen(false);
+      loadData();
+    } catch (e) {
+      setItems([...items, { id: Math.random().toString(), customName: type.name, material: type.agnosticMaterial, dimensions: '0x0x0 mm', weight: 0 }]);
+      setModalOpen(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const groupedTypes = standardTypes.reduce((acc, curr) => {
+    if (!acc[curr.agnosticMaterial]) acc[curr.agnosticMaterial] = [];
+    acc[curr.agnosticMaterial].push(curr);
+    return acc;
+  }, {} as Record<string, PackagingType[]>);
 
   const handleDeleteItem = async (id: string) => {
     try {
@@ -282,6 +322,39 @@ export default function Inventory() {
         ]}
       >
         <Modal.Section>
+          {!editingItemId && !editingSuggestionId && standardTypes.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <BlockStack gap="400">
+                <Text as="h3" variant="headingMd">Imballaggi Standard</Text>
+                {Object.entries(groupedTypes).map(([material, types]) => (
+                  <BlockStack key={material} gap="200">
+                    <Text as="h4" variant="headingSm" tone="subdued">{material}</Text>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                      {types.map(type => (
+                        <Card key={type.id} padding="200" background="bg-surface-secondary">
+                          <BlockStack gap="200">
+                            <Text as="span" fontWeight="bold">{type.name}</Text>
+                            <InlineStack gap="100" align="end">
+                              <Button size="micro" onClick={() => {
+                                setName(type.name);
+                                setMaterial(type.agnosticMaterial);
+                                // Optional: scroll down to custom form
+                                document.getElementById('custom-form')?.scrollIntoView({ behavior: 'smooth' });
+                              }}>Modifica</Button>
+                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)}>Accetta</Button>
+                            </InlineStack>
+                          </BlockStack>
+                        </Card>
+                      ))}
+                    </div>
+                  </BlockStack>
+                ))}
+              </BlockStack>
+              <div style={{ marginTop: '24px', marginBottom: '8px', borderBottom: '1px solid #e1e3e5' }}></div>
+              <Text as="h3" variant="headingMd" id="custom-form">Personalizza Imballaggio</Text>
+            </div>
+          )}
+
           <Form onSubmit={handleSubmit}>
             <FormLayout>
               <TextField label="Nome Personalizzato" value={name} onChange={setName} autoComplete="off" placeholder="es. Bustina Calzini Custom" />
