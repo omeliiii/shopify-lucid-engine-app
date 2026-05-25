@@ -11,9 +11,9 @@ import {
   BlockStack,
   InlineStack,
   Badge,
-  ProgressBar,
   EmptyState
 } from '@shopify/polaris';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
 
 interface ShippingLog {
@@ -27,7 +27,9 @@ interface ShippingLog {
 
 interface KPI {
   totalWeightKg: number;
+  weightByCountry: { country: string; weight: number }[];
   trackedOrders: number;
+  ordersHistory: { day: string; count: number }[];
   materials: { name: string; percentage: number; color: "success" | "highlight" | "critical" | "primary" }[];
 }
 
@@ -93,40 +95,98 @@ export default function Dashboard() {
       <Layout>
         {/* KPI Section */}
         <Layout.Section variant="oneThird">
-          <Card>
-            <BlockStack gap="400">
-              <Text as="h3" variant="headingSm">Peso Totale Spedito</Text>
-              <Text as="p" variant="headingXl">{kpis?.totalWeightKg} kg</Text>
-            </BlockStack>
-          </Card>
+          <div style={{ height: '100%' }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', height: '320px' }}>
+                <BlockStack gap="400">
+                  <Text as="h3" variant="headingSm">Peso Totale per Paese</Text>
+                  <Text as="p" variant="headingXl">{kpis?.totalWeightKg} kg</Text>
+                  <div style={{ width: '100%', height: 200, marginTop: 'auto' }}>
+                    {kpis?.weightByCountry ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={kpis.weightByCountry} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e5e7" />
+                          <XAxis dataKey="country" axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
+                          <Tooltip formatter={(value) => [`${value} kg`, 'Peso']} cursor={{ fill: '#f4f6f8' }} />
+                          <Bar dataKey="weight" fill="#005bd3" radius={[4, 4, 0, 0]} barSize={40} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : null}
+                  </div>
+                </BlockStack>
+              </div>
+            </Card>
+          </div>
         </Layout.Section>
 
         <Layout.Section variant="oneThird">
-          <Card>
-            <BlockStack gap="400">
-              <Text as="h3" variant="headingSm">Ordini Tracciati</Text>
-              <Text as="p" variant="headingXl">{kpis?.trackedOrders}</Text>
-            </BlockStack>
-          </Card>
+          <div style={{ height: '100%' }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', height: '320px' }}>
+                <BlockStack gap="400">
+                  <Text as="h3" variant="headingSm">Ordini Tracciati (Ultimi 5 gg)</Text>
+                  <Text as="p" variant="headingXl">{kpis?.trackedOrders}</Text>
+                  <div style={{ width: '100%', height: 200, marginTop: 'auto' }}>
+                    {kpis?.ordersHistory ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={kpis.ordersHistory} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#1c7100" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#1c7100" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e5e7" />
+                          <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
+                          <Tooltip formatter={(value) => [`${value} ordini`, 'Ordini']} />
+                          <Area type="monotone" dataKey="count" stroke="#1c7100" fillOpacity={1} fill="url(#colorOrders)" strokeWidth={3} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    ) : null}
+                  </div>
+                </BlockStack>
+              </div>
+            </Card>
+          </div>
         </Layout.Section>
 
         <Layout.Section variant="oneThird">
-          <Card>
-            <BlockStack gap="400">
-              <Text as="h3" variant="headingSm">Distribuzione Materiali</Text>
-              <BlockStack gap="200">
-                {kpis?.materials.map((mat) => (
-                  <BlockStack key={mat.name} gap="100">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodySm">{mat.name}</Text>
-                      <Text as="span" variant="bodySm" fontWeight="bold">{mat.percentage}%</Text>
-                    </InlineStack>
-                    <ProgressBar progress={mat.percentage} size="small" tone={mat.color} />
-                  </BlockStack>
-                ))}
-              </BlockStack>
-            </BlockStack>
-          </Card>
+          <div style={{ height: '100%' }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', height: '320px' }}>
+                <BlockStack gap="400">
+                  <Text as="h3" variant="headingSm">Distribuzione Materiali</Text>
+                  <div style={{ width: '100%', height: 250, marginTop: 'auto' }}>
+                    {kpis?.materials && kpis.materials.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                          <Pie
+                            data={kpis.materials}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={70}
+                            paddingAngle={5}
+                            dataKey="percentage"
+                            nameKey="name"
+                          >
+                            {kpis.materials.map((entry, index) => {
+                              const colors = ['#1c7100', '#005bd3', '#e3a008', '#de3618', '#000000'];
+                              return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                            })}
+                          </Pie>
+                          <Tooltip formatter={(value) => `${value}%`} />
+                          <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <Text as="p" tone="subdued">Nessun dato disponibile</Text>
+                    )}
+                  </div>
+                </BlockStack>
+              </div>
+            </Card>
+          </div>
         </Layout.Section>
 
         {/* Logs Table Section */}

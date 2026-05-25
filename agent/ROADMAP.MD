@@ -47,7 +47,8 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 | Task | Stato | Note |
 | :--- | :--- | :--- |
 | Centralizzazione mock delle varie API e configurazione in .env | ✅ Completato | Utilizza `VITE_USE_MOCKS` in `.env`. |
-| Nella dashboard la distribuzione materiali deve essere un grafico a torta con dati veri restituiti dal backend |
+| Nella dashboard la distribuzione materiali deve essere un grafico a torta con dati veri restituiti dal backend | ✅ Completato | Utilizzato `recharts` con fetching su `/orders/kpis`. |
+| Suddividere il peso totale per Paese tramite un grafico a barre, ed allineare in altezza tutte le card KPI della dashboard | ✅ Completato | Utilizzato `BarChart` di Recharts, aggiunto mock per storico ordini con `AreaChart` per riempire e flexbox per altezze uniformi. |
 | Nella dashboard la lista degli ordini deve essere paginata e il Paese deve avere anche il colore della bandiera |
 | Nell'inventario imballaggi ci deve essere una sezione superiore con i suggerimenti dell'AI, con le box che mostrano l'immagine del packaging e il nome con i tasti elimina (che elimina il suggerimento), accetta (che accetta il suggerimento e lo aggiunge alla lista dei packaging) e modifica (che accetta il suggerimento ma apre il form di modifica con i dati) |
 | Nell'inventario imballaggi la lista dei packaging deve avere card con foto e nome e il tasto per eliminare o modificare l'imballaggio |

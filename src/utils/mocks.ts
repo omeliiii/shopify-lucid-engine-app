@@ -9,7 +9,19 @@ export const MOCKS: Record<string, any> = {
   },
   '/orders/kpis': {
     totalWeightKg: 124.5,
+    weightByCountry: [
+      { country: 'DE', weight: 65.2 },
+      { country: 'IT', weight: 40.1 },
+      { country: 'FR', weight: 19.2 },
+    ],
     trackedOrders: 1045,
+    ordersHistory: [
+      { day: 'Lun', count: 120 },
+      { day: 'Mar', count: 210 },
+      { day: 'Mer', count: 180 },
+      { day: 'Gio', count: 240 },
+      { day: 'Ven', count: 295 },
+    ],
     materials: [
       { name: 'Carta / Cartone', percentage: 65, color: 'success' },
       { name: 'Plastica', percentage: 25, color: 'highlight' },
