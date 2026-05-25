@@ -25,10 +25,7 @@ export default function ShippingRules() {
       const data = await apiFetch('/orders/shipping-rules');
       setRules(data);
     } catch (e) {
-      setRules([
-        { id: '1', name: 'Box Calzini Fino a 5 Articoli', maxItems: 5, isActive: true },
-        { id: '2', name: 'Scatola Grande (> 5 Articoli)', maxItems: 20, isActive: false },
-      ]);
+      console.error("Failed to load rules", e);
     } finally {
       setLoading(false);
     }

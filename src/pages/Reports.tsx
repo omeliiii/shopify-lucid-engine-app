@@ -30,10 +30,7 @@ export default function Reports() {
       const data = await apiFetch('/reports');
       setReports(data);
     } catch (e) {
-      setReports([
-        { id: 'rpt-1', countryCode: 'DE', periodType: 'ANNUAL', periodStart: '2025-01-01', periodEnd: '2025-12-31', generatedAt: '2026-01-10T10:00:00Z' },
-        { id: 'rpt-2', countryCode: 'IT', periodType: 'QUARTERLY', periodStart: '2026-01-01', periodEnd: '2026-03-31', generatedAt: '2026-04-05T14:30:00Z' },
-      ]);
+      console.error("Failed to load reports", e);
     } finally {
       setLoading(false);
     }

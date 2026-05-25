@@ -30,11 +30,7 @@ export default function Inventory() {
       const data = await apiFetch('/packaging/inventory');
       setItems(data);
     } catch (e) {
-      console.warn("Using mock data for inventory");
-      setItems([
-        { id: '1', customName: 'Bustina Calzini Custom', material: 'PAPER', dimensions: '150x100x20 mm', weight: 7.92 },
-        { id: '2', customName: 'Scatola Standard', material: 'COMPOSITE', dimensions: '300x200x100 mm', weight: 150 },
-      ]);
+      console.error("Failed to load inventory", e);
     } finally {
       setLoading(false);
     }

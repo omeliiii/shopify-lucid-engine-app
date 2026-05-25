@@ -42,34 +42,12 @@ export default function Dashboard() {
       try {
         setLoading(true);
         // Attempt to fetch logs
-        let logsData: any;
-        try {
-          logsData = await apiFetch('/orders/logs?page=1&limit=10');
-        } catch (e) {
-          console.warn("Backend not available, using mock logs");
-          // Fallback to mock data for demonstration
-          logsData = {
-            data: [
-              { id: '1', shopifyOrderId: '#1045', orderDate: '2026-05-25', countryCode: 'DE', totalWeightGrams: 450, components: 'Scatola di cartone, Nastro' },
-              { id: '2', shopifyOrderId: '#1046', orderDate: '2026-05-24', countryCode: 'IT', totalWeightGrams: 120, components: 'Busta plastica' },
-              { id: '3', shopifyOrderId: '#1047', orderDate: '2026-05-24', countryCode: 'FR', totalWeightGrams: 890, components: 'Scatola di cartone, Pluriball' },
-              { id: '4', shopifyOrderId: '#1048', orderDate: '2026-05-23', countryCode: 'DE', totalWeightGrams: 50, components: 'Busta carta' },
-            ]
-          };
-        }
-
+        const logsData = await apiFetch('/orders/logs?page=1&limit=10');
         setLogs(logsData.data || []);
         
         // Calculate or fetch KPIs
-        setKpis({
-          totalWeightKg: 124.5,
-          trackedOrders: 1045,
-          materials: [
-            { name: 'Carta / Cartone', percentage: 65, color: 'success' },
-            { name: 'Plastica', percentage: 25, color: 'highlight' },
-            { name: 'Composito', percentage: 10, color: 'critical' },
-          ]
-        });
+        const kpisData = await apiFetch('/orders/kpis');
+        setKpis(kpisData);
 
       } catch (err) {
         setError(true);

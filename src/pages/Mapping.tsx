@@ -27,34 +27,7 @@ export default function Mapping() {
       const data = await apiFetch('/products/mappings');
       setProducts(data);
     } catch (e) {
-      setProducts([
-        {
-          id: '1',
-          title: 'Calzini sportivi in cotone',
-          currentMapping: null,
-          recommendation: {
-            packagingName: 'Bustina Calzini Custom',
-            confidence: 0.94,
-            reason: 'Mappato per similarità semantica con abbigliamento sportivo.'
-          }
-        },
-        {
-          id: '2',
-          title: 'Scarpe da Corsa PRO',
-          currentMapping: 'Scatola Scarpe Standard',
-          recommendation: null
-        },
-        {
-          id: '3',
-          title: 'T-Shirt Basic',
-          currentMapping: null,
-          recommendation: {
-            packagingName: 'Busta Plastica Media',
-            confidence: 0.78,
-            reason: 'Categoria t-shirt spesso associata a buste medie.'
-          }
-        }
-      ]);
+      console.error("Failed to load mappings", e);
     } finally {
       setLoading(false);
     }
