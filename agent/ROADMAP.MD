@@ -21,9 +21,9 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 ### Fase 2: Dashboard e Log Spedizioni
 | Task | Stato | Note |
 | :--- | :--- | :--- |
-| Creazione KPI Card (Peso, Ordini, Materiali) | ⏳ In attesa | Grafico a torta/barre per distribuzione materiali. |
-| Tabella Log Spedizioni (Polaris DataTable) | ⏳ In attesa | Implementare fetch con paginazione (`/orders/logs`). |
-| Gestione Skeleton Loading & Error States | ⏳ In attesa | |
+| Creazione KPI Card (Peso, Ordini, Materiali) | ✅ Completato | Grafico a torta/barre per distribuzione materiali. |
+| Tabella Log Spedizioni (Polaris DataTable) | ✅ Completato | Implementare fetch con paginazione (`/orders/logs`). |
+| Gestione Skeleton Loading & Error States | ✅ Completato | |
 
 ### Fase 3: CRUD Inventario e Mappatura
 | Task | Stato | Note |
