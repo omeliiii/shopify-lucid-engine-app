@@ -29,6 +29,7 @@ export default function Inventory() {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [editingSuggestionId, setEditingSuggestionId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -50,18 +51,27 @@ export default function Inventory() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    const bodyParams = {
+      customName: name,
+      material,
+      customLengthMm: Number(length),
+      customWidthMm: Number(width),
+      customHeightMm: Number(height),
+      customWeightGrams: Number(weight)
+    };
+
     try {
-      await apiFetch('/packaging/inventory', {
-        method: 'POST',
-        body: JSON.stringify({
-          customName: name,
-          material,
-          customLengthMm: Number(length),
-          customWidthMm: Number(width),
-          customHeightMm: Number(height),
-          customWeightGrams: Number(weight)
-        })
-      });
+      if (editingItemId) {
+        await apiFetch(`/packaging/inventory/${editingItemId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(bodyParams)
+        });
+      } else {
+        await apiFetch('/packaging/inventory', {
+          method: 'POST',
+          body: JSON.stringify(bodyParams)
+        });
+      }
       setModalOpen(false);
       if (editingSuggestionId) {
         setSuggestions(suggestions.filter(s => s.id !== editingSuggestionId));
@@ -70,7 +80,11 @@ export default function Inventory() {
       loadData();
     } catch (e) {
       // Simulate success for demo
-      setItems([...items, { id: Math.random().toString(), customName: name, material, dimensions: `${length}x${width}x${height} mm`, weight: Number(weight) }]);
+      if (editingItemId) {
+        setItems(items.map(i => i.id === editingItemId ? { ...i, customName: name, material, dimensions: `${length}x${width}x${height} mm`, weight: Number(weight) } : i));
+      } else {
+        setItems([...items, { id: Math.random().toString(), customName: name, material, dimensions: `${length}x${width}x${height} mm`, weight: Number(weight) }]);
+      }
       setModalOpen(false);
       if (editingSuggestionId) {
         setSuggestions(suggestions.filter(s => s.id !== editingSuggestionId));
@@ -78,6 +92,7 @@ export default function Inventory() {
       }
     } finally {
       setSubmitting(false);
+      setEditingItemId(null);
     }
   };
 
@@ -111,6 +126,39 @@ export default function Inventory() {
     setSuggestions(suggestions.filter(s => s.id !== id));
   };
 
+  const handleEditItem = (item: InventoryItem) => {
+    setName(item.customName);
+    setMaterial(item.material);
+    
+    // Parse dimensions if customLengthMm is missing (due to mock data format)
+    if (!item.customLengthMm && item.dimensions) {
+      const parts = item.dimensions.replace(' mm', '').split('x');
+      if (parts.length === 3) {
+        setLength(parts[0]);
+        setWidth(parts[1]);
+        setHeight(parts[2]);
+      }
+    } else {
+      setLength(item.customLengthMm?.toString() || '');
+      setWidth(item.customWidthMm?.toString() || '');
+      setHeight(item.customHeightMm?.toString() || '');
+    }
+    
+    setWeight(item.weight?.toString() || '');
+    setEditingItemId(item.id);
+    setEditingSuggestionId(null);
+    setModalOpen(true);
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await apiFetch(`/packaging/inventory/${id}`, { method: 'DELETE' });
+      setItems(items.filter(i => i.id !== id));
+    } catch (e) {
+      setItems(items.filter(i => i.id !== id));
+    }
+  };
+
   const resetForm = () => {
     setName('');
     setMaterial('PAPER');
@@ -119,6 +167,7 @@ export default function Inventory() {
     setHeight('');
     setWeight('');
     setEditingSuggestionId(null);
+    setEditingItemId(null);
   };
 
   return (
@@ -178,37 +227,39 @@ export default function Inventory() {
             {items.length === 0 && !loading ? (
               <EmptyState
                 heading="Nessun imballaggio presente"
-                action={{ content: 'Aggiungi', onAction: () => setModalOpen(true) }}
+                action={{ content: 'Aggiungi', onAction: () => { resetForm(); setModalOpen(true); } }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
                 <p>Aggiungi il tuo primo imballaggio personalizzato.</p>
               </EmptyState>
             ) : (
-              <ResourceList
-                resourceName={{ singular: 'imballaggio', plural: 'imballaggi' }}
-                items={items}
-                loading={loading}
-                renderItem={(item) => {
-                  return (
-                    <ResourceItem
-                      id={item.id}
-                      onClick={() => { }}
-                    >
-                      <InlineStack align="space-between">
-                        <BlockStack gap="100">
-                          <Text variant="bodyMd" fontWeight="bold" as="h3">
-                            {item.customName}
-                          </Text>
-                          <Text variant="bodySm" as="p" tone="subdued">
-                            Dimensioni: {item.dimensions} | Peso: {item.weight}g
-                          </Text>
-                        </BlockStack>
-                        <Badge tone={item.material === 'PAPER' ? 'success' : 'info'}>{item.material}</Badge>
-                      </InlineStack>
-                    </ResourceItem>
-                  );
-                }}
-              />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', padding: '16px' }}>
+                {items.map((item) => (
+                  <Card key={item.id} padding="0">
+                    <img 
+                      src={getMaterialImage(item.material)} 
+                      alt={item.material} 
+                      style={{ width: '100%', height: '160px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }} 
+                    />
+                    <Box padding="400">
+                      <BlockStack gap="200">
+                        <Text as="h3" variant="headingSm">{item.customName}</Text>
+                        <InlineStack gap="200" align="space-between">
+                          <Badge tone={item.material === 'PAPER' ? 'success' : 'info'}>{item.material}</Badge>
+                          <Text as="span" tone="subdued" variant="bodySm">{item.weight}g</Text>
+                        </InlineStack>
+                        <Text as="span" tone="subdued" variant="bodySm">Dimensioni: {item.dimensions}</Text>
+                        <div style={{ paddingTop: '12px' }}>
+                          <InlineStack gap="200" align="space-between">
+                            <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => handleDeleteItem(item.id)}>Elimina</Button>
+                            <Button size="micro" icon={EditIcon} onClick={() => handleEditItem(item)}>Modifica</Button>
+                          </InlineStack>
+                        </div>
+                      </BlockStack>
+                    </Box>
+                  </Card>
+                ))}
+              </div>
             )}
           </Card>
         </Layout.Section>
@@ -217,7 +268,7 @@ export default function Inventory() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingSuggestionId ? "Accetta e Modifica Suggerimento" : "Aggiungi Imballaggio Personalizzato"}
+        title={editingSuggestionId ? "Accetta e Modifica Suggerimento" : editingItemId ? "Modifica Imballaggio" : "Aggiungi Imballaggio Personalizzato"}
         primaryAction={{
           content: 'Salva',
           onAction: handleSubmit,
