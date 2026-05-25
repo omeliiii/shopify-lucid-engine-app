@@ -73,8 +73,8 @@ export const MOCKS: Record<string, any> = {
     }
   ],
   '/orders/shipping-rules': [
-    { id: '1', name: 'Box Calzini Fino a 5 Articoli', maxItems: 5, isActive: true },
-    { id: '2', name: 'Scatola Grande (> 5 Articoli)', maxItems: 20, isActive: false },
+    { id: '1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillingMaterialId: '1', priority: 10, isActive: true },
+    { id: '2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: '1', fillingMaterialId: '2', priority: 5, isActive: false },
   ],
   '/reports': [
     { id: 'rpt-1', countryCode: 'DE', periodType: 'ANNUAL', periodStart: '2025-01-01', periodEnd: '2025-12-31', generatedAt: '2026-01-10T10:00:00Z' },
