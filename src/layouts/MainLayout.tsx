@@ -1,5 +1,5 @@
 import { Frame, Navigation } from '@shopify/polaris';
-import { HomeMinor, InventoryMajor, ProductsMajor, SettingsMajor, ReportMinor } from '@shopify/polaris-icons';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -13,35 +13,35 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {
             url: '/',
             label: 'Dashboard & Logs',
-            icon: HomeMinor,
+            icon: HomeIcon,
             onClick: () => navigate('/'),
             selected: location.pathname === '/',
           },
           {
             url: '/inventory',
             label: 'Inventario Imballaggi',
-            icon: InventoryMajor,
+            icon: InventoryIcon,
             onClick: () => navigate('/inventory'),
             selected: location.pathname === '/inventory',
           },
           {
             url: '/mapping',
             label: 'Mappatura Prodotti',
-            icon: ProductsMajor,
+            icon: ProductIcon,
             onClick: () => navigate('/mapping'),
             selected: location.pathname === '/mapping',
           },
           {
             url: '/shipping-rules',
             label: 'Regole di Spedizione',
-            icon: SettingsMajor,
+            icon: SettingsIcon,
             onClick: () => navigate('/shipping-rules'),
             selected: location.pathname === '/shipping-rules',
           },
           {
             url: '/reports',
             label: 'Report e Dichiarazioni',
-            icon: ReportMinor,
+            icon: FileIcon,
             onClick: () => navigate('/reports'),
             selected: location.pathname === '/reports',
           },

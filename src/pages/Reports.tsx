@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, Select, TextField, EmptyState, Icon } from '@shopify/polaris';
-import { ExportMinor } from '@shopify/polaris-icons';
+import { ExportIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 
 interface Report {
@@ -87,16 +87,16 @@ export default function Reports() {
     `${report.periodStart} / ${report.periodEnd}`,
     new Date(report.generatedAt).toLocaleDateString(),
     <InlineStack gap="200">
-      <Button 
-        size="micro" 
-        icon={ExportMinor} 
+      <Button
+        size="micro"
+        icon={ExportIcon}
         onClick={() => handleDownloadRegistry(report.id, report.countryCode)}
       >
         Registro
       </Button>
-      <Button 
-        size="micro" 
-        icon={ExportMinor} 
+      <Button
+        size="micro"
+        icon={ExportIcon}
         onClick={() => handleDownloadDualSystem(report.id)}
       >
         Dual System
@@ -105,7 +105,7 @@ export default function Reports() {
   ]);
 
   return (
-    <Page 
+    <Page
       title="Report e Dichiarazioni"
       primaryAction={{
         content: 'Genera Nuovo Report',

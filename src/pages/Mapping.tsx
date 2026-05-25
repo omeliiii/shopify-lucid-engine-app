@@ -106,7 +106,7 @@ export default function Mapping() {
         <InlineStack gap="100" blockAlign="center">
           <Icon source={MagicIcon} tone="magic" />
           <Text as="span" fontWeight="bold">{product.recommendation.packagingName}</Text>
-          <Badge tone="info">{(product.recommendation.confidence * 100).toFixed(0)}% AI</Badge>
+          <Badge tone="info">{`${(product.recommendation.confidence * 100).toFixed(0)}% AI`}</Badge>
         </InlineStack>
         <Text as="p" variant="bodySm" tone="subdued">{product.recommendation.reason}</Text>
         <div style={{ marginTop: '4px' }}>
