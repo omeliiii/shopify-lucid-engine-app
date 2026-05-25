@@ -12,11 +12,11 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 ### Fase 1: Configurazione & Autenticazione App Bridge
 | Task | Stato | Note |
 | :--- | :--- | :--- |
-| Inizializzazione progetto (Remix/Vite + React) | 🚧 In corso | Da inizializzare. |
-| Integrazione Shopify Polaris (UI Kit) | ⏳ In attesa |  |
-| Configurazione Shopify App Bridge React | ⏳ In attesa | Modali, toast, navigazione nativa. |
-| Setup Autenticazione (Session Token JWT) | ⏳ In attesa | Predisporre header `Authorization: Bearer <Token>` (o `X-Merchant-Id: 100` per dev locale). |
-| Creazione layout base con navigazione a Tabs/Sidebar | ⏳ In attesa | 5 schede principali: Dashboard, Inventario, Mappatura, Regole, Report. |
+| Inizializzazione progetto (Remix/Vite + React) | ✅ Completato | Da inizializzare. |
+| Integrazione Shopify Polaris (UI Kit) | ✅ Completato |  |
+| Configurazione Shopify App Bridge React | ✅ Completato | Modali, toast, navigazione nativa. |
+| Setup Autenticazione (Session Token JWT) | ✅ Completato | Predisporre header `Authorization: Bearer <Token>` (o `X-Merchant-Id: 100` per dev locale). |
+| Creazione layout base con navigazione a Tabs/Sidebar | ✅ Completato | 5 schede principali: Dashboard, Inventario, Mappatura, Regole, Report. |
 
 ### Fase 2: Dashboard e Log Spedizioni
 | Task | Stato | Note |
