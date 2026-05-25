@@ -11,7 +11,10 @@ import {
   BlockStack,
   InlineStack,
   Badge,
-  EmptyState
+  EmptyState,
+  Select,
+  TextField,
+  Button
 } from '@shopify/polaris';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
@@ -39,12 +42,23 @@ export default function Dashboard() {
   const [kpis, setKpis] = useState<KPI | null>(null);
   const [error, setError] = useState(false);
 
+  // Pagination and Filters State
+  const [page, setPage] = useState(1);
+  const [countryFilter, setCountryFilter] = useState('ALL');
+  const [periodStart, setPeriodStart] = useState('');
+  const [periodEnd, setPeriodEnd] = useState('');
+
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
-        // Attempt to fetch logs
-        const logsData = await apiFetch('/orders/logs?page=1&limit=10');
+        // Attempt to fetch logs with filters
+        const params = new URLSearchParams({ page: page.toString(), limit: '10' });
+        if (countryFilter !== 'ALL') params.append('country', countryFilter);
+        if (periodStart) params.append('periodStart', periodStart);
+        if (periodEnd) params.append('periodEnd', periodEnd);
+        
+        const logsData = await apiFetch(`/orders/logs?${params.toString()}`);
         setLogs(logsData.data || []);
         
         // Calculate or fetch KPIs
@@ -59,9 +73,9 @@ export default function Dashboard() {
     }
     
     loadData();
-  }, []);
+  }, [page, countryFilter, periodStart, periodEnd]);
 
-  if (loading) {
+  if (loading && !kpis) {
     return (
       <SkeletonPage primaryAction>
         <Layout>
@@ -82,10 +96,28 @@ export default function Dashboard() {
     );
   }
 
+  const getFlag = (countryCode: string) => {
+    switch (countryCode.toUpperCase()) {
+      case 'IT': return '🇮🇹 IT';
+      case 'DE': return '🇩🇪 DE';
+      case 'FR': return '🇫🇷 FR';
+      default: return countryCode;
+    }
+  };
+
+  const getCountryTone = (countryCode: string) => {
+    switch (countryCode.toUpperCase()) {
+      case 'IT': return 'success';
+      case 'DE': return 'info';
+      case 'FR': return 'attention';
+      default: return 'new';
+    }
+  };
+
   const logRows = logs.map((log) => [
     <Text as="span" fontWeight="bold">{log.shopifyOrderId}</Text>,
     log.orderDate,
-    <Badge tone="info">{log.countryCode}</Badge>,
+    <Badge tone={getCountryTone(log.countryCode) as any}>{getFlag(log.countryCode)}</Badge>,
     `${log.totalWeightGrams} g`,
     log.components
   ]);
@@ -197,11 +229,39 @@ export default function Dashboard() {
                 <Text as="h2" variant="headingMd">Ultimi Log di Spedizione</Text>
               </div>
               
+              {/* Filters */}
+              <div style={{ padding: '0 16px 16px 16px' }}>
+                <InlineStack gap="400" blockAlign="end">
+                  <Select
+                    label="Filtra per Paese"
+                    options={[
+                      { label: 'Tutti i paesi', value: 'ALL' },
+                      { label: 'Germania (DE)', value: 'DE' },
+                      { label: 'Italia (IT)', value: 'IT' },
+                      { label: 'Francia (FR)', value: 'FR' },
+                    ]}
+                    value={countryFilter}
+                    onChange={(val) => { setCountryFilter(val); setPage(1); }}
+                  />
+                  <TextField label="Data inizio" type="date" value={periodStart} onChange={(val) => { setPeriodStart(val); setPage(1); }} autoComplete="off" />
+                  <TextField label="Data fine" type="date" value={periodEnd} onChange={(val) => { setPeriodEnd(val); setPage(1); }} autoComplete="off" />
+                  {(countryFilter !== 'ALL' || periodStart !== '' || periodEnd !== '') && (
+                    <Button onClick={() => { setCountryFilter('ALL'); setPeriodStart(''); setPeriodEnd(''); setPage(1); }}>Resetta Filtri</Button>
+                  )}
+                </InlineStack>
+              </div>
+
               {logs.length > 0 ? (
                 <DataTable
                   columnContentTypes={['text', 'text', 'text', 'numeric', 'text']}
                   headings={['ID Ordine', 'Data', 'Paese', 'Peso Totale', 'Componenti']}
                   rows={logRows}
+                  pagination={{
+                    hasNext: logs.length === 10,
+                    hasPrevious: page > 1,
+                    onNext: () => setPage(page + 1),
+                    onPrevious: () => setPage(page - 1),
+                  }}
                 />
               ) : (
                 <EmptyState
