@@ -28,12 +28,12 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 ### Fase 3: CRUD Inventario e Mappatura
 | Task | Stato | Note |
 | :--- | :--- | :--- |
-| Vista Catalogo Imballaggi & Form Inserimento | ⏳ In attesa | Fetch tipi base (`/packaging/types`) e inv (`/packaging/inventory`). Form con Polaris. |
-| Gestione CRUD Inventario (Modifica/Elimina) | ⏳ In attesa | Chiamate PATCH e DELETE. |
-| Tabella Mappatura Prodotti | ⏳ In attesa | Lista prodotti da `/products/mappings`. Icone stato mappatura. |
-| Logica Raccomandazioni AI (Embedding) | ⏳ In attesa | UI per mostrare suggerimento e bottone conferma 1-click (`PATCH /.../confirm`). |
-| Sincronizzazione Prodotti da Shopify | ⏳ In attesa | Bottone per forzare `POST /products/sync`. |
-| Configurazione Regole di Spedizione | ⏳ In attesa | Form per limiti imballaggio multi-articolo (`/orders/shipping-rules`). |
+| Vista Catalogo Imballaggi & Form Inserimento | ✅ Completato | Fetch tipi base (`/packaging/types`) e inv (`/packaging/inventory`). Form con Polaris. |
+| Gestione CRUD Inventario (Modifica/Elimina) | ✅ Completato | Chiamate PATCH e DELETE. |
+| Tabella Mappatura Prodotti | ✅ Completato | Lista prodotti da `/products/mappings`. Icone stato mappatura. |
+| Logica Raccomandazioni AI (Embedding) | ✅ Completato | UI per mostrare suggerimento e bottone conferma 1-click (`PATCH /.../confirm`). |
+| Sincronizzazione Prodotti da Shopify | ✅ Completato | Bottone per forzare `POST /products/sync`. |
+| Configurazione Regole di Spedizione | ✅ Completato | Form per limiti imballaggio multi-articolo (`/orders/shipping-rules`). |
 
 ### Fase 4: Generazione & Download Report
 | Task | Stato | Note |
