@@ -54,7 +54,7 @@ Questo file traccia lo stato di avanzamento dello sviluppo della Single Page App
 | Nell'inventario imballaggi la lista dei packaging deve avere card con foto e nome e il tasto per eliminare o modificare l'imballaggio | ✅ Completato | Sostituita la `ResourceList` con una griglia Flex/Grid di Card contenenti le foto dinamiche e i tasti di azione. |
 | Nell'inventario imballaggi nel popup per l'aggiunta di un imballaggio ci devono essere tutti gli imballaggi standard censiti a db (API /packaging/types che torna i vari name, agnosticMaterial, defaultGsm, formulaType, defaultOverlapFactor, embedding), divisi per agnosticMaterial con i tasti accetta e modifica | ✅ Completato | Aggiunta fetch a `/packaging/types`, raggruppati per materiale con carte cliccabili nel modal di inserimento. |
 | Regole di spedizione oltre a nome regola e numero massimo articoli devono avere numero minimo articoli, imballaggio secondario da selezionare come per l'inventario imballaggi, riempimento e priorità. Inoltre ci deve essere il tasto per modificare o eliminare una regola | ✅ Completato | Campi aggiunti all'interfaccia e form, inclusa fetch dell'inventario per i campi `Select` dell'imballaggio. Aggiunti tasti Edit e Delete. |
-| In report e dichiarazioni la tabella deve essere paginata e filtrabile per Paese e date |
+| In report e dichiarazioni la tabella deve essere paginata e filtrabile per Paese e date | ✅ Completato | Aggiunti Select e TextField per filtri; fetch paginato da `/reports`. Aggiunte flag emoji sui badge. |
 | In report e dichiarazioni i tasti download devono chiamare realmente le API per fare il download dei file |
 | Implementare i18n per tradurre l'app in italiano, inglese, francese e tedesco |
 | Migliorare UI/UX e layout generale |

@@ -18,6 +18,12 @@ export default function Reports() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Pagination & Filters State
+  const [page, setPage] = useState(1);
+  const [filterCountry, setFilterCountry] = useState('ALL');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+
   // Form State
   const [country, setCountry] = useState('DE');
   const [periodType, setPeriodType] = useState('QUARTERLY');
@@ -27,14 +33,19 @@ export default function Reports() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/reports');
-      setReports(data);
+      const params = new URLSearchParams({ page: page.toString(), limit: '10' });
+      if (filterCountry !== 'ALL') params.append('country', filterCountry);
+      if (filterStartDate) params.append('periodStart', filterStartDate);
+      if (filterEndDate) params.append('periodEnd', filterEndDate);
+
+      const data = await apiFetch(`/reports?${params.toString()}`);
+      setReports(Array.isArray(data) ? data : data.data || []);
     } catch (e) {
       console.error("Failed to load reports", e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, filterCountry, filterStartDate, filterEndDate]);
 
   useEffect(() => {
     loadData();
@@ -78,8 +89,17 @@ export default function Reports() {
     alert(`Download avviato per il file Dual System (CSV) per il report ${id}`);
   };
 
+  const getFlag = (countryCode: string) => {
+    switch (countryCode.toUpperCase()) {
+      case 'IT': return '🇮🇹 IT';
+      case 'DE': return '🇩🇪 DE';
+      case 'FR': return '🇫🇷 FR';
+      default: return countryCode;
+    }
+  };
+
   const rows = reports.map((report) => [
-    <Badge tone={report.countryCode === 'DE' ? 'info' : 'success'}>{report.countryCode}</Badge>,
+    <Badge tone={report.countryCode === 'DE' ? 'info' : 'success'}>{getFlag(report.countryCode)}</Badge>,
     report.periodType,
     `${report.periodStart} / ${report.periodEnd}`,
     new Date(report.generatedAt).toLocaleDateString(),
@@ -112,6 +132,28 @@ export default function Reports() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
+            {/* Filters */}
+            <div style={{ padding: '16px' }}>
+              <InlineStack gap="400" blockAlign="end">
+                <Select
+                  label="Filtra per Paese"
+                  options={[
+                    { label: 'Tutti i paesi', value: 'ALL' },
+                    { label: 'Germania (DE)', value: 'DE' },
+                    { label: 'Italia (IT)', value: 'IT' },
+                    { label: 'Francia (FR)', value: 'FR' },
+                  ]}
+                  value={filterCountry}
+                  onChange={(val) => { setFilterCountry(val); setPage(1); }}
+                />
+                <TextField label="Da Data" type="date" value={filterStartDate} onChange={(val) => { setFilterStartDate(val); setPage(1); }} autoComplete="off" />
+                <TextField label="A Data" type="date" value={filterEndDate} onChange={(val) => { setFilterEndDate(val); setPage(1); }} autoComplete="off" />
+                {(filterCountry !== 'ALL' || filterStartDate || filterEndDate) && (
+                  <Button onClick={() => { setFilterCountry('ALL'); setFilterStartDate(''); setFilterEndDate(''); setPage(1); }}>Resetta Filtri</Button>
+                )}
+              </InlineStack>
+            </div>
+
             {reports.length === 0 && !loading ? (
               <EmptyState
                 heading="Nessun report generato"
@@ -125,6 +167,12 @@ export default function Reports() {
                 columnContentTypes={['text', 'text', 'text', 'text', 'text']}
                 headings={['Paese', 'Periodo', 'Date', 'Generato Il', 'Azioni / Download']}
                 rows={rows}
+                pagination={{
+                  hasNext: reports.length === 10,
+                  hasPrevious: page > 1,
+                  onNext: () => setPage(page + 1),
+                  onPrevious: () => setPage(page - 1),
+                }}
               />
             )}
           </Card>
