@@ -194,8 +194,8 @@ export default function Inventory() {
     panelID: `panel-${index}`,
   }));
 
-  const activeItems = items.filter(i => i.isActive);
-  const suggestedItems = items.filter(i => !i.isActive);
+  const activeItems = items.filter(i => i.isActive && (!i.isAiSuggested || i.isConfirmed));
+  const suggestedItems = items.filter(i => i.isAiSuggested && !i.isConfirmed);
 
   const isCustomFormVisible = editingItemId !== null || showCustomForm;
 
@@ -225,7 +225,7 @@ export default function Inventory() {
                 <p>Aggiungi il tuo primo imballaggio personalizzato.</p>
               </EmptyState>
             ) : (
-              <BlockStack gap="0">
+              <BlockStack gap="025">
                 {suggestedItems.length > 0 && (
                   <Box background="bg-surface-warning" padding="400" borderRadius="200" borderColor="border-warning" borderWidth="025">
                     <BlockStack gap="400">

@@ -19,6 +19,8 @@ export interface InventoryItem {
   role: 'PRIMARY' | 'SECONDARY' | 'FILLER';
   isActive: boolean;
   packagingType: PackagingType;
+  isAiSuggested: boolean;
+  isConfirmed: boolean;
 }
 
 interface PackagingCardProps {
