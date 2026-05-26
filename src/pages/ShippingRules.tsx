@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, ResourceList, ResourceItem, Text, Button, Modal, Form, FormLayout, TextField, Select, Checkbox, InlineStack, BlockStack, Badge, Icon, Box } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Select, Checkbox, InlineStack, BlockStack, Badge, Icon, Box } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 
@@ -18,7 +18,7 @@ interface ShippingRule {
 
 export default function ShippingRules() {
   const [rules, setRules] = useState<ShippingRule[]>([]);
-  const [inventory, setInventory] = useState<{label: string, value: string}[]>([]);
+  const [inventory, setInventory] = useState<{ label: string, value: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export default function ShippingRules() {
     } else {
       setRules([...rules, newRule]);
     }
-    
+
     setModalOpen(false);
   };
 
@@ -105,7 +105,7 @@ export default function ShippingRules() {
   };
 
   return (
-    <Page 
+    <Page
       title="Regole di Spedizione"
       primaryAction={{
         content: 'Nuova Regola',
@@ -122,7 +122,7 @@ export default function ShippingRules() {
                     <InlineStack gap="200" blockAlign="center">
                       <Text as="h3" variant="headingMd">{item.name}</Text>
                       <Badge tone={item.isActive ? "success" : "critical"}>{item.isActive ? "Attiva" : "Disattiva"}</Badge>
-                      <Badge tone="info">Priorità: {item.priority}</Badge>
+                      <Badge tone="info">{'Priorità: ' + item.priority}</Badge>
                     </InlineStack>
                     <Text as="p" tone="subdued">
                       Da {item.minItems} a {item.maxItems} articoli per pacco.
@@ -170,8 +170,8 @@ export default function ShippingRules() {
                 <TextField label="Articoli Minimi" type="number" value={minItems} onChange={setMinItems} autoComplete="off" />
                 <TextField label="Articoli Massimi" type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" />
               </FormLayout.Group>
-              <Select label="Imballaggio Secondario (Opzionale)" options={[{label: 'Nessuno', value: 'none'}, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
-              <Select label="Imballaggio di Riempimento (Opzionale)" options={[{label: 'Nessuno', value: 'none'}, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
+              <Select label="Imballaggio Secondario (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
+              <Select label="Imballaggio di Riempimento (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
               <TextField label="Priorità (numero più alto = più importante)" type="number" value={priority} onChange={setPriority} autoComplete="off" helpText="Le regole con priorità più alta vengono valutate prima." />
               <Checkbox label="Regola Attiva" checked={isActive} onChange={setIsActive} />
             </FormLayout>

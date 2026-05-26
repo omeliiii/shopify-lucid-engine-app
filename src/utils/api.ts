@@ -12,7 +12,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     console.log(`[MOCK] ${options.method || 'GET'} ${endpoint}`);
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     if (isGet && MOCKS[baseEndpoint]) {
       return MOCKS[baseEndpoint];
     } else if (!isGet) {
@@ -41,9 +41,9 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   } catch (error) {
     // Fallback if real server is down but useMocks is false (optional, kept for resilience)
     console.warn(`[API] Failed to fetch ${endpoint}, falling back to centralized mock data.`, error);
-    if (isGet && MOCKS[baseEndpoint]) {
+    if (isGet && useMocks && MOCKS[baseEndpoint]) {
       return MOCKS[baseEndpoint];
-    } else if (!isGet) {
+    } else if (!isGet && useMocks) {
       return { success: true };
     }
     throw error;
@@ -71,7 +71,7 @@ export async function apiDownload(endpoint: string, fallbackFilename: string) {
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
-    
+
     let filename = fallbackFilename;
     const contentDisposition = response.headers.get('content-disposition');
     if (contentDisposition) {
@@ -80,7 +80,7 @@ export async function apiDownload(endpoint: string, fallbackFilename: string) {
         filename = match[1];
       }
     }
-    
+
     const blob = await response.blob();
     triggerDownload(blob, filename);
   } catch (error) {

@@ -154,7 +154,7 @@ export default function Dashboard() {
                   <Text as="p" variant="headingXl">{kpis?.totalWeightKg} kg</Text>
                   <div style={{ width: '100%', height: 200, marginTop: 'auto' }}>
                     {kpis?.weightByCountry ? (
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 100, height: 200 }}>
                         <BarChart data={kpis.weightByCountry} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e5e7" />
                           <XAxis dataKey="countryCode" axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
@@ -179,7 +179,7 @@ export default function Dashboard() {
                   <Text as="p" variant="headingXl">{kpis?.totalOrders}</Text>
                   <div style={{ width: '100%', height: 200, marginTop: 'auto' }}>
                     {kpis?.ordersHistory ? (
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 100, height: 200 }}>
                         <AreaChart data={kpis.ordersHistory} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
@@ -209,7 +209,7 @@ export default function Dashboard() {
                   <Text as="h3" variant="headingSm">Distribuzione Materiali</Text>
                   <div style={{ width: '100%', height: 250, marginTop: 'auto' }}>
                     {kpis?.materialBreakdown && kpis.materialBreakdown.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 100, height: 250 }}>
                         <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                           <Pie
                             data={kpis.materialBreakdown}
