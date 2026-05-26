@@ -1,28 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, ResourceList, ResourceItem, Text, Button, Modal, Form, FormLayout, TextField, Badge, InlineStack, BlockStack, EmptyState, Icon, Box } from '@shopify/polaris';
-import { DeleteIcon, EditIcon, CheckIcon, MagicIcon } from '@shopify/polaris-icons';
+import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Icon, Box, BlockStack, InlineStack, EmptyState, Tabs } from '@shopify/polaris';
+import { MagicIcon, ArrowLeftIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
+import { PackagingCard, type InventoryItem } from '../components/PackagingCard';
 
-interface InventoryItem {
-  id: string;
-  packagingTypeId: string;
-  name: string;
-  lMm: number | null;
-  wMm: number | null;
-  hMm: number | null;
-  customGsm: number | null;
-  calculatedUnitWeightGrams: number;
-  role: 'PRIMARY' | 'SECONDARY' | 'FILLER';
-  isActive: boolean;
-  packagingType: {
-    id: string;
-    name: string;
-    agnosticMaterial: string;
-    formulaType: string;
-    defaultGsm: number;
-  };
-}
 
 interface PackagingType {
   id: string;
@@ -31,6 +13,9 @@ interface PackagingType {
   defaultGsm?: number;
   formulaType?: string;
   defaultOverlapFactor?: number;
+  defaultLMm?: number;
+  defaultWMm?: number;
+  defaultHMm?: number;
 }
 
 export default function Inventory() {
@@ -39,14 +24,17 @@ export default function Inventory() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(false);
 
-  // Form State
+  // Form state
   const [name, setName] = useState('');
   const [packagingTypeId, setPackagingTypeId] = useState('');
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+  const [customGsm, setCustomGsm] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -74,10 +62,10 @@ export default function Inventory() {
     const bodyParams = {
       packagingTypeId,
       name,
-      lMm: Number(length),
-      wMm: Number(width),
-      hMm: Number(height),
-      customGsm: null,
+      lMm: length ? Number(length) : null,
+      wMm: width ? Number(width) : null,
+      hMm: height ? Number(height) : null,
+      customGsm: customGsm ? Number(customGsm) : null,
       role: 'PRIMARY'
     };
 
@@ -93,26 +81,37 @@ export default function Inventory() {
           body: JSON.stringify(bodyParams)
         });
       }
-      setModalOpen(false);
+      closeModal();
       loadData();
     } catch (e) {
-      setModalOpen(false);
+      closeModal();
     } finally {
       setSubmitting(false);
-      setEditingItemId(null);
     }
   };
 
-  const getMaterialImage = (material: string) => {
-    switch (material) {
-      case 'PAPER': return 'https://images.unsplash.com/photo-1589758438368-0c313dc12574?auto=format&fit=crop&q=80&w=200&h=200';
-      case 'PLASTIC': return 'https://images.unsplash.com/photo-1628148818167-27e1f4404fbe?auto=format&fit=crop&q=80&w=200&h=200';
-      case 'COMPOSITE': return 'https://images.unsplash.com/photo-1563241527-2004fb0f49c0?auto=format&fit=crop&q=80&w=200&h=200';
-      default: return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
-    }
+  const closeModal = () => {
+    setModalOpen(false);
+    setShowCustomForm(false);
+    setEditingItemId(null);
   };
 
-
+  const resetForm = () => {
+    setName('');
+    setLength('');
+    setWidth('');
+    setHeight('');
+    setCustomGsm('');
+    setEditingItemId(null);
+    setShowCustomForm(false);
+    setSelectedTab(0);
+    if (standardTypes.length > 0) {
+      setPackagingTypeId(standardTypes[0].id);
+      setLength(standardTypes[0].defaultLMm?.toString() || '');
+      setWidth(standardTypes[0].defaultWMm?.toString() || '');
+      setHeight(standardTypes[0].defaultHMm?.toString() || '');
+    }
+  };
 
   const handleEditItem = (item: InventoryItem) => {
     setName(item.name);
@@ -120,8 +119,35 @@ export default function Inventory() {
     setLength(item.lMm?.toString() || '');
     setWidth(item.wMm?.toString() || '');
     setHeight(item.hMm?.toString() || '');
+    setCustomGsm(item.customGsm?.toString() || '');
     setEditingItemId(item.id);
+    setShowCustomForm(true);
     setModalOpen(true);
+  };
+
+  const handleEditStandardType = (type: PackagingType) => {
+    setName(type.name);
+    setPackagingTypeId(type.id);
+    setLength(type.defaultLMm?.toString() || '');
+    setWidth(type.defaultWMm?.toString() || '');
+    setHeight(type.defaultHMm?.toString() || '');
+    setCustomGsm(type.defaultGsm?.toString() || '');
+    setShowCustomForm(true);
+  };
+
+  const handleAcceptSuggested = async (item: InventoryItem) => {
+    setSubmitting(true);
+    try {
+      await apiFetch(`/packaging/inventory/${item.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive: true })
+      });
+      loadData();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleAcceptType = async (type: PackagingType) => {
@@ -129,21 +155,30 @@ export default function Inventory() {
     const bodyParams = {
       packagingTypeId: type.id,
       name: type.name,
-      lMm: 0,
-      wMm: 0,
-      hMm: 0,
+      lMm: type.defaultLMm ?? null,
+      wMm: type.defaultWMm ?? null,
+      hMm: type.defaultHMm ?? null,
       customGsm: null,
       role: 'PRIMARY'
     };
     try {
       await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
-      setModalOpen(false);
+      closeModal();
       loadData();
     } catch (e) {
-      setModalOpen(false);
+      closeModal();
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await apiFetch(`/packaging/inventory/${id}`, { method: 'DELETE' });
+    } catch (e) {
+      // item removed regardless
+    }
+    setItems(items.filter(i => i.id !== id));
   };
 
   const groupedTypes = standardTypes.reduce((acc, curr) => {
@@ -152,23 +187,23 @@ export default function Inventory() {
     return acc;
   }, {} as Record<string, PackagingType[]>);
 
-  const handleDeleteItem = async (id: string) => {
-    try {
-      await apiFetch(`/packaging/inventory/${id}`, { method: 'DELETE' });
-      setItems(items.filter(i => i.id !== id));
-    } catch (e) {
-      setItems(items.filter(i => i.id !== id));
-    }
-  };
+  const materialTabs = Object.keys(groupedTypes).map((material, index) => ({
+    id: `tab-${index}`,
+    content: material,
+    accessibilityLabel: material,
+    panelID: `panel-${index}`,
+  }));
 
-  const resetForm = () => {
-    setName('');
-    if (standardTypes.length > 0) setPackagingTypeId(standardTypes[0].id);
-    setLength('');
-    setWidth('');
-    setHeight('');
-    setEditingItemId(null);
-  };
+  const activeItems = items.filter(i => i.isActive);
+  const suggestedItems = items.filter(i => !i.isActive);
+
+  const isCustomFormVisible = editingItemId !== null || showCustomForm;
+
+  const modalTitle = editingItemId
+    ? "Modifica Imballaggio"
+    : showCustomForm
+      ? "Personalizza Imballaggio"
+      : "Aggiungi Imballaggio";
 
   return (
     <Page
@@ -179,7 +214,6 @@ export default function Inventory() {
       }}
     >
       <Layout>
-
         <Layout.Section>
           <Card padding="0">
             {items.length === 0 && !loading ? (
@@ -191,33 +225,43 @@ export default function Inventory() {
                 <p>Aggiungi il tuo primo imballaggio personalizzato.</p>
               </EmptyState>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', padding: '16px' }}>
-                {items.map((item) => (
-                  <Card key={item.id} padding="0">
-                    <img 
-                      src={getMaterialImage(item.packagingType?.agnosticMaterial || 'PAPER')} 
-                      alt={item.packagingType?.agnosticMaterial} 
-                      style={{ width: '100%', height: '160px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }} 
-                    />
-                    <Box padding="400">
-                      <BlockStack gap="200">
-                        <Text as="h3" variant="headingSm">{item.name}</Text>
-                        <InlineStack gap="200" align="space-between">
-                          <Badge tone={item.packagingType?.agnosticMaterial === 'PAPER' ? 'success' : 'info'}>{item.packagingType?.agnosticMaterial}</Badge>
-                          <Text as="span" tone="subdued" variant="bodySm">{item.calculatedUnitWeightGrams}g</Text>
-                        </InlineStack>
-                        <Text as="span" tone="subdued" variant="bodySm">Dimensioni: {`${item.lMm}x${item.wMm}x${item.hMm} mm`}</Text>
-                        <div style={{ paddingTop: '12px' }}>
-                          <InlineStack gap="200" align="space-between">
-                            <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => handleDeleteItem(item.id)}>Elimina</Button>
-                            <Button size="micro" icon={EditIcon} onClick={() => handleEditItem(item)}>Modifica</Button>
-                          </InlineStack>
-                        </div>
-                      </BlockStack>
-                    </Box>
-                  </Card>
-                ))}
-              </div>
+              <BlockStack gap="0">
+                {suggestedItems.length > 0 && (
+                  <Box background="bg-surface-warning" padding="400" borderRadius="200" borderColor="border-warning" borderWidth="025">
+                    <BlockStack gap="400">
+                      <InlineStack gap="200" align="start" blockAlign="center">
+                        <Icon source={MagicIcon} tone="warning" />
+                        <Text as="h3" variant="headingMd" tone="magic">Suggeriti dall'Intelligenza Artificiale</Text>
+                      </InlineStack>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                        {suggestedItems.map((item) => (
+                          <PackagingCard
+                            key={item.id}
+                            item={item}
+                            onEdit={handleEditItem}
+                            onDelete={handleDeleteItem}
+                            onAccept={handleAcceptSuggested}
+                            isAiSuggested
+                          />
+                        ))}
+                      </div>
+                    </BlockStack>
+                  </Box>
+                )}
+
+                {activeItems.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', padding: '16px' }}>
+                    {activeItems.map((item) => (
+                      <PackagingCard
+                        key={item.id}
+                        item={item}
+                        onEdit={handleEditItem}
+                        onDelete={handleDeleteItem}
+                      />
+                    ))}
+                  </div>
+                )}
+              </BlockStack>
             )}
           </Card>
         </Layout.Section>
@@ -225,69 +269,102 @@ export default function Inventory() {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editingItemId ? "Modifica Imballaggio" : "Aggiungi Imballaggio Personalizzato"}
-        primaryAction={{
+        onClose={closeModal}
+        title={modalTitle}
+        primaryAction={isCustomFormVisible ? {
           content: 'Salva',
           onAction: handleSubmit,
           loading: submitting,
-        }}
+        } : undefined}
         secondaryActions={[
           {
             content: 'Annulla',
-            onAction: () => setModalOpen(false),
+            onAction: closeModal,
           },
         ]}
       >
         <Modal.Section>
-          {!editingItemId && standardTypes.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <BlockStack gap="400">
-                <Text as="h3" variant="headingMd">Imballaggi Standard</Text>
-                {Object.entries(groupedTypes).map(([material, types]) => (
-                  <BlockStack key={material} gap="200">
-                    <Text as="h4" variant="headingSm" tone="subdued">{material}</Text>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
-                      {types.map(type => (
-                        <Card key={type.id} padding="200" background="bg-surface-secondary">
-                          <BlockStack gap="200">
-                            <Text as="span" fontWeight="bold">{type.name}</Text>
+          {!isCustomFormVisible && standardTypes.length > 0 ? (
+            <BlockStack gap="400">
+              {materialTabs.length > 0 && (
+                <Tabs tabs={materialTabs} selected={selectedTab} onSelect={setSelectedTab}>
+                  <Box paddingBlockStart="400">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
+                      {groupedTypes[materialTabs[selectedTab]?.content]?.map(type => (
+                        <Card key={type.id} padding="300" background="bg-surface-secondary">
+                          <BlockStack gap="150">
+                            <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
+                            {type.defaultGsm && (
+                              <Text as="span" tone="subdued" variant="bodySm">{type.defaultGsm} g/m²</Text>
+                            )}
                             <InlineStack gap="100" align="end">
-                              <Button size="micro" onClick={() => {
-                                setName(type.name);
-                                setPackagingTypeId(type.id);
-                                document.getElementById('custom-form')?.scrollIntoView({ behavior: 'smooth' });
-                              }}>Modifica</Button>
-                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)}>Accetta</Button>
+                              <Button size="micro" onClick={() => handleEditStandardType(type)}>Modifica</Button>
+                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>Aggiungi</Button>
                             </InlineStack>
                           </BlockStack>
                         </Card>
                       ))}
                     </div>
-                  </BlockStack>
-                ))}
-              </BlockStack>
-              <div style={{ marginTop: '24px', marginBottom: '8px', borderBottom: '1px solid #e1e3e5' }}></div>
-              <Text as="h3" variant="headingMd" id="custom-form">Personalizza Imballaggio</Text>
-            </div>
+                  </Box>
+                </Tabs>
+              )}
+              <div style={{ borderTop: '1px solid #e1e3e5', paddingTop: '16px' }}>
+                <Button onClick={() => setShowCustomForm(true)}>Crea imballaggio personalizzato</Button>
+              </div>
+            </BlockStack>
+          ) : (
+            <BlockStack gap="400">
+              {!editingItemId && (
+                <Button
+                  icon={ArrowLeftIcon}
+                  variant="plain"
+                  onClick={() => setShowCustomForm(false)}
+                >
+                  Torna ai tipi standard
+                </Button>
+              )}
+              <Form onSubmit={handleSubmit}>
+                <FormLayout>
+                  <TextField
+                    label="Nome Personalizzato"
+                    value={name}
+                    onChange={setName}
+                    autoComplete="off"
+                    placeholder="es. Bustina Calzini Custom"
+                  />
+                  <PolarisSelect
+                    label="Tipo di Imballaggio"
+                    options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
+                    value={packagingTypeId}
+                    onChange={(val) => {
+                      setPackagingTypeId(val);
+                      const type = standardTypes.find(t => t.id === val);
+                      if (type) {
+                        setLength(type.defaultLMm?.toString() || '');
+                        setWidth(type.defaultWMm?.toString() || '');
+                        setHeight(type.defaultHMm?.toString() || '');
+                      }
+                    }}
+                  />
+                  <FormLayout.Group>
+                    <TextField label="Lunghezza (mm)" value={length} onChange={setLength} type="number" autoComplete="off" />
+                    <TextField label="Larghezza (mm)" value={width} onChange={setWidth} type="number" autoComplete="off" />
+                    {standardTypes.find(t => t.id === packagingTypeId)?.defaultHMm !== null && (
+                      <TextField label="Altezza (mm)" value={height} onChange={setHeight} type="number" autoComplete="off" />
+                    )}
+                    <TextField
+                      label="Grammatura Personalizzata (g/m²)"
+                      value={customGsm}
+                      onChange={setCustomGsm}
+                      type="number"
+                      autoComplete="off"
+                      helpText="Lascia vuoto per usare la grammatura standard del materiale"
+                    />
+                  </FormLayout.Group>
+                </FormLayout>
+              </Form>
+            </BlockStack>
           )}
-
-          <Form onSubmit={handleSubmit}>
-            <FormLayout>
-              <TextField label="Nome Personalizzato" value={name} onChange={setName} autoComplete="off" placeholder="es. Bustina Calzini Custom" />
-              <PolarisSelect
-                label="Tipo di Imballaggio"
-                options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
-                value={packagingTypeId}
-                onChange={setPackagingTypeId}
-              />
-              <FormLayout.Group>
-                <TextField label="Lunghezza (mm)" value={length} onChange={setLength} type="number" autoComplete="off" />
-                <TextField label="Larghezza (mm)" value={width} onChange={setWidth} type="number" autoComplete="off" />
-                <TextField label="Altezza (mm)" value={height} onChange={setHeight} type="number" autoComplete="off" />
-              </FormLayout.Group>
-            </FormLayout>
-          </Form>
         </Modal.Section>
       </Modal>
     </Page>
