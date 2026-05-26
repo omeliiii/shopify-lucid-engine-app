@@ -19,6 +19,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
+import { FlagBadge } from '../components/FlagBadge';
 
 interface ShippingLog {
   id: string;
@@ -109,24 +110,6 @@ export default function Dashboard() {
     );
   }
 
-  const getFlag = (countryCode: string) => {
-    switch (countryCode.toUpperCase()) {
-      case 'IT': return '🇮🇹 IT';
-      case 'DE': return '🇩🇪 DE';
-      case 'FR': return '🇫🇷 FR';
-      default: return countryCode;
-    }
-  };
-
-  const getCountryTone = (countryCode: string) => {
-    switch (countryCode.toUpperCase()) {
-      case 'IT': return 'success';
-      case 'DE': return 'info';
-      case 'FR': return 'attention';
-      default: return 'new';
-    }
-  };
-
   const logRows = logs.map((log) => {
     const componentsLabel = log.lineItems
       .flatMap(li => li.packaging_components.map(c => c.packaging_name))
@@ -136,7 +119,7 @@ export default function Dashboard() {
     return [
       <Text as="span" fontWeight="bold">{log.shopifyOrderName}</Text>,
       log.orderDate,
-      <Badge tone={getCountryTone(log.shippingCountryCode) as any}>{getFlag(log.shippingCountryCode)}</Badge>,
+      <FlagBadge countryCode={log.shippingCountryCode} />,
       `${log.totalWeightGrams} g`,
       componentsLabel
     ];

@@ -3,6 +3,7 @@ import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockS
 import { ExportIcon } from '@shopify/polaris-icons';
 import { apiFetch, apiDownload } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
+import { FlagBadge } from '../components/FlagBadge';
 
 interface Report {
   id: string;
@@ -98,17 +99,8 @@ export default function Reports() {
     }
   };
 
-  const getFlag = (countryCode: string) => {
-    switch (countryCode.toUpperCase()) {
-      case 'IT': return '🇮🇹 IT';
-      case 'DE': return '🇩🇪 DE';
-      case 'FR': return '🇫🇷 FR';
-      default: return countryCode;
-    }
-  };
-
   const rows = reports.map((report) => [
-    <Badge tone={report.countryCode === 'DE' ? 'info' : 'success'}>{getFlag(report.countryCode)}</Badge>,
+    <FlagBadge countryCode={report.countryCode} />,
     report.periodType,
     `${report.periodStart} / ${report.periodEnd}`,
     new Date(report.generatedAt).toLocaleDateString(),
