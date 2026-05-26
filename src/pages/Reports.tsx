@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, Select, TextField, EmptyState, Icon } from '@shopify/polaris';
 import { ExportIcon } from '@shopify/polaris-icons';
-import { apiFetch } from '../utils/api';
+import { apiFetch, apiDownload } from '../utils/api';
 
 interface Report {
   id: string;
@@ -79,14 +79,22 @@ export default function Reports() {
     }
   };
 
-  const handleDownloadRegistry = (id: string, countryCode: string) => {
-    // In a real app we'd fetch the blob or redirect to a download URL
-    // e.g. window.open(`/api/reports/${id}/export/registry`, '_blank')
-    alert(`Download avviato per il file di registro UFFICIALE (es. ${countryCode === 'DE' ? 'LUCID XML' : 'CONAI CSV'}) per il report ${id}`);
+  const handleDownloadRegistry = async (id: string, countryCode: string) => {
+    const ext = countryCode === 'DE' ? 'xml' : 'csv';
+    const filename = `registro_${countryCode}_${id}.${ext}`;
+    try {
+      await apiDownload(`/reports/${id}/export/registry`, filename);
+    } catch (e) {
+      alert('Errore durante il download del file di registro.');
+    }
   };
 
-  const handleDownloadDualSystem = (id: string) => {
-    alert(`Download avviato per il file Dual System (CSV) per il report ${id}`);
+  const handleDownloadDualSystem = async (id: string) => {
+    try {
+      await apiDownload(`/reports/${id}/export/dual-system`, `dual_system_${id}.csv`);
+    } catch (e) {
+      alert('Errore durante il download del file Dual System.');
+    }
   };
 
   const getFlag = (countryCode: string) => {
