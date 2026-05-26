@@ -229,10 +229,12 @@ export default function Inventory() {
                 {suggestedItems.length > 0 && (
                   <Box background="bg-surface-warning" padding="400" borderRadius="200" borderColor="border-warning" borderWidth="025">
                     <BlockStack gap="400">
-                      <InlineStack gap="200" align="start" blockAlign="center">
-                        <Icon source={MagicIcon} tone="warning" />
-                        <Text as="h3" variant="headingMd" tone="magic">Suggeriti dall'Intelligenza Artificiale</Text>
-                      </InlineStack>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Icon source={MagicIcon} tone="warning" />
+                        </div>
+                        <Text as="span" variant="headingMd" tone="magic">Suggeriti dall'IA</Text>
+                      </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
                         {suggestedItems.map((item) => (
                           <PackagingCard
