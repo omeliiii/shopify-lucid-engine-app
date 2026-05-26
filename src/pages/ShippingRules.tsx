@@ -9,9 +9,11 @@ interface ShippingRule {
   minItems: number;
   maxItems: number;
   secondaryPackagingId: string | null;
-  fillingMaterialId: string | null;
+  fillerPackagingId: string | null;
   priority: number;
   isActive: boolean;
+  secondaryPackaging?: { id: string; name: string };
+  fillerPackaging?: { id: string; name: string };
 }
 
 export default function ShippingRules() {
@@ -26,7 +28,7 @@ export default function ShippingRules() {
   const [minItems, setMinItems] = useState('1');
   const [maxItems, setMaxItems] = useState('5');
   const [secondaryPackagingId, setSecondaryPackagingId] = useState('none');
-  const [fillingMaterialId, setFillingMaterialId] = useState('none');
+  const [fillerPackagingId, setFillerPackagingId] = useState('none');
   const [priority, setPriority] = useState('10');
   const [isActive, setIsActive] = useState(true);
 
@@ -57,7 +59,7 @@ export default function ShippingRules() {
       minItems: Number(minItems),
       maxItems: Number(maxItems),
       secondaryPackagingId: secondaryPackagingId === 'none' ? null : secondaryPackagingId,
-      fillingMaterialId: fillingMaterialId === 'none' ? null : fillingMaterialId,
+      fillerPackagingId: fillerPackagingId === 'none' ? null : fillerPackagingId,
       priority: Number(priority),
       isActive
     };
@@ -76,7 +78,7 @@ export default function ShippingRules() {
     setMinItems(rule.minItems?.toString() || '1');
     setMaxItems(rule.maxItems?.toString() || '5');
     setSecondaryPackagingId(rule.secondaryPackagingId || 'none');
-    setFillingMaterialId(rule.fillingMaterialId || 'none');
+    setFillerPackagingId(rule.fillerPackagingId || 'none');
     setPriority(rule.priority?.toString() || '10');
     setIsActive(rule.isActive);
     setEditingRuleId(rule.id);
@@ -92,7 +94,7 @@ export default function ShippingRules() {
     setMinItems('1');
     setMaxItems('5');
     setSecondaryPackagingId('none');
-    setFillingMaterialId('none');
+    setFillerPackagingId('none');
     setPriority('10');
     setIsActive(true);
     setEditingRuleId(null);
@@ -127,10 +129,10 @@ export default function ShippingRules() {
                     </Text>
                     <InlineStack gap="400">
                       {item.secondaryPackagingId && (
-                        <Text as="span" variant="bodySm"><b>Secondario:</b> {inventory.find(i => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}</Text>
+                        <Text as="span" variant="bodySm"><b>Secondario:</b> {item.secondaryPackaging?.name || inventory.find(i => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}</Text>
                       )}
-                      {item.fillingMaterialId && (
-                        <Text as="span" variant="bodySm"><b>Riempimento:</b> {inventory.find(i => i.value === item.fillingMaterialId)?.label || item.fillingMaterialId}</Text>
+                      {item.fillerPackagingId && (
+                        <Text as="span" variant="bodySm"><b>Riempimento:</b> {item.fillerPackaging?.name || inventory.find(i => i.value === item.fillerPackagingId)?.label || item.fillerPackagingId}</Text>
                       )}
                     </InlineStack>
                   </BlockStack>
@@ -169,7 +171,7 @@ export default function ShippingRules() {
                 <TextField label="Articoli Massimi" type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" />
               </FormLayout.Group>
               <Select label="Imballaggio Secondario (Opzionale)" options={[{label: 'Nessuno', value: 'none'}, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
-              <Select label="Materiale di Riempimento (Opzionale)" options={[{label: 'Nessuno', value: 'none'}, ...inventory]} value={fillingMaterialId} onChange={setFillingMaterialId} />
+              <Select label="Imballaggio di Riempimento (Opzionale)" options={[{label: 'Nessuno', value: 'none'}, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
               <TextField label="Priorità (numero più alto = più importante)" type="number" value={priority} onChange={setPriority} autoComplete="off" helpText="Le regole con priorità più alta vengono valutate prima." />
               <Checkbox label="Regola Attiva" checked={isActive} onChange={setIsActive} />
             </FormLayout>

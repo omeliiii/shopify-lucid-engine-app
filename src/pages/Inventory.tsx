@@ -5,13 +5,22 @@ import { apiFetch } from '../utils/api';
 
 interface InventoryItem {
   id: string;
-  customName: string;
-  material: string;
-  dimensions: string;
-  weight: number;
-  customLengthMm?: number;
-  customWidthMm?: number;
-  customHeightMm?: number;
+  packagingTypeId: string;
+  name: string;
+  lMm: number | null;
+  wMm: number | null;
+  hMm: number | null;
+  customGsm: number | null;
+  calculatedUnitWeightGrams: number;
+  role: 'PRIMARY' | 'SECONDARY' | 'FILLER';
+  isActive: boolean;
+  packagingType: {
+    id: string;
+    name: string;
+    agnosticMaterial: string;
+    formulaType: string;
+    defaultGsm: number;
+  };
 }
 
 interface PackagingType {
@@ -25,7 +34,6 @@ interface PackagingType {
 
 export default function Inventory() {
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [suggestions, setSuggestions] = useState<InventoryItem[]>([]);
   const [standardTypes, setStandardTypes] = useState<PackagingType[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -33,12 +41,10 @@ export default function Inventory() {
 
   // Form State
   const [name, setName] = useState('');
-  const [material, setMaterial] = useState('PAPER');
+  const [packagingTypeId, setPackagingTypeId] = useState('');
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [editingSuggestionId, setEditingSuggestionId] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
@@ -46,10 +52,11 @@ export default function Inventory() {
     try {
       const data = await apiFetch('/packaging/inventory');
       setItems(data);
-      const suggData = await apiFetch('/packaging/suggestions');
-      setSuggestions(suggData);
       const typesData = await apiFetch('/packaging/types');
       setStandardTypes(typesData);
+      if (typesData.length > 0) {
+        setPackagingTypeId(typesData[0].id);
+      }
     } catch (e) {
       console.error("Failed to load inventory", e);
     } finally {
@@ -64,12 +71,13 @@ export default function Inventory() {
   const handleSubmit = async () => {
     setSubmitting(true);
     const bodyParams = {
-      customName: name,
-      material,
-      customLengthMm: Number(length),
-      customWidthMm: Number(width),
-      customHeightMm: Number(height),
-      customWeightGrams: Number(weight)
+      packagingTypeId,
+      name,
+      lMm: Number(length),
+      wMm: Number(width),
+      hMm: Number(height),
+      customGsm: null,
+      role: 'PRIMARY'
     };
 
     try {
@@ -85,23 +93,9 @@ export default function Inventory() {
         });
       }
       setModalOpen(false);
-      if (editingSuggestionId) {
-        setSuggestions(suggestions.filter(s => s.id !== editingSuggestionId));
-        setEditingSuggestionId(null);
-      }
       loadData();
     } catch (e) {
-      // Simulate success for demo
-      if (editingItemId) {
-        setItems(items.map(i => i.id === editingItemId ? { ...i, customName: name, material, dimensions: `${length}x${width}x${height} mm`, weight: Number(weight) } : i));
-      } else {
-        setItems([...items, { id: Math.random().toString(), customName: name, material, dimensions: `${length}x${width}x${height} mm`, weight: Number(weight) }]);
-      }
       setModalOpen(false);
-      if (editingSuggestionId) {
-        setSuggestions(suggestions.filter(s => s.id !== editingSuggestionId));
-        setEditingSuggestionId(null);
-      }
     } finally {
       setSubmitting(false);
       setEditingItemId(null);
@@ -117,67 +111,34 @@ export default function Inventory() {
     }
   };
 
-  const handleAcceptSuggestion = async (suggestion: InventoryItem) => {
-    // API POST here, then update local state
-    setItems([...items, suggestion]);
-    setSuggestions(suggestions.filter(s => s.id !== suggestion.id));
-  };
 
-  const handleEditSuggestion = (suggestion: InventoryItem) => {
-    setName(suggestion.customName);
-    setMaterial(suggestion.material);
-    setLength(suggestion.customLengthMm?.toString() || '');
-    setWidth(suggestion.customWidthMm?.toString() || '');
-    setHeight(suggestion.customHeightMm?.toString() || '');
-    setWeight(suggestion.weight?.toString() || '');
-    setEditingSuggestionId(suggestion.id);
-    setModalOpen(true);
-  };
-
-  const handleDeleteSuggestion = (id: string) => {
-    setSuggestions(suggestions.filter(s => s.id !== id));
-  };
 
   const handleEditItem = (item: InventoryItem) => {
-    setName(item.customName);
-    setMaterial(item.material);
-    
-    // Parse dimensions if customLengthMm is missing (due to mock data format)
-    if (!item.customLengthMm && item.dimensions) {
-      const parts = item.dimensions.replace(' mm', '').split('x');
-      if (parts.length === 3) {
-        setLength(parts[0].trim());
-        setWidth(parts[1].trim());
-        setHeight(parts[2].trim());
-      }
-    } else {
-      setLength(item.customLengthMm?.toString() || '');
-      setWidth(item.customWidthMm?.toString() || '');
-      setHeight(item.customHeightMm?.toString() || '');
-    }
-    
-    setWeight(item.weight?.toString() || '');
+    setName(item.name);
+    setPackagingTypeId(item.packagingTypeId);
+    setLength(item.lMm?.toString() || '');
+    setWidth(item.wMm?.toString() || '');
+    setHeight(item.hMm?.toString() || '');
     setEditingItemId(item.id);
-    setEditingSuggestionId(null);
     setModalOpen(true);
   };
 
   const handleAcceptType = async (type: PackagingType) => {
     setSubmitting(true);
     const bodyParams = {
-      customName: type.name,
-      material: type.agnosticMaterial,
-      customLengthMm: 0,
-      customWidthMm: 0,
-      customHeightMm: 0,
-      customWeightGrams: 0
+      packagingTypeId: type.id,
+      name: type.name,
+      lMm: 0,
+      wMm: 0,
+      hMm: 0,
+      customGsm: null,
+      role: 'PRIMARY'
     };
     try {
       await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
       setModalOpen(false);
       loadData();
     } catch (e) {
-      setItems([...items, { id: Math.random().toString(), customName: type.name, material: type.agnosticMaterial, dimensions: '0x0x0 mm', weight: 0 }]);
       setModalOpen(false);
     } finally {
       setSubmitting(false);
@@ -201,12 +162,10 @@ export default function Inventory() {
 
   const resetForm = () => {
     setName('');
-    setMaterial('PAPER');
+    if (standardTypes.length > 0) setPackagingTypeId(standardTypes[0].id);
     setLength('');
     setWidth('');
     setHeight('');
-    setWeight('');
-    setEditingSuggestionId(null);
     setEditingItemId(null);
   };
 
@@ -219,48 +178,6 @@ export default function Inventory() {
       }}
     >
       <Layout>
-        {/* AI Suggestions Section */}
-        {suggestions.length > 0 && (
-          <Layout.Section>
-            <BlockStack gap="400">
-              <InlineStack gap="200" blockAlign="center">
-                <Icon source={MagicIcon} tone="magic" />
-                <Text as="h2" variant="headingMd">Suggerimenti AI per il tuo inventario</Text>
-              </InlineStack>
-              <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px' }}>
-                {suggestions.map((sugg) => (
-                  <div key={sugg.id} style={{ minWidth: '280px', flex: '0 0 auto' }}>
-                    <Card padding="0">
-                      <img
-                        src={getMaterialImage(sugg.material)}
-                        alt={sugg.material}
-                        style={{ width: '100%', height: '140px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-                      />
-                      <Box padding="400">
-                        <BlockStack gap="200">
-                          <Text as="h3" variant="headingSm">{sugg.customName}</Text>
-                          <InlineStack gap="200">
-                            <Badge tone={sugg.material === 'PAPER' ? 'success' : 'info'}>{sugg.material}</Badge>
-                            <Text as="span" tone="subdued" variant="bodySm">{sugg.dimensions}</Text>
-                          </InlineStack>
-                          <div style={{ paddingTop: '12px' }}>
-                            <InlineStack gap="200" align="space-between">
-                              <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => handleDeleteSuggestion(sugg.id)} />
-                              <InlineStack gap="200">
-                                <Button size="micro" icon={EditIcon} onClick={() => handleEditSuggestion(sugg)}>Modifica</Button>
-                                <Button size="micro" tone="success" icon={CheckIcon} onClick={() => handleAcceptSuggestion(sugg)}>Accetta</Button>
-                              </InlineStack>
-                            </InlineStack>
-                          </div>
-                        </BlockStack>
-                      </Box>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            </BlockStack>
-          </Layout.Section>
-        )}
 
         <Layout.Section>
           <Card padding="0">
@@ -277,18 +194,18 @@ export default function Inventory() {
                 {items.map((item) => (
                   <Card key={item.id} padding="0">
                     <img 
-                      src={getMaterialImage(item.material)} 
-                      alt={item.material} 
+                      src={getMaterialImage(item.packagingType?.agnosticMaterial || 'PAPER')} 
+                      alt={item.packagingType?.agnosticMaterial} 
                       style={{ width: '100%', height: '160px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }} 
                     />
                     <Box padding="400">
                       <BlockStack gap="200">
-                        <Text as="h3" variant="headingSm">{item.customName}</Text>
+                        <Text as="h3" variant="headingSm">{item.name}</Text>
                         <InlineStack gap="200" align="space-between">
-                          <Badge tone={item.material === 'PAPER' ? 'success' : 'info'}>{item.material}</Badge>
-                          <Text as="span" tone="subdued" variant="bodySm">{item.weight}g</Text>
+                          <Badge tone={item.packagingType?.agnosticMaterial === 'PAPER' ? 'success' : 'info'}>{item.packagingType?.agnosticMaterial}</Badge>
+                          <Text as="span" tone="subdued" variant="bodySm">{item.calculatedUnitWeightGrams}g</Text>
                         </InlineStack>
-                        <Text as="span" tone="subdued" variant="bodySm">Dimensioni: {item.dimensions}</Text>
+                        <Text as="span" tone="subdued" variant="bodySm">Dimensioni: {`${item.lMm}x${item.wMm}x${item.hMm} mm`}</Text>
                         <div style={{ paddingTop: '12px' }}>
                           <InlineStack gap="200" align="space-between">
                             <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => handleDeleteItem(item.id)}>Elimina</Button>
@@ -308,7 +225,7 @@ export default function Inventory() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingSuggestionId ? "Accetta e Modifica Suggerimento" : editingItemId ? "Modifica Imballaggio" : "Aggiungi Imballaggio Personalizzato"}
+        title={editingItemId ? "Modifica Imballaggio" : "Aggiungi Imballaggio Personalizzato"}
         primaryAction={{
           content: 'Salva',
           onAction: handleSubmit,
@@ -322,7 +239,7 @@ export default function Inventory() {
         ]}
       >
         <Modal.Section>
-          {!editingItemId && !editingSuggestionId && standardTypes.length > 0 && (
+          {!editingItemId && standardTypes.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
               <BlockStack gap="400">
                 <Text as="h3" variant="headingMd">Imballaggi Standard</Text>
@@ -337,8 +254,7 @@ export default function Inventory() {
                             <InlineStack gap="100" align="end">
                               <Button size="micro" onClick={() => {
                                 setName(type.name);
-                                setMaterial(type.agnosticMaterial);
-                                // Optional: scroll down to custom form
+                                setPackagingTypeId(type.id);
                                 document.getElementById('custom-form')?.scrollIntoView({ behavior: 'smooth' });
                               }}>Modifica</Button>
                               <Button size="micro" tone="success" onClick={() => handleAcceptType(type)}>Accetta</Button>
@@ -359,17 +275,16 @@ export default function Inventory() {
             <FormLayout>
               <TextField label="Nome Personalizzato" value={name} onChange={setName} autoComplete="off" placeholder="es. Bustina Calzini Custom" />
               <Select
-                label="Materiale"
-                options={[{ label: 'Carta/Cartone', value: 'PAPER' }, { label: 'Plastica', value: 'PLASTIC' }, { label: 'Composito', value: 'COMPOSITE' }]}
-                value={material}
-                onChange={setMaterial}
+                label="Tipo di Imballaggio"
+                options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
+                value={packagingTypeId}
+                onChange={setPackagingTypeId}
               />
               <FormLayout.Group>
                 <TextField label="Lunghezza (mm)" value={length} onChange={setLength} type="number" autoComplete="off" />
                 <TextField label="Larghezza (mm)" value={width} onChange={setWidth} type="number" autoComplete="off" />
                 <TextField label="Altezza (mm)" value={height} onChange={setHeight} type="number" autoComplete="off" />
               </FormLayout.Group>
-              <TextField label="Peso a vuoto (g)" value={weight} onChange={setWeight} type="number" autoComplete="off" />
             </FormLayout>
           </Form>
         </Modal.Section>

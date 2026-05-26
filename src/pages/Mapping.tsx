@@ -3,17 +3,25 @@ import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockS
 import { CheckIcon, AlertCircleIcon, MagicIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 
-interface Recommendation {
+interface PackagingComponent {
+  mappingId: string;
+  packagingId: string;
   packagingName: string;
-  confidence: number;
+  purpose: 'WRAP' | 'CONTAINER' | 'SEAL' | 'LABEL' | 'CUSHION';
+  quantityPerUnit: number;
+  unitWeightGrams: number;
+}
+
+interface PendingComponent extends PackagingComponent {
+  similarityScore: number;
   reason: string;
 }
 
 interface ProductMapping {
-  id: string;
-  title: string;
-  currentMapping: string | null;
-  recommendation: Recommendation | null;
+  shopifyProductId: number;
+  shopifyProductTitle: string;
+  confirmedComponents: PackagingComponent[];
+  pendingComponents: PendingComponent[];
 }
 
 export default function Mapping() {
@@ -24,8 +32,8 @@ export default function Mapping() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/products/mappings');
-      setProducts(data);
+      const data = await apiFetch('/products/mappings?page=1&limit=50');
+      setProducts(data.data || []);
     } catch (e) {
       console.error("Failed to load mappings", e);
     } finally {
@@ -50,17 +58,31 @@ export default function Mapping() {
     }, 1500);
   };
 
-  const handleConfirmRecommendation = (id: string) => {
-    setProducts(products.map(p => {
-      if (p.id === id && p.recommendation) {
-        return { ...p, currentMapping: p.recommendation.packagingName, recommendation: null };
-      }
-      return p;
-    }));
+  const handleConfirmRecommendation = async (productId: number, mappingId: string) => {
+    try {
+      await apiFetch(`/products/${productId}/packaging/${mappingId}/confirm`, { method: 'PATCH' });
+      loadData();
+    } catch (e) {
+      // simulate success for demo
+      setProducts(products.map(p => {
+        if (p.shopifyProductId === productId) {
+          const compToConfirm = p.pendingComponents.find(c => c.mappingId === mappingId);
+          if (compToConfirm) {
+            return {
+              ...p,
+              pendingComponents: p.pendingComponents.filter(c => c.mappingId !== mappingId),
+              confirmedComponents: [...p.confirmedComponents, { ...compToConfirm }]
+            };
+          }
+        }
+        return p;
+      }));
+    }
   };
 
   const rows = products.map((product) => {
-    const statusIcon = product.currentMapping ? (
+    const isMapped = product.confirmedComponents.length > 0;
+    const statusIcon = isMapped ? (
       <InlineStack gap="100" blockAlign="center">
         <Icon source={CheckIcon} tone="success" />
         <Text as="span" tone="success">Mappato</Text>
@@ -72,26 +94,42 @@ export default function Mapping() {
       </InlineStack>
     );
 
-    const mappingDetails = product.currentMapping ? (
-      <Badge tone="success">{product.currentMapping}</Badge>
-    ) : product.recommendation ? (
-      <BlockStack gap="100">
-        <InlineStack gap="100" blockAlign="center">
-          <Icon source={MagicIcon} tone="magic" />
-          <Text as="span" fontWeight="bold">{product.recommendation.packagingName}</Text>
-          <Badge tone="info">{`${(product.recommendation.confidence * 100).toFixed(0)}% AI`}</Badge>
-        </InlineStack>
-        <Text as="p" variant="bodySm" tone="subdued">{product.recommendation.reason}</Text>
-        <div style={{ marginTop: '4px' }}>
-          <Button size="micro" onClick={() => handleConfirmRecommendation(product.id)}>Conferma</Button>
-        </div>
+    const mappingDetails = (
+      <BlockStack gap="200">
+        {product.confirmedComponents.length > 0 && (
+          <InlineStack gap="200">
+            {product.confirmedComponents.map(comp => (
+              <Badge key={comp.mappingId} tone="success">{comp.packagingName} ({comp.quantityPerUnit}x)</Badge>
+            ))}
+          </InlineStack>
+        )}
+        
+        {product.pendingComponents.length > 0 && (
+          <BlockStack gap="200">
+            {product.pendingComponents.map(comp => (
+              <BlockStack key={comp.mappingId} gap="100">
+                <InlineStack gap="100" blockAlign="center">
+                  <Icon source={MagicIcon} tone="magic" />
+                  <Text as="span" fontWeight="bold">{comp.packagingName}</Text>
+                  <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}% AI`}</Badge>
+                </InlineStack>
+                <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
+                <div style={{ marginTop: '4px' }}>
+                  <Button size="micro" onClick={() => handleConfirmRecommendation(product.shopifyProductId, comp.mappingId)}>Conferma</Button>
+                </div>
+              </BlockStack>
+            ))}
+          </BlockStack>
+        )}
+
+        {product.confirmedComponents.length === 0 && product.pendingComponents.length === 0 && (
+          <Text as="span" tone="subdued">Nessuna proposta</Text>
+        )}
       </BlockStack>
-    ) : (
-      <Text as="span" tone="subdued">Nessuna proposta</Text>
     );
 
     return [
-      <Text as="span" fontWeight="bold">{product.title}</Text>,
+      <Text as="span" fontWeight="bold">{product.shopifyProductTitle}</Text>,
       statusIcon,
       mappingDetails,
     ];
