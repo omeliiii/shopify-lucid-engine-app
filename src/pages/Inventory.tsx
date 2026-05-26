@@ -222,7 +222,7 @@ export default function Inventory() {
                 action={{ content: 'Aggiungi', onAction: () => { resetForm(); setModalOpen(true); } }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
-                <p>Aggiungi il tuo primo imballaggio personalizzato.</p>
+                <Text as="p">Aggiungi il tuo primo imballaggio personalizzato.</Text>
               </EmptyState>
             ) : (
               <BlockStack gap="025">
@@ -252,16 +252,18 @@ export default function Inventory() {
                 )}
 
                 {activeItems.length > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', padding: '16px' }}>
-                    {activeItems.map((item) => (
-                      <PackagingCard
-                        key={item.id}
-                        item={item}
-                        onEdit={handleEditItem}
-                        onDelete={handleDeleteItem}
-                      />
-                    ))}
-                  </div>
+                  <Box padding="400">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                      {activeItems.map((item) => (
+                        <PackagingCard
+                          key={item.id}
+                          item={item}
+                          onEdit={handleEditItem}
+                          onDelete={handleDeleteItem}
+                        />
+                      ))}
+                    </div>
+                  </Box>
                 )}
               </BlockStack>
             )}
@@ -310,9 +312,9 @@ export default function Inventory() {
                   </Box>
                 </Tabs>
               )}
-              <div style={{ borderTop: '1px solid #e1e3e5', paddingTop: '16px' }}>
+              <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
                 <Button onClick={() => setShowCustomForm(true)}>Crea imballaggio personalizzato</Button>
-              </div>
+              </Box>
             </BlockStack>
           ) : (
             <BlockStack gap="400">

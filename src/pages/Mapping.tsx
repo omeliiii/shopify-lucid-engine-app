@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Icon } from '@shopify/polaris';
+import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Icon, EmptyState } from '@shopify/polaris';
 import { CheckIcon, AlertCircleIcon, MagicIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 
@@ -147,11 +147,25 @@ export default function Mapping() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            <DataTable
-              columnContentTypes={['text', 'text', 'text']}
-              headings={['Prodotto', 'Stato', 'Imballaggio Assegnato / Proposta AI']}
-              rows={rows}
-            />
+            {products.length === 0 && !loading ? (
+              <EmptyState
+                heading="Nessun prodotto trovato"
+                action={{
+                  content: 'Sincronizza Shopify',
+                  onAction: handleSync,
+                  loading: syncing,
+                }}
+                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+              >
+                <p>Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura con gli imballaggi.</p>
+              </EmptyState>
+            ) : (
+              <DataTable
+                columnContentTypes={['text', 'text', 'text']}
+                headings={['Prodotto', 'Stato', 'Imballaggio Assegnato / Proposta AI']}
+                rows={rows}
+              />
+            )}
           </Card>
         </Layout.Section>
       </Layout>
