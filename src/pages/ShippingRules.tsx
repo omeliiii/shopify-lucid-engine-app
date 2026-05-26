@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Select, Checkbox, InlineStack, BlockStack, Badge, Icon, Box } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
+import { PolarisSelect } from '../components/PolarisSelect';
 
 interface ShippingRule {
   id: string;
@@ -170,8 +171,8 @@ export default function ShippingRules() {
                 <TextField label="Articoli Minimi" type="number" value={minItems} onChange={setMinItems} autoComplete="off" />
                 <TextField label="Articoli Massimi" type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" />
               </FormLayout.Group>
-              <Select label="Imballaggio Secondario (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
-              <Select label="Imballaggio di Riempimento (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
+              <PolarisSelect label="Imballaggio Secondario (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
+              <PolarisSelect label="Imballaggio di Riempimento (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
               <TextField label="Priorità (numero più alto = più importante)" type="number" value={priority} onChange={setPriority} autoComplete="off" helpText="Le regole con priorità più alta vengono valutate prima." />
               <Checkbox label="Regola Attiva" checked={isActive} onChange={setIsActive} />
             </FormLayout>

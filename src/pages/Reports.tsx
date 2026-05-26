@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, Select, TextField, EmptyState, Icon } from '@shopify/polaris';
+import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, TextField, EmptyState, Icon } from '@shopify/polaris';
 import { ExportIcon } from '@shopify/polaris-icons';
 import { apiFetch, apiDownload } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
+import { PolarisDatePicker } from '../components/PolarisDatePicker';
+import { PolarisSelect } from '../components/PolarisSelect';
 import { FlagBadge } from '../components/FlagBadge';
 
 interface Report {
@@ -181,7 +183,7 @@ export default function Reports() {
         <Modal.Section>
           <Form onSubmit={handleGenerate}>
             <FormLayout>
-              <Select
+              <PolarisSelect
                 label="Paese di Destinazione (Registro)"
                 options={[
                   { label: 'Germania (LUCID)', value: 'DE' },
@@ -191,7 +193,7 @@ export default function Reports() {
                 value={country}
                 onChange={setCountry}
               />
-              <Select
+              <PolarisSelect
                 label="Tipo di Periodo"
                 options={[
                   { label: 'Annuale', value: 'ANNUAL' },
@@ -202,8 +204,8 @@ export default function Reports() {
                 onChange={setPeriodType}
               />
               <FormLayout.Group>
-                <TextField label="Data Inizio" type="date" value={startDate} onChange={setStartDate} autoComplete="off" />
-                <TextField label="Data Fine" type="date" value={endDate} onChange={setEndDate} autoComplete="off" />
+                <PolarisDatePicker label="Data Inizio" value={startDate} onChange={setStartDate} />
+                <PolarisDatePicker label="Data Fine" value={endDate} onChange={setEndDate} />
               </FormLayout.Group>
               <BlockStack>
                 <Text as="p" tone="subdued" variant="bodySm">

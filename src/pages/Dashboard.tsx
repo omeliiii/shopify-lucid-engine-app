@@ -12,7 +12,6 @@ import {
   InlineStack,
   Badge,
   EmptyState,
-  Select,
   TextField,
   Button
 } from '@shopify/polaris';

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, ResourceList, ResourceItem, Text, Button, Modal, Form, FormLayout, TextField, Select, Badge, InlineStack, BlockStack, EmptyState, Icon, Box } from '@shopify/polaris';
+import { Page, Layout, Card, ResourceList, ResourceItem, Text, Button, Modal, Form, FormLayout, TextField, Badge, InlineStack, BlockStack, EmptyState, Icon, Box } from '@shopify/polaris';
 import { DeleteIcon, EditIcon, CheckIcon, MagicIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
+import { PolarisSelect } from '../components/PolarisSelect';
 
 interface InventoryItem {
   id: string;
@@ -274,7 +275,7 @@ export default function Inventory() {
           <Form onSubmit={handleSubmit}>
             <FormLayout>
               <TextField label="Nome Personalizzato" value={name} onChange={setName} autoComplete="off" placeholder="es. Bustina Calzini Custom" />
-              <Select
+              <PolarisSelect
                 label="Tipo di Imballaggio"
                 options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
                 value={packagingTypeId}
