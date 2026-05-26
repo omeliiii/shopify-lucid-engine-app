@@ -35,7 +35,7 @@ export default function Reports() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: '10' });
-      if (filterCountry !== 'ALL') params.append('country', filterCountry);
+      if (filterCountry !== 'ALL') params.append('countryCode', filterCountry);
       if (filterStartDate) params.append('periodStart', filterStartDate);
       if (filterEndDate) params.append('periodEnd', filterEndDate);
 
