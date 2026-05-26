@@ -99,11 +99,11 @@ export default function Mapping() {
         {product.confirmedComponents.length > 0 && (
           <InlineStack gap="200">
             {product.confirmedComponents.map(comp => (
-              <Badge key={comp.mappingId} tone="success">{comp.packagingName} ({comp.quantityPerUnit}x)</Badge>
+              <Badge key={comp.mappingId} tone="success">{comp.packagingName + ' ' + comp.quantityPerUnit + 'x'}</Badge>
             ))}
           </InlineStack>
         )}
-        
+
         {product.pendingComponents.length > 0 && (
           <BlockStack gap="200">
             {product.pendingComponents.map(comp => (
@@ -136,7 +136,7 @@ export default function Mapping() {
   });
 
   return (
-    <Page 
+    <Page
       title="Mappatura Prodotti"
       primaryAction={{
         content: 'Sincronizza Shopify',
