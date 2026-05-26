@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, Select, TextField, EmptyState, Icon } from '@shopify/polaris';
 import { ExportIcon } from '@shopify/polaris-icons';
 import { apiFetch, apiDownload } from '../utils/api';
+import { CountryDateFilters } from '../components/CountryDateFilters';
 
 interface Report {
   id: string;
@@ -142,24 +143,15 @@ export default function Reports() {
           <Card padding="0">
             {/* Filters */}
             <div style={{ padding: '16px' }}>
-              <InlineStack gap="400" blockAlign="end">
-                <Select
-                  label="Filtra per Paese"
-                  options={[
-                    { label: 'Tutti i paesi', value: 'ALL' },
-                    { label: 'Germania (DE)', value: 'DE' },
-                    { label: 'Italia (IT)', value: 'IT' },
-                    { label: 'Francia (FR)', value: 'FR' },
-                  ]}
-                  value={filterCountry}
-                  onChange={(val) => { setFilterCountry(val); setPage(1); }}
-                />
-                <TextField label="Da Data" type="date" value={filterStartDate} onChange={(val) => { setFilterStartDate(val); setPage(1); }} autoComplete="off" />
-                <TextField label="A Data" type="date" value={filterEndDate} onChange={(val) => { setFilterEndDate(val); setPage(1); }} autoComplete="off" />
-                {(filterCountry !== 'ALL' || filterStartDate || filterEndDate) && (
-                  <Button onClick={() => { setFilterCountry('ALL'); setFilterStartDate(''); setFilterEndDate(''); setPage(1); }}>Resetta Filtri</Button>
-                )}
-              </InlineStack>
+              <CountryDateFilters
+                countryFilter={filterCountry}
+                onCountryChange={(val) => { setFilterCountry(val); setPage(1); }}
+                startDate={filterStartDate}
+                onStartDateChange={(val) => { setFilterStartDate(val); setPage(1); }}
+                endDate={filterEndDate}
+                onEndDateChange={(val) => { setFilterEndDate(val); setPage(1); }}
+                onReset={() => { setFilterCountry('ALL'); setFilterStartDate(''); setFilterEndDate(''); setPage(1); }}
+              />
             </div>
 
             {reports.length === 0 && !loading ? (

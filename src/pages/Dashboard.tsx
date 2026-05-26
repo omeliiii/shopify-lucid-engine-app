@@ -18,6 +18,7 @@ import {
 } from '@shopify/polaris';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
+import { CountryDateFilters } from '../components/CountryDateFilters';
 
 interface ShippingLog {
   id: string;
@@ -250,24 +251,15 @@ export default function Dashboard() {
               
               {/* Filters */}
               <div style={{ padding: '0 16px 16px 16px' }}>
-                <InlineStack gap="400" blockAlign="end">
-                  <Select
-                    label="Filtra per Paese"
-                    options={[
-                      { label: 'Tutti i paesi', value: 'ALL' },
-                      { label: 'Germania (DE)', value: 'DE' },
-                      { label: 'Italia (IT)', value: 'IT' },
-                      { label: 'Francia (FR)', value: 'FR' },
-                    ]}
-                    value={countryFilter}
-                    onChange={(val) => { setCountryFilter(val); setPage(1); }}
-                  />
-                  <TextField label="Data inizio" type="date" value={startDate} onChange={(val) => { setStartDate(val); setPage(1); }} autoComplete="off" />
-                  <TextField label="Data fine" type="date" value={endDate} onChange={(val) => { setEndDate(val); setPage(1); }} autoComplete="off" />
-                  {(countryFilter !== 'ALL' || startDate !== '' || endDate !== '') && (
-                    <Button onClick={() => { setCountryFilter('ALL'); setStartDate(''); setEndDate(''); setPage(1); }}>Resetta Filtri</Button>
-                  )}
-                </InlineStack>
+                <CountryDateFilters
+                  countryFilter={countryFilter}
+                  onCountryChange={(val) => { setCountryFilter(val); setPage(1); }}
+                  startDate={startDate}
+                  onStartDateChange={(val) => { setStartDate(val); setPage(1); }}
+                  endDate={endDate}
+                  onEndDateChange={(val) => { setEndDate(val); setPage(1); }}
+                  onReset={() => { setCountryFilter('ALL'); setStartDate(''); setEndDate(''); setPage(1); }}
+                />
               </div>
 
               {logs.length > 0 ? (
