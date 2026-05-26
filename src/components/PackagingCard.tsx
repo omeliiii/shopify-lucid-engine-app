@@ -56,7 +56,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
             <Text as="h3" variant="headingXs" truncate>{item.name}</Text>
             <InlineStack gap="100" align="space-between">
               <Badge tone={material === 'PAPER' ? 'success' : 'info'} size="small">{material}</Badge>
-              <Text as="span" tone="subdued" variant="bodySm">{item.calculatedUnitWeightGrams}g</Text>
+              <Text as="span" tone="subdued" variant="bodySm">{Number(item.calculatedUnitWeightGrams.toFixed(2))}g</Text>
             </InlineStack>
             {(item.lMm || item.wMm || item.hMm) && (
               <Text as="span" tone="subdued" variant="bodySm">
@@ -86,7 +86,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           <Text as="h3" variant="headingSm" truncate>{item.name}</Text>
           <InlineStack gap="200" align="space-between">
             <Badge tone={material === 'PAPER' ? 'success' : 'info'}>{material}</Badge>
-            <Text as="span" tone="subdued" variant="bodySm">{item.calculatedUnitWeightGrams}g</Text>
+            <Text as="span" tone="subdued" variant="bodySm">{Number(item.calculatedUnitWeightGrams.toFixed(2))}g</Text>
           </InlineStack>
           <Text as="span" tone="subdued" variant="bodySm">
             {item.lMm || 0}×{item.wMm || 0}×{item.hMm || 0} mm
