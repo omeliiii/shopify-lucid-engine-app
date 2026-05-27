@@ -18,20 +18,14 @@ import {
   Tabs,
   Thumbnail,
   SkeletonBodyText,
+  Pagination,
 } from '@shopify/polaris';
-import { CheckIcon, AlertCircleIcon, MagicIcon, DeleteIcon, PlusIcon } from '@shopify/polaris-icons';
+import { CheckIcon, AlertCircleIcon, MagicIcon, DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { getMaterialImage } from '../components/PackagingCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ShopifyProduct {
-  id: number;
-  title: string;
-  imageUrl?: string;
-  productType?: string;
-}
 
 interface PackagingItem {
   id: string;
@@ -53,13 +47,6 @@ interface PendingComponent extends PackagingComponent {
   reason: string;
 }
 
-interface ProductMapping {
-  shopifyProductId: number;
-  shopifyProductTitle: string;
-  confirmedComponents: PackagingComponent[];
-  pendingComponents: PendingComponent[];
-}
-
 type MappingStatus = 'mapped' | 'pending' | 'unmapped';
 
 interface MergedProduct {
@@ -69,6 +56,15 @@ interface MergedProduct {
   status: MappingStatus;
   confirmedComponents: PackagingComponent[];
   pendingComponents: PendingComponent[];
+}
+
+interface MergedViewMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalMapped: number;
+  totalPending: number;
+  totalUnmapped: number;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -81,18 +77,20 @@ const PURPOSE_OPTIONS = [
   { label: 'Cuscinetto', value: 'CUSHION' },
 ];
 
+const STATUS_FILTER_MAP: Record<number, MappingStatus | undefined> = {
+  0: undefined,    // "Tutti"
+  1: 'mapped',     // "Mappati"
+  2: 'pending',    // "Da Revisionare"
+  3: 'unmapped',   // "Senza Imballaggio"
+};
+
+const PAGE_LIMIT = 25;
+
 function purposeLabel(purpose: string): string {
   return PURPOSE_OPTIONS.find((o) => o.value === purpose)?.label ?? purpose;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function deriveMappingStatus(mapping?: ProductMapping): MappingStatus {
-  if (!mapping) return 'unmapped';
-  if (mapping.confirmedComponents.length > 0) return 'mapped';
-  if (mapping.pendingComponents.length > 0) return 'pending';
-  return 'unmapped';
-}
 
 function StatusCell({ status }: { status: MappingStatus }) {
   if (status === 'mapped') {
@@ -107,11 +105,18 @@ function StatusCell({ status }: { status: MappingStatus }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Mapping() {
-  const [mergedProducts, setMergedProducts] = useState<MergedProduct[]>([]);
+  const [products, setProducts] = useState<MergedProduct[]>([]);
+  const [meta, setMeta] = useState<MergedViewMeta>({
+    total: 0, page: 1, limit: PAGE_LIMIT,
+    totalMapped: 0, totalPending: 0, totalUnmapped: 0,
+  });
   const [packagingOptions, setPackagingOptions] = useState<PackagingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchDebounced, setSearchDebounced] = useState('');
 
   // Add packaging modal
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -124,58 +129,50 @@ export default function Mapping() {
   const [deleteTarget, setDeleteTarget] = useState<{ productId: number; mappingId: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // ── Debounce search ───────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchDebounced(searchQuery);
+      setCurrentPage(1); // Reset to page 1 on search change
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ── Data loading ──────────────────────────────────────────────────────────
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch Shopify products, backend mappings, and packaging inventory in parallel.
-      // NOTE: /products/shopify-list must be a NestJS endpoint that proxies to
-      // Shopify Admin GraphQL (products query → id, title, featuredImage, productType).
-      // Until that endpoint exists, shopifyProducts will be empty and the component
-      // will fall back to showing only products that have backend mappings.
-      const [shopifyResult, mappingsResult, inventoryResult] = await Promise.allSettled([
-        apiFetch('/products/shopify-list'),
-        apiFetch('/products/mappings?page=1&limit=100'),
+      const statusParam = STATUS_FILTER_MAP[selectedTab];
+      const params = new URLSearchParams();
+      params.set('page', String(currentPage));
+      params.set('limit', String(PAGE_LIMIT));
+      if (statusParam) params.set('status', statusParam);
+      if (searchDebounced.trim()) params.set('search', searchDebounced.trim());
+
+      const [mergedResult, inventoryResult] = await Promise.allSettled([
+        apiFetch(`/products/merged-view?${params.toString()}`),
         apiFetch('/packaging/inventory'),
       ]);
 
-      const shopifyProducts: ShopifyProduct[] =
-        shopifyResult.status === 'fulfilled' ? (shopifyResult.value?.data ?? []) : [];
-      const mappings: ProductMapping[] =
-        mappingsResult.status === 'fulfilled' ? (mappingsResult.value?.data ?? []) : [];
-      const inventory: PackagingItem[] =
-        inventoryResult.status === 'fulfilled' ? (inventoryResult.value ?? []) : [];
+      if (mergedResult.status === 'fulfilled') {
+        setProducts(mergedResult.value?.data ?? []);
+        setMeta(mergedResult.value?.meta ?? {
+          total: 0, page: 1, limit: PAGE_LIMIT,
+          totalMapped: 0, totalPending: 0, totalUnmapped: 0,
+        });
+      } else {
+        setProducts([]);
+      }
 
-      setPackagingOptions(inventory);
-
-      // Merge algorithm:
-      // If Shopify product list is available, it is the source of truth (shows ALL products).
-      // Otherwise degrade gracefully to the backend mappings list (only mapped products visible).
-      const merged: MergedProduct[] =
-        shopifyProducts.length > 0
-          ? shopifyProducts.map((product) => {
-            const mapping = mappings.find((m) => m.shopifyProductId == product.id);
-            return {
-              shopifyProductId: product.id,
-              title: product.title,
-              imageUrl: product.imageUrl,
-              status: deriveMappingStatus(mapping),
-              confirmedComponents: mapping?.confirmedComponents ?? [],
-              pendingComponents: mapping?.pendingComponents ?? [],
-            };
-          })
-          : mappings.map((m) => ({
-            shopifyProductId: m.shopifyProductId,
-            title: m.shopifyProductTitle,
-            status: deriveMappingStatus(m),
-            confirmedComponents: m.confirmedComponents,
-            pendingComponents: m.pendingComponents,
-          }));
-
-      setMergedProducts(merged);
+      if (inventoryResult.status === 'fulfilled') {
+        setPackagingOptions(inventoryResult.value ?? []);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, selectedTab, searchDebounced]);
 
   useEffect(() => {
     loadData();
@@ -202,7 +199,7 @@ export default function Mapping() {
     } catch {
       // optimistic update continues below
     }
-    setMergedProducts((prev) =>
+    setProducts((prev) =>
       prev.map((p) => {
         if (p.shopifyProductId !== productId) return p;
         const comp = p.pendingComponents.find((c) => c.mappingId === mappingId);
@@ -229,22 +226,14 @@ export default function Mapping() {
     } catch {
       // optimistic update continues below
     }
-    setMergedProducts((prev) =>
+    setProducts((prev) =>
       prev.map((p) => {
         if (p.shopifyProductId !== deleteTarget.productId) return p;
         const confirmed = p.confirmedComponents.filter((c) => c.mappingId !== deleteTarget.mappingId);
         const pending = p.pendingComponents.filter((c) => c.mappingId !== deleteTarget.mappingId);
-        return {
-          ...p,
-          confirmedComponents: confirmed,
-          pendingComponents: pending,
-          status: deriveMappingStatus({
-            shopifyProductId: p.shopifyProductId,
-            shopifyProductTitle: p.title,
-            confirmedComponents: confirmed,
-            pendingComponents: pending,
-          }),
-        };
+        const status: MappingStatus =
+          confirmed.length > 0 ? 'mapped' : pending.length > 0 ? 'pending' : 'unmapped';
+        return { ...p, confirmedComponents: confirmed, pendingComponents: pending, status };
       })
     );
     setDeleteLoading(false);
@@ -279,32 +268,28 @@ export default function Mapping() {
     }
   };
 
-  // ── Filtering ──────────────────────────────────────────────────────────────
+  // ── Tab handling ──────────────────────────────────────────────────────────
 
-  const counts = {
-    all: mergedProducts.length,
-    mapped: mergedProducts.filter((p) => p.status === 'mapped').length,
-    pending: mergedProducts.filter((p) => p.status === 'pending').length,
-    unmapped: mergedProducts.filter((p) => p.status === 'unmapped').length,
+  const handleTabChange = (tabIndex: number) => {
+    setSelectedTab(tabIndex);
+    setCurrentPage(1); // Reset to page 1 on tab change
   };
 
+  // ── Tab labels with server-side counts ────────────────────────────────────
+
+  const totalAll = meta.totalMapped + meta.totalPending + meta.totalUnmapped;
   const tabs = [
-    { id: 'all', content: `Tutti (${counts.all})` },
-    { id: 'mapped', content: `Mappati (${counts.mapped})` },
-    { id: 'pending', content: `Da Revisionare (${counts.pending})` },
-    { id: 'unmapped', content: `Senza Imballaggio (${counts.unmapped})` },
+    { id: 'all', content: `Tutti (${totalAll})` },
+    { id: 'mapped', content: `Mappati (${meta.totalMapped})` },
+    { id: 'pending', content: `Da Revisionare (${meta.totalPending})` },
+    { id: 'unmapped', content: `Senza Imballaggio (${meta.totalUnmapped})` },
   ];
 
-  const filteredProducts = mergedProducts.filter((p) => {
-    if (selectedTab === 1) return p.status === 'mapped';
-    if (selectedTab === 2) return p.status === 'pending';
-    if (selectedTab === 3) return p.status === 'unmapped';
-    return true;
-  });
+  const totalPages = Math.max(1, Math.ceil(meta.total / PAGE_LIMIT));
 
   // ── Table rows ─────────────────────────────────────────────────────────────
 
-  const rows = filteredProducts.map((product) => {
+  const rows = products.map((product) => {
     const productCell = (
       <InlineStack gap="300" blockAlign="center">
         <Thumbnail
@@ -417,34 +402,74 @@ export default function Mapping() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab} fitted>
+            <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange} fitted>
+              {/* Search bar */}
+              <Box padding="300" paddingBlockEnd="0">
+                <TextField
+                  label=""
+                  labelHidden
+                  placeholder="Cerca prodotto..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  prefix={<Icon source={SearchIcon} />}
+                  clearButton
+                  onClearButtonClick={() => setSearchQuery('')}
+                  autoComplete="off"
+                />
+              </Box>
+
               {loading ? (
                 <Box padding="400">
                   <SkeletonBodyText lines={6} />
                 </Box>
-              ) : filteredProducts.length === 0 ? (
+              ) : products.length === 0 ? (
                 <EmptyState
                   heading={
                     selectedTab === 3
                       ? 'Tutti i prodotti sono mappati!'
-                      : 'Nessun prodotto trovato'
+                      : searchDebounced
+                        ? 'Nessun risultato trovato'
+                        : 'Nessun prodotto trovato'
                   }
-                  action={{ content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }}
+                  action={
+                    !searchDebounced
+                      ? { content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }
+                      : undefined
+                  }
                   image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                 >
                   <Text as="p">
                     {selectedTab === 3
                       ? 'Ottimo! Ogni prodotto ha almeno un imballaggio associato.'
-                      : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
+                      : searchDebounced
+                        ? `Nessun prodotto corrisponde a "${searchDebounced}".`
+                        : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
                   </Text>
                 </EmptyState>
               ) : (
-                <DataTable
-                  columnContentTypes={['text', 'text', 'text', 'text']}
-                  headings={['Prodotto', 'Stato', 'Imballaggio', 'Azione']}
-                  rows={rows}
-                  verticalAlign="middle"
-                />
+                <BlockStack>
+                  <DataTable
+                    columnContentTypes={['text', 'text', 'text', 'text']}
+                    headings={['Prodotto', 'Stato', 'Imballaggio', 'Azione']}
+                    rows={rows}
+                    verticalAlign="middle"
+                  />
+                  {totalPages > 1 && (
+                    <Box padding="400" paddingBlockStart="200">
+                      <InlineStack align="center" gap="300" blockAlign="center">
+                        <Pagination
+                          hasPrevious={currentPage > 1}
+                          hasNext={currentPage < totalPages}
+                          onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        />
+                        <Text as="span" variant="bodySm" tone="subdued">
+                          Pagina {currentPage} di {totalPages} · {meta.total} prodotti
+                        </Text>
+                      </InlineStack>
+                    </Box>
+                  )}
+                </BlockStack>
               )}
             </Tabs>
           </Card>

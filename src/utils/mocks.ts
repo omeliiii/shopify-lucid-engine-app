@@ -152,6 +152,85 @@ export const MOCKS: Record<string, any> = {
     meta: { totalItems: 3, page: 1, limit: 50 }
   },
 
+  '/products/merged-view': {
+    data: [
+      {
+        shopifyProductId: 991,
+        title: 'Calzini sportivi in cotone',
+        imageUrl: 'https://via.placeholder.com/100',
+        status: 'pending',
+        confirmedComponents: [],
+        pendingComponents: [
+          {
+            mappingId: 'map-1',
+            packagingId: 'inv-1',
+            packagingName: 'Bustina Calzini Custom',
+            packagingMaterial: 'PAPER',
+            purpose: 'CONTAINER',
+            quantityPerUnit: 1,
+            unitWeightGrams: 7.92,
+            similarityScore: 0.94,
+            reason: 'AI match: Bustina Calzini Custom (PAPER) — 94%'
+          }
+        ]
+      },
+      {
+        shopifyProductId: 992,
+        title: 'Scarpe da Corsa PRO',
+        imageUrl: 'https://via.placeholder.com/100',
+        status: 'mapped',
+        confirmedComponents: [
+          {
+            mappingId: 'map-2',
+            packagingId: 'inv-2',
+            packagingName: 'Scatola Standard',
+            packagingMaterial: 'COMPOSITE',
+            purpose: 'CONTAINER',
+            quantityPerUnit: 1,
+            unitWeightGrams: 150
+          }
+        ],
+        pendingComponents: []
+      },
+      {
+        shopifyProductId: 993,
+        title: 'T-Shirt Basic',
+        imageUrl: 'https://via.placeholder.com/100',
+        status: 'pending',
+        confirmedComponents: [],
+        pendingComponents: [
+          {
+            mappingId: 'map-3',
+            packagingId: 'inv-1',
+            packagingName: 'Bustina Calzini Custom',
+            packagingMaterial: 'PAPER',
+            purpose: 'WRAP',
+            quantityPerUnit: 1,
+            unitWeightGrams: 7.92,
+            similarityScore: 0.78,
+            reason: 'AI match: Bustina Calzini Custom (PAPER) — 78%'
+          }
+        ]
+      },
+      {
+        shopifyProductId: 994,
+        title: 'Pantaloni Cargo',
+        imageUrl: 'https://via.placeholder.com/100',
+        status: 'unmapped',
+        confirmedComponents: [],
+        pendingComponents: []
+      }
+    ],
+    meta: {
+      total: 4,
+      page: 1,
+      limit: 25,
+      totalMapped: 1,
+      totalPending: 2,
+      totalUnmapped: 1
+    }
+  },
+
   '/orders/shipping-rules': [
     { id: 'rule-1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillerPackagingId: 'inv-1', priority: 10, isActive: true },
     { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', priority: 5, isActive: false }
