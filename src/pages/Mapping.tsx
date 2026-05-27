@@ -1,12 +1,48 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Icon, EmptyState } from '@shopify/polaris';
-import { CheckIcon, AlertCircleIcon, MagicIcon } from '@shopify/polaris-icons';
+import {
+  Page,
+  Layout,
+  Card,
+  DataTable,
+  Badge,
+  Button,
+  Text,
+  InlineStack,
+  BlockStack,
+  Box,
+  Icon,
+  EmptyState,
+  Modal,
+  FormLayout,
+  TextField,
+  Tabs,
+  Thumbnail,
+  SkeletonBodyText,
+} from '@shopify/polaris';
+import { CheckIcon, AlertCircleIcon, MagicIcon, DeleteIcon, PlusIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
+import { PolarisSelect } from '../components/PolarisSelect';
+import { getMaterialImage } from '../components/PackagingCard';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ShopifyProduct {
+  id: number;
+  title: string;
+  imageUrl?: string;
+  productType?: string;
+}
+
+interface PackagingItem {
+  id: string;
+  name: string;
+}
 
 interface PackagingComponent {
   mappingId: string;
   packagingId: string;
   packagingName: string;
+  packagingMaterial?: string;
   purpose: 'WRAP' | 'CONTAINER' | 'SEAL' | 'LABEL' | 'CUSHION';
   quantityPerUnit: number;
   unitWeightGrams: number;
@@ -24,18 +60,118 @@ interface ProductMapping {
   pendingComponents: PendingComponent[];
 }
 
+type MappingStatus = 'mapped' | 'pending' | 'unmapped';
+
+interface MergedProduct {
+  shopifyProductId: number;
+  title: string;
+  imageUrl?: string;
+  status: MappingStatus;
+  confirmedComponents: PackagingComponent[];
+  pendingComponents: PendingComponent[];
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const PURPOSE_OPTIONS = [
+  { label: 'Contenitore', value: 'CONTAINER' },
+  { label: 'Involucro', value: 'WRAP' },
+  { label: 'Sigillo', value: 'SEAL' },
+  { label: 'Etichetta', value: 'LABEL' },
+  { label: 'Cuscinetto', value: 'CUSHION' },
+];
+
+function purposeLabel(purpose: string): string {
+  return PURPOSE_OPTIONS.find((o) => o.value === purpose)?.label ?? purpose;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function deriveMappingStatus(mapping?: ProductMapping): MappingStatus {
+  if (!mapping) return 'unmapped';
+  if (mapping.confirmedComponents.length > 0) return 'mapped';
+  if (mapping.pendingComponents.length > 0) return 'pending';
+  return 'unmapped';
+}
+
+function StatusCell({ status }: { status: MappingStatus }) {
+  if (status === 'mapped') {
+    return <Badge tone="success">Mappato</Badge>;
+  }
+  if (status === 'pending') {
+    return <Badge tone="info">Suggerimento AI</Badge>;
+  }
+  return <Badge tone="critical">Non Mappato</Badge>;
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function Mapping() {
-  const [products, setProducts] = useState<ProductMapping[]>([]);
+  const [mergedProducts, setMergedProducts] = useState<MergedProduct[]>([]);
+  const [packagingOptions, setPackagingOptions] = useState<PackagingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  // Add packaging modal
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addTarget, setAddTarget] = useState<MergedProduct | null>(null);
+  const [addForm, setAddForm] = useState({ packagingId: '', purpose: 'CONTAINER', quantityPerUnit: '1' });
+  const [addLoading, setAddLoading] = useState(false);
+
+  // Delete/reject confirm modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ productId: number; mappingId: string; name: string } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/products/mappings?page=1&limit=50');
-      setProducts(data.data || []);
-    } catch (e) {
-      console.error("Failed to load mappings", e);
+      // Fetch Shopify products, backend mappings, and packaging inventory in parallel.
+      // NOTE: /products/shopify-list must be a NestJS endpoint that proxies to
+      // Shopify Admin GraphQL (products query → id, title, featuredImage, productType).
+      // Until that endpoint exists, shopifyProducts will be empty and the component
+      // will fall back to showing only products that have backend mappings.
+      const [shopifyResult, mappingsResult, inventoryResult] = await Promise.allSettled([
+        apiFetch('/products/shopify-list'),
+        apiFetch('/products/mappings?page=1&limit=100'),
+        apiFetch('/packaging/inventory'),
+      ]);
+
+      const shopifyProducts: ShopifyProduct[] =
+        shopifyResult.status === 'fulfilled' ? (shopifyResult.value?.data ?? []) : [];
+      const mappings: ProductMapping[] =
+        mappingsResult.status === 'fulfilled' ? (mappingsResult.value?.data ?? []) : [];
+      const inventory: PackagingItem[] =
+        inventoryResult.status === 'fulfilled' ? (inventoryResult.value ?? []) : [];
+
+      setPackagingOptions(inventory);
+
+      // Merge algorithm:
+      // If Shopify product list is available, it is the source of truth (shows ALL products).
+      // Otherwise degrade gracefully to the backend mappings list (only mapped products visible).
+      const merged: MergedProduct[] =
+        shopifyProducts.length > 0
+          ? shopifyProducts.map((product) => {
+            const mapping = mappings.find((m) => m.shopifyProductId == product.id);
+            return {
+              shopifyProductId: product.id,
+              title: product.title,
+              imageUrl: product.imageUrl,
+              status: deriveMappingStatus(mapping),
+              confirmedComponents: mapping?.confirmedComponents ?? [],
+              pendingComponents: mapping?.pendingComponents ?? [],
+            };
+          })
+          : mappings.map((m) => ({
+            shopifyProductId: m.shopifyProductId,
+            title: m.shopifyProductTitle,
+            status: deriveMappingStatus(m),
+            confirmedComponents: m.confirmedComponents,
+            pendingComponents: m.pendingComponents,
+          }));
+
+      setMergedProducts(merged);
     } finally {
       setLoading(false);
     }
@@ -45,11 +181,13 @@ export default function Mapping() {
     loadData();
   }, [loadData]);
 
+  // ── Actions ────────────────────────────────────────────────────────────────
+
   const handleSync = async () => {
     setSyncing(true);
     try {
       await apiFetch('/products/sync', { method: 'POST' });
-    } catch (e) {
+    } catch {
       // ignore
     }
     setTimeout(() => {
@@ -58,82 +196,214 @@ export default function Mapping() {
     }, 1500);
   };
 
-  const handleConfirmRecommendation = async (productId: number, mappingId: string) => {
+  const handleConfirm = async (productId: number, mappingId: string) => {
     try {
       await apiFetch(`/products/${productId}/packaging/${mappingId}/confirm`, { method: 'PATCH' });
+    } catch {
+      // optimistic update continues below
+    }
+    setMergedProducts((prev) =>
+      prev.map((p) => {
+        if (p.shopifyProductId !== productId) return p;
+        const comp = p.pendingComponents.find((c) => c.mappingId === mappingId);
+        if (!comp) return p;
+        const confirmed = [...p.confirmedComponents, { ...comp }];
+        const pending = p.pendingComponents.filter((c) => c.mappingId !== mappingId);
+        return { ...p, confirmedComponents: confirmed, pendingComponents: pending, status: 'mapped' };
+      })
+    );
+  };
+
+  const openDeleteModal = (productId: number, mappingId: string, name: string) => {
+    setDeleteTarget({ productId, mappingId, name });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      await apiFetch(`/products/${deleteTarget.productId}/packaging/${deleteTarget.mappingId}`, {
+        method: 'DELETE',
+      });
+    } catch {
+      // optimistic update continues below
+    }
+    setMergedProducts((prev) =>
+      prev.map((p) => {
+        if (p.shopifyProductId !== deleteTarget.productId) return p;
+        const confirmed = p.confirmedComponents.filter((c) => c.mappingId !== deleteTarget.mappingId);
+        const pending = p.pendingComponents.filter((c) => c.mappingId !== deleteTarget.mappingId);
+        return {
+          ...p,
+          confirmedComponents: confirmed,
+          pendingComponents: pending,
+          status: deriveMappingStatus({
+            shopifyProductId: p.shopifyProductId,
+            shopifyProductTitle: p.title,
+            confirmedComponents: confirmed,
+            pendingComponents: pending,
+          }),
+        };
+      })
+    );
+    setDeleteLoading(false);
+    setDeleteModalOpen(false);
+    setDeleteTarget(null);
+  };
+
+  const openAddModal = (product: MergedProduct) => {
+    setAddTarget(product);
+    setAddForm({ packagingId: packagingOptions[0]?.id ?? '', purpose: 'CONTAINER', quantityPerUnit: '1' });
+    setAddModalOpen(true);
+  };
+
+  const handleAddConfirm = async () => {
+    if (!addTarget || !addForm.packagingId) return;
+    setAddLoading(true);
+    try {
+      await apiFetch(`/products/${addTarget.shopifyProductId}/packaging`, {
+        method: 'POST',
+        body: JSON.stringify({
+          packagingId: addForm.packagingId,
+          purpose: addForm.purpose,
+          quantityPerUnit: parseInt(addForm.quantityPerUnit, 10),
+        }),
+      });
+      setAddModalOpen(false);
       loadData();
-    } catch (e) {
-      // simulate success for demo
-      setProducts(products.map(p => {
-        if (p.shopifyProductId === productId) {
-          const compToConfirm = p.pendingComponents.find(c => c.mappingId === mappingId);
-          if (compToConfirm) {
-            return {
-              ...p,
-              pendingComponents: p.pendingComponents.filter(c => c.mappingId !== mappingId),
-              confirmedComponents: [...p.confirmedComponents, { ...compToConfirm }]
-            };
-          }
-        }
-        return p;
-      }));
+    } catch {
+      // ignore for demo
+    } finally {
+      setAddLoading(false);
     }
   };
 
-  const rows = products.map((product) => {
-    const isMapped = product.confirmedComponents.length > 0;
-    const statusIcon = isMapped ? (
-      <InlineStack gap="100" blockAlign="center">
-        <Icon source={CheckIcon} tone="success" />
-        <Text as="span" tone="success">Mappato</Text>
-      </InlineStack>
-    ) : (
-      <InlineStack gap="100" blockAlign="center">
-        <Icon source={AlertCircleIcon} tone="critical" />
-        <Text as="span" tone="critical">Non Mappato</Text>
+  // ── Filtering ──────────────────────────────────────────────────────────────
+
+  const counts = {
+    all: mergedProducts.length,
+    mapped: mergedProducts.filter((p) => p.status === 'mapped').length,
+    pending: mergedProducts.filter((p) => p.status === 'pending').length,
+    unmapped: mergedProducts.filter((p) => p.status === 'unmapped').length,
+  };
+
+  const tabs = [
+    { id: 'all', content: `Tutti (${counts.all})` },
+    { id: 'mapped', content: `Mappati (${counts.mapped})` },
+    { id: 'pending', content: `Da Revisionare (${counts.pending})` },
+    { id: 'unmapped', content: `Senza Imballaggio (${counts.unmapped})` },
+  ];
+
+  const filteredProducts = mergedProducts.filter((p) => {
+    if (selectedTab === 1) return p.status === 'mapped';
+    if (selectedTab === 2) return p.status === 'pending';
+    if (selectedTab === 3) return p.status === 'unmapped';
+    return true;
+  });
+
+  // ── Table rows ─────────────────────────────────────────────────────────────
+
+  const rows = filteredProducts.map((product) => {
+    const productCell = (
+      <InlineStack gap="300" blockAlign="center">
+        <Thumbnail
+          source={product.imageUrl ?? ''}
+          alt={product.title}
+          size="small"
+        />
+        <Text as="span" fontWeight="bold">{product.title}</Text>
       </InlineStack>
     );
 
-    const mappingDetails = (
+    const packagingCell = (
       <BlockStack gap="200">
         {product.confirmedComponents.length > 0 && (
-          <InlineStack gap="200">
-            {product.confirmedComponents.map(comp => (
-              <Badge key={comp.mappingId} tone="success">{comp.packagingName + ' ' + comp.quantityPerUnit + 'x'}</Badge>
+          <BlockStack gap="150">
+            {product.confirmedComponents.map((comp) => (
+              <InlineStack key={comp.mappingId} gap="200" blockAlign="center" wrap={false}>
+                <Thumbnail
+                  source={getMaterialImage(comp.packagingMaterial)}
+                  alt={comp.packagingName}
+                  size="extraSmall"
+                />
+                <BlockStack gap="050">
+                  <Text as="span" fontWeight="semibold" variant="bodySm">{comp.packagingName} ×{comp.quantityPerUnit}</Text>
+                  <Text as="span" variant="bodySm" tone="subdued">{purposeLabel(comp.purpose)}</Text>
+                </BlockStack>
+                <Button
+                  icon={DeleteIcon}
+                  size="micro"
+                  tone="critical"
+                  variant="plain"
+                  accessibilityLabel="Rimuovi associazione"
+                  onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
+                />
+              </InlineStack>
             ))}
-          </InlineStack>
+          </BlockStack>
         )}
 
         {product.pendingComponents.length > 0 && (
           <BlockStack gap="200">
-            {product.pendingComponents.map(comp => (
-              <BlockStack key={comp.mappingId} gap="100">
-                <InlineStack gap="100" blockAlign="center">
-                  <Icon source={MagicIcon} tone="magic" />
-                  <Text as="span" fontWeight="bold">{comp.packagingName}</Text>
-                  <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}% AI`}</Badge>
-                </InlineStack>
-                <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
-                <div style={{ marginTop: '4px' }}>
-                  <Button size="micro" onClick={() => handleConfirmRecommendation(product.shopifyProductId, comp.mappingId)}>Conferma</Button>
-                </div>
-              </BlockStack>
+            {product.pendingComponents.map((comp) => (
+              <Box
+                key={comp.mappingId}
+                background="bg-surface-secondary"
+                padding="300"
+                borderRadius="200"
+                borderWidth="025"
+                borderColor="border"
+              >
+                <BlockStack gap="200">
+                  <InlineStack gap="200" blockAlign="center" wrap={false}>
+                    <Thumbnail
+                      source={getMaterialImage(comp.packagingMaterial)}
+                      alt={comp.packagingName}
+                      size="extraSmall"
+                    />
+                    <Text as="span" fontWeight="semibold">{comp.packagingName}</Text>
+                    <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}%`}</Badge>
+                  </InlineStack>
+                  <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
+                  <InlineStack gap="200">
+                    <Button
+                      size="micro"
+                      variant="primary"
+                      onClick={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
+                    >
+                      Conferma
+                    </Button>
+                    <Button
+                      size="micro"
+                      tone="critical"
+                      onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
+                    >
+                      Rifiuta
+                    </Button>
+                  </InlineStack>
+                </BlockStack>
+              </Box>
             ))}
           </BlockStack>
         )}
 
         {product.confirmedComponents.length === 0 && product.pendingComponents.length === 0 && (
-          <Text as="span" tone="subdued">Nessuna proposta</Text>
+          <Text as="span" tone="subdued" variant="bodySm">Nessun imballaggio assegnato</Text>
         )}
       </BlockStack>
     );
 
-    return [
-      <Text as="span" fontWeight="bold">{product.shopifyProductTitle}</Text>,
-      statusIcon,
-      mappingDetails,
-    ];
+    const actionsCell = (
+      <Button icon={PlusIcon} size="micro" onClick={() => openAddModal(product)}>
+        Aggiungi
+      </Button>
+    );
+
+    return [productCell, <StatusCell status={product.status} />, packagingCell, actionsCell];
   });
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Page
@@ -147,28 +417,99 @@ export default function Mapping() {
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            {products.length === 0 && !loading ? (
-              <EmptyState
-                heading="Nessun prodotto trovato"
-                action={{
-                  content: 'Sincronizza Shopify',
-                  onAction: handleSync,
-                  loading: syncing,
-                }}
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-              >
-                <p>Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura con gli imballaggi.</p>
-              </EmptyState>
-            ) : (
-              <DataTable
-                columnContentTypes={['text', 'text', 'text']}
-                headings={['Prodotto', 'Stato', 'Imballaggio Assegnato / Proposta AI']}
-                rows={rows}
-              />
-            )}
+            <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab} fitted>
+              {loading ? (
+                <Box padding="400">
+                  <SkeletonBodyText lines={6} />
+                </Box>
+              ) : filteredProducts.length === 0 ? (
+                <EmptyState
+                  heading={
+                    selectedTab === 3
+                      ? 'Tutti i prodotti sono mappati!'
+                      : 'Nessun prodotto trovato'
+                  }
+                  action={{ content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }}
+                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                >
+                  <Text as="p">
+                    {selectedTab === 3
+                      ? 'Ottimo! Ogni prodotto ha almeno un imballaggio associato.'
+                      : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
+                  </Text>
+                </EmptyState>
+              ) : (
+                <DataTable
+                  columnContentTypes={['text', 'text', 'text', 'text']}
+                  headings={['Prodotto', 'Stato', 'Imballaggio', 'Azione']}
+                  rows={rows}
+                  verticalAlign="middle"
+                />
+              )}
+            </Tabs>
           </Card>
         </Layout.Section>
       </Layout>
+
+      {/* ── Add Packaging Modal ─────────────────────────────────────────────── */}
+      <Modal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        title={`Associa imballaggio — ${addTarget?.title ?? ''}`}
+        primaryAction={{
+          content: 'Salva',
+          onAction: handleAddConfirm,
+          loading: addLoading,
+          disabled: !addForm.packagingId,
+        }}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setAddModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <FormLayout>
+            <PolarisSelect
+              label="Imballaggio"
+              options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
+              value={addForm.packagingId}
+              onChange={(v) => setAddForm((f) => ({ ...f, packagingId: v }))}
+            />
+            <PolarisSelect
+              label="Scopo"
+              options={PURPOSE_OPTIONS}
+              value={addForm.purpose}
+              onChange={(v) => setAddForm((f) => ({ ...f, purpose: v }))}
+            />
+            <TextField
+              label="Quantità per unità"
+              type="number"
+              value={addForm.quantityPerUnit}
+              onChange={(v) => setAddForm((f) => ({ ...f, quantityPerUnit: v }))}
+              autoComplete="off"
+              min={1}
+            />
+          </FormLayout>
+        </Modal.Section>
+      </Modal>
+
+      {/* ── Delete / Reject Confirm Modal ───────────────────────────────────── */}
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Conferma rimozione"
+        primaryAction={{
+          content: 'Rimuovi',
+          onAction: handleDeleteConfirm,
+          loading: deleteLoading,
+          destructive: true,
+        }}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setDeleteModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <Text as="p">
+            Vuoi rimuovere l'associazione con <Text as="span" fontWeight="bold">{deleteTarget?.name}</Text>?
+            Questa azione non può essere annullata.
+          </Text>
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 }

@@ -31,7 +31,7 @@ interface PackagingCardProps {
   isAiSuggested?: boolean;
 }
 
-const getMaterialImage = (material: string) => {
+export const getMaterialImage = (material?: string) => {
   switch (material) {
     case 'PAPER': return 'https://images.unsplash.com/photo-1589758438368-0c313dc12574?auto=format&fit=crop&q=80&w=200&h=200';
     case 'PLASTIC': return 'https://images.unsplash.com/photo-1628148818167-27e1f4404fbe?auto=format&fit=crop&q=80&w=200&h=200';
