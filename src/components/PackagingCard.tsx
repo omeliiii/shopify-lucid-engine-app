@@ -33,9 +33,9 @@ interface PackagingCardProps {
 
 export const getMaterialImage = (material?: string) => {
   switch (material) {
-    case 'PAPER': return 'https://images.unsplash.com/photo-1589758438368-0c313dc12574?auto=format&fit=crop&q=80&w=200&h=200';
-    case 'PLASTIC': return 'https://images.unsplash.com/photo-1628148818167-27e1f4404fbe?auto=format&fit=crop&q=80&w=200&h=200';
-    case 'COMPOSITE': return 'https://images.unsplash.com/photo-1563241527-2004fb0f49c0?auto=format&fit=crop&q=80&w=200&h=200';
+    case 'PAPER': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
+    case 'PLASTIC': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
+    case 'COMPOSITE': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
     default: return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
   }
 };
