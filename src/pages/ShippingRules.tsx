@@ -41,7 +41,7 @@ export default function ShippingRules() {
         apiFetch('/packaging/inventory')
       ]);
       setRules(rulesData);
-      setInventory(invData.map((i: any) => ({ label: i.customName, value: i.id })));
+      setInventory(invData.map((i: any) => ({ label: i.name, value: i.id })));
     } catch (e) {
       console.error("Failed to load rules", e);
     } finally {
