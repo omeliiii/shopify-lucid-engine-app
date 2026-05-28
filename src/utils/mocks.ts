@@ -152,6 +152,25 @@ export const MOCKS: Record<string, any> = {
     meta: { totalItems: 3, page: 1, limit: 50 }
   },
 
+  '/products/shopify-list': {
+    data: [
+      { id: 991, title: 'Calzini sportivi in cotone', productType: 'Clothing' },
+      { id: 992, title: 'Scarpe da Corsa PRO', productType: 'Shoes' },
+      { id: 993, title: 'T-Shirt Basic', productType: 'Clothing' },
+      { id: 994, title: 'Pantaloni Cargo', productType: 'Clothing' }
+    ]
+  },
+
+  '/products/groups/product-types': [
+    'Clothing',
+    'Shoes',
+    'Accessories'
+  ],
+
+  '/products/groups/sync-from-catalog': {
+    created: 1
+  },
+
   '/products/merged-view': {
     data: [
       {
@@ -231,9 +250,15 @@ export const MOCKS: Record<string, any> = {
     }
   },
 
+  '/products/groups': [
+    { id: 'grp-1', name: 'Abbigliamento', matchType: 'PRODUCT_TYPE', matchValue: 'Clothing', members: [] },
+    { id: 'grp-2', name: 'Accessori', matchType: 'PRODUCT_TYPE', matchValue: 'Accessories', members: [] },
+    { id: 'grp-3', name: 'Fragili', matchType: 'MANUAL', matchValue: null, members: [{ shopifyProductId: 992 }] },
+  ],
+
   '/orders/shipping-rules': [
-    { id: 'rule-1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillerPackagingId: 'inv-1', priority: 3, isActive: true },
-    { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', priority: 1, isActive: false }
+    { id: 'rule-1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillerPackagingId: 'inv-1', productGroupId: 'grp-1', priority: 3, isActive: true, productGroup: { id: 'grp-1', name: 'Abbigliamento', matchType: 'PRODUCT_TYPE', matchValue: 'Clothing' } },
+    { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', productGroupId: null, priority: 1, isActive: false, productGroup: null }
   ],
 
   '/reports': [
