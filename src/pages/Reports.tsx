@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, EmptyState } from '@shopify/polaris';
-import { ExportIcon } from '@shopify/polaris-icons';
-import { apiFetch, apiDownload } from '../utils/api';
+import {
+  Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack,
+  Modal, Form, FormLayout, EmptyState, Tooltip, Icon,
+} from '@shopify/polaris';
+import { ExportIcon, LockIcon } from '@shopify/polaris-icons';
+import { apiFetch, apiDownload, isBillingError } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { PolarisDatePicker } from '../components/PolarisDatePicker';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { FlagBadge } from '../components/FlagBadge';
+import { useBilling } from '../contexts/BillingProvider';
+import { useNavigate } from 'react-router-dom';
+import type { LockedReason } from '../types/billingTypes';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 interface ReportExport {
   id: string;
@@ -24,14 +32,27 @@ interface Report {
   downloadedAt: string | null;
   notificationSentAt: string | null;
   exports: ReportExport[];
+  canDownload?: boolean;
+  lockedReason?: LockedReason | null;
 }
 
 interface ReportListResponse {
   data: Report[];
-  meta: { totalItems: number; page: number; limit: number; unreadCount?: number };
+  meta: {
+    totalItems: number;
+    page: number;
+    limit: number;
+    unreadCount?: number;
+    entitlements?: unknown;
+  };
 }
 
+// ── Component ──────────────────────────────────────────────────────────────────
+
 export default function Reports() {
+  const navigate = useNavigate();
+  const { catalog, redirectToAddon } = useBilling();
+
   const [newReports, setNewReports] = useState<Report[]>([]);
   const [pastReports, setPastReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +71,17 @@ export default function Reports() {
   const [periodType, setPeriodType] = useState('QUARTERLY');
   const [startDate, setStartDate] = useState('2026-01-01');
   const [endDate, setEndDate] = useState('2026-03-31');
+
+  // Add-on modal for COUNTRY_NOT_INCLUDED
+  const [addonModalOpen, setAddonModalOpen] = useState(false);
+  const [addonModalCountry, setAddonModalCountry] = useState('');
+  const [addingAddon, setAddingAddon] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shopify = typeof window !== 'undefined' ? (window as any).shopify : null;
+  const showToast = (msg: string, opts?: { isError?: boolean }) => {
+    if (shopify?.toast) shopify.toast.show(msg, opts);
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -105,22 +137,123 @@ export default function Reports() {
       setNewReports((prev) => prev.filter((r) => r.id !== report.id));
       setPastReports((prev) => [{ ...report, downloadedAt: new Date().toISOString() }, ...prev]);
     } catch (e) {
-      console.error('Failed to download report bundle', e);
-      alert('Errore durante il download del report.');
+      // Handle structured billing errors from download endpoints
+      if (isBillingError(e)) {
+        if (e.error === 'SUBSCRIPTION_ACCESS_DENIED') {
+          const reason = e.details?.reason;
+          if (reason === 'TRIAL') {
+            showToast('Upgrade or wait until your trial ends to download reports', { isError: true });
+          } else if (reason === 'COUNTRY_NOT_INCLUDED') {
+            setAddonModalCountry(report.countryCode);
+            setAddonModalOpen(true);
+          } else if (reason === 'EXPIRED') {
+            showToast('Your subscription has expired. Please renew.', { isError: true });
+            navigate('/billing/start');
+          } else {
+            navigate('/billing/start');
+          }
+        } else if (e.error === 'NO_ACTIVE_SUBSCRIPTION') {
+          navigate('/billing/start');
+        } else if (e.error === 'SHOPIFY_BILLING_ERROR') {
+          showToast('Shopify is having issues, try again in a moment', { isError: true });
+        } else {
+          showToast(e.message || 'Download failed', { isError: true });
+        }
+      } else {
+        console.error('Failed to download report bundle', e);
+        showToast('Errore durante il download del report.', { isError: true });
+      }
     } finally {
       setDownloadingId(null);
     }
   };
 
+  const handleAddonFromReport = async () => {
+    setAddingAddon(true);
+    try {
+      await redirectToAddon(addonModalCountry);
+    } catch {
+      showToast('Something went wrong', { isError: true });
+    } finally {
+      setAddingAddon(false);
+      setAddonModalOpen(false);
+    }
+  };
+
+  // ── Row builder ──
   const buildRow = (report: Report, isNew: boolean) => {
     const formatsLabel = report.exports?.length
       ? report.exports.map((e) => e.outputFormat.toUpperCase()).join(' + ')
       : '—';
 
+    const canDownload = report.canDownload !== false;
+    const lockedReason = report.lockedReason;
+    const addonAmount = catalog?.addon.amount ?? 99;
+
+    // Build the action cell based on download access
+    let actionCell: React.ReactNode;
+
+    if (canDownload) {
+      actionCell = (
+        <Button
+          size="micro"
+          icon={ExportIcon}
+          variant={isNew ? 'primary' : 'secondary'}
+          loading={downloadingId === report.id}
+          onClick={() => handleDownloadBundle(report)}
+        >
+          Scarica
+        </Button>
+      );
+    } else if (lockedReason === 'TRIAL') {
+      actionCell = (
+        <Tooltip content="Upgrade or wait until trial ends to download" dismissOnMouseOut>
+          <Button size="micro" icon={LockIcon} disabled>
+            Scarica
+          </Button>
+        </Tooltip>
+      );
+    } else if (lockedReason === 'COUNTRY_NOT_INCLUDED') {
+      actionCell = (
+        <Button
+          size="micro"
+          variant="primary"
+          onClick={() => {
+            setAddonModalCountry(report.countryCode);
+            setAddonModalOpen(true);
+          }}
+        >
+          {`Add country ($${addonAmount})`}
+        </Button>
+      );
+    } else if (lockedReason === 'EXPIRED') {
+      actionCell = (
+        <Button size="micro" variant="primary" onClick={() => navigate('/billing/start')}>
+          Renew
+        </Button>
+      );
+    } else if (lockedReason === 'NO_ACCESS') {
+      actionCell = (
+        <Button size="micro" variant="primary" onClick={() => navigate('/billing/start')}>
+          Subscribe
+        </Button>
+      );
+    } else {
+      // Fallback — should not happen but display locked state
+      actionCell = (
+        <Button size="micro" icon={LockIcon} disabled>
+          Locked
+        </Button>
+      );
+    }
+
     return [
       <InlineStack gap="200" align="start" blockAlign="center">
         <FlagBadge countryCode={report.countryCode} />
         {isNew && <Badge tone="info">Nuovo</Badge>}
+        {!canDownload && lockedReason === 'TRIAL' && (
+          <Icon source={LockIcon} tone="subdued" />
+        )}
       </InlineStack>,
       report.periodType,
       `${report.periodStart} → ${report.periodEnd}`,
@@ -128,15 +261,7 @@ export default function Reports() {
       <Text as="span" tone="subdued" variant="bodySm">
         {formatsLabel}
       </Text>,
-      <Button
-        size="micro"
-        icon={ExportIcon}
-        variant={isNew ? 'primary' : 'secondary'}
-        loading={downloadingId === report.id}
-        onClick={() => handleDownloadBundle(report)}
-      >
-        Scarica
-      </Button>,
+      actionCell,
     ];
   };
 
@@ -236,6 +361,7 @@ export default function Reports() {
         </Layout.Section>
       </Layout>
 
+      {/* ── Modal: Manual Generation ── */}
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -276,6 +402,27 @@ export default function Reports() {
               </Text>
             </FormLayout>
           </Form>
+        </Modal.Section>
+      </Modal>
+
+      {/* ── Modal: Add Country for Download ── */}
+      <Modal
+        open={addonModalOpen}
+        onClose={() => setAddonModalOpen(false)}
+        title="Country not included"
+        primaryAction={{
+          content: `Add ${addonModalCountry} ($${catalog?.addon.amount ?? 99}/year)`,
+          onAction: handleAddonFromReport,
+          loading: addingAddon,
+        }}
+        secondaryActions={[{ content: 'Cancel', onAction: () => setAddonModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <Text as="p">
+            This report requires access to <strong>{addonModalCountry}</strong>, which is not
+            included in your current plan. Add it as an extra country for
+            ${catalog?.addon.amount ?? 99}/year.
+          </Text>
         </Modal.Section>
       </Modal>
     </Page>

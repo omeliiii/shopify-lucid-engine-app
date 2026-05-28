@@ -77,7 +77,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<ShippingLog[]>([]);
   const [kpis, setKpis] = useState<KPI | null>(null);
-  const [error, setError] = useState(false);
+  const [_error, setError] = useState(false);
 
   // Pagination and Filters State
   const [page, setPage] = useState(1);
@@ -207,7 +207,7 @@ export default function Dashboard() {
                   dataKey="percentage"
                   nameKey="material"
                 >
-                  {kpis.materialBreakdown.map((entry, index) => {
+                  {kpis.materialBreakdown.map((_entry, index) => {
                     const colors = ['#1c7100', '#005bd3', '#e3a008', '#de3618', '#000000'];
                     return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
                   })}

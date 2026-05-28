@@ -1,7 +1,36 @@
 import { MOCKS } from './mocks';
+import type { BillingError } from '../types/billingTypes';
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+/** Returns a Shopify session token (JWT) via App Bridge v4, or null in dev. */
+async function getSessionToken(): Promise<string | null> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const shopify = (window as any).shopify;
+    if (shopify?.idToken) {
+      return await shopify.idToken();
+    }
+  } catch {
+    console.warn('[API] Could not obtain session token — running outside Shopify?');
+  }
+  return null;
+}
+
+/** Returns true when the error body matches the backend's BillingError shape. */
+export function isBillingError(err: unknown): err is BillingError {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'statusCode' in err &&
+    'error' in err &&
+    'message' in err
+  );
+}
+
+// ── apiFetch ───────────────────────────────────────────────────────────────────
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  // In Vite, env variables are available under import.meta.env
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -10,7 +39,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   if (useMocks) {
     console.log(`[MOCK] ${options.method || 'GET'} ${endpoint}`);
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (isGet && MOCKS[baseEndpoint]) {
@@ -24,31 +52,47 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   // Real fetch
   const headers = new Headers(options.headers || {});
-  headers.append('X-Merchant-Id', '100');
-  headers.append('Content-Type', 'application/json');
+  headers.set('Content-Type', 'application/json');
 
-  try {
-    const response = await fetch(`${apiUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    // Fallback if real server is down but useMocks is false (optional, kept for resilience)
-    console.warn(`[API] Failed to fetch ${endpoint}, falling back to centralized mock data.`, error);
-    if (isGet && useMocks && MOCKS[baseEndpoint]) {
-      return MOCKS[baseEndpoint];
-    } else if (!isGet && useMocks) {
-      return { success: true };
-    }
-    throw error;
+  // Attach Bearer token when running inside Shopify admin
+  const token = await getSessionToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  } else {
+    // Fallback for local development outside App Bridge
+    headers.set('X-Merchant-Id', '100');
   }
+
+  const response = await fetch(`${apiUrl}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    // Try to parse a structured error body from the backend
+    let errorBody: BillingError | null = null;
+    try {
+      errorBody = await response.json();
+    } catch {
+      // body is not JSON — fall through
+    }
+
+    if (errorBody && isBillingError(errorBody)) {
+      throw errorBody;
+    }
+
+    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  }
+
+  // 204 No Content (e.g. POST /billing/cancel)
+  if (response.status === 204) {
+    return undefined;
+  }
+
+  return await response.json();
 }
+
+// ── apiDownload ────────────────────────────────────────────────────────────────
 
 export async function apiDownload(endpoint: string, fallbackFilename: string) {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -64,30 +108,47 @@ export async function apiDownload(endpoint: string, fallbackFilename: string) {
   }
 
   const headers = new Headers();
-  headers.append('X-Merchant-Id', '100'); // Simulated auth token
-
-  try {
-    const response = await fetch(`${apiUrl}${endpoint}`, { headers });
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    let filename = fallbackFilename;
-    const contentDisposition = response.headers.get('content-disposition');
-    if (contentDisposition) {
-      const match = contentDisposition.match(/filename="?([^"]+)"?/);
-      if (match && match[1]) {
-        filename = match[1];
-      }
-    }
-
-    const blob = await response.blob();
-    triggerDownload(blob, filename);
-  } catch (error) {
-    console.error(`[API] Failed to download ${endpoint}`, error);
-    throw error;
+  const token = await getSessionToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  } else {
+    // Fallback for local development outside App Bridge
+    headers.set('X-Merchant-Id', import.meta.env.VITE_DEV_MERCHANT_ID || 'lucid-test-merchant.myshopify.com');
   }
+
+  const response = await fetch(`${apiUrl}${endpoint}`, { headers });
+
+  if (!response.ok) {
+    // Try to parse structured billing error (e.g. 402 on locked download)
+    let errorBody: BillingError | null = null;
+    try {
+      const cloned = response.clone();
+      errorBody = await cloned.json();
+    } catch {
+      // not JSON
+    }
+
+    if (errorBody && isBillingError(errorBody)) {
+      throw errorBody;
+    }
+
+    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  }
+
+  let filename = fallbackFilename;
+  const contentDisposition = response.headers.get('content-disposition');
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (match && match[1]) {
+      filename = match[1];
+    }
+  }
+
+  const blob = await response.blob();
+  triggerDownload(blob, filename);
 }
+
+// ── triggerDownload ────────────────────────────────────────────────────────────
 
 function triggerDownload(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob);

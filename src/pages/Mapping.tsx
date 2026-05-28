@@ -20,7 +20,7 @@ import {
   SkeletonBodyText,
   Pagination,
 } from '@shopify/polaris';
-import { CheckIcon, AlertCircleIcon, MagicIcon, DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
+import { DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { getMaterialImage } from '../components/PackagingCard';

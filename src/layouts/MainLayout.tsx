@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Frame, Navigation } from '@shopify/polaris';
-import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon } from '@shopify/polaris-icons';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, CreditCardIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
+import { useBilling } from '../contexts/BillingProvider';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadReports, setUnreadReports] = useState<number>(0);
+  const { subscription } = useBilling();
 
   // One-shot fetch at app load — no polling.
   useEffect(() => {
@@ -23,6 +25,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       cancelled = true;
     };
   }, []);
+
+  // Show subscription nav item only when there's an active subscription
+  const showSubscriptionNav = subscription?.hasSubscription === true;
 
   const navigationMarkup = (
     <Navigation location={location.pathname}>
@@ -67,6 +72,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             },
             selected: location.pathname === '/reports',
           },
+          ...(showSubscriptionNav
+            ? [
+                {
+                  url: '/subscription',
+                  label: 'Subscription',
+                  icon: CreditCardIcon,
+                  onClick: () => navigate('/subscription'),
+                  selected: location.pathname === '/subscription',
+                },
+              ]
+            : []),
         ]}
       />
     </Navigation>

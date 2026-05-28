@@ -261,6 +261,30 @@ export const MOCKS: Record<string, any> = {
     { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', productGroupId: null, priority: 1, isActive: false, productGroup: null }
   ],
 
+  '/billing/catalog': {
+    currency: 'USD',
+    trialDays: 7,
+    plans: [
+      { plan: 'ONE_COUNTRY', name: 'LUCID Engine — One Country', amount: 179, interval: 'ANNUAL' },
+      { plan: 'MULTI_COUNTRY', name: 'LUCID Engine — Multi Country', amount: 329, interval: 'ANNUAL' },
+    ],
+    addon: { name: 'Extra country', amount: 99, interval: 'ANNUAL' },
+  },
+
+  '/billing/subscription': {
+    hasSubscription: true,
+    plan: 'ONE_COUNTRY',
+    status: 'ACTIVE',
+    isInTrial: true,
+    trialEndsAt: '2026-06-04T00:00:00.000Z',
+    currentPeriodEnd: '2027-05-28T00:00:00.000Z',
+    selectedCountry: 'DE',
+    canChangeSelectedCountry: false,
+    addonCountries: ['IT'],
+    accessibleCountries: ['DE', 'IT'],
+    availableCountries: ['DE', 'IT', 'FR'],
+  },
+
   '/reports': {
     data: [
       {
@@ -272,6 +296,8 @@ export const MOCKS: Record<string, any> = {
         generatedAt: '2026-05-01T06:00:00Z',
         downloadedAt: null,
         notificationSentAt: '2026-05-01T06:00:05Z',
+        canDownload: false,
+        lockedReason: 'TRIAL',
         exports: [
           { id: 'exp-3a', destinationType: 'REGISTRY', destinationCode: 'LUCID', outputFormat: 'xml' },
           { id: 'exp-3b', destinationType: 'DUAL_SYSTEM', destinationCode: 'GENERIC', outputFormat: 'csv' },
@@ -286,6 +312,8 @@ export const MOCKS: Record<string, any> = {
         generatedAt: '2026-01-10T10:00:00Z',
         downloadedAt: '2026-01-12T09:15:00Z',
         notificationSentAt: '2026-01-10T10:00:05Z',
+        canDownload: true,
+        lockedReason: null,
         exports: [
           { id: 'exp-1a', destinationType: 'REGISTRY', destinationCode: 'LUCID', outputFormat: 'xml' },
           { id: 'exp-1b', destinationType: 'DUAL_SYSTEM', destinationCode: 'GENERIC', outputFormat: 'csv' },
@@ -300,12 +328,38 @@ export const MOCKS: Record<string, any> = {
         generatedAt: '2026-04-05T14:30:00Z',
         downloadedAt: '2026-04-06T11:00:00Z',
         notificationSentAt: '2026-04-05T14:30:05Z',
+        canDownload: true,
+        lockedReason: null,
         exports: [
           { id: 'exp-2a', destinationType: 'REGISTRY', destinationCode: 'GENERIC', outputFormat: 'csv' },
         ],
       },
+      {
+        id: 'rpt-4',
+        countryCode: 'FR',
+        periodType: 'QUARTERLY',
+        periodStart: '2026-01-01',
+        periodEnd: '2026-03-31',
+        generatedAt: '2026-04-05T14:30:00Z',
+        downloadedAt: null,
+        notificationSentAt: null,
+        canDownload: false,
+        lockedReason: 'COUNTRY_NOT_INCLUDED',
+        exports: [
+          { id: 'exp-4a', destinationType: 'REGISTRY', destinationCode: 'GENERIC', outputFormat: 'csv' },
+        ],
+      },
     ],
-    meta: { totalItems: 3, page: 1, limit: 10, unreadCount: 1 },
+    meta: {
+      totalItems: 4, page: 1, limit: 10, unreadCount: 2,
+      entitlements: {
+        hasSubscription: true,
+        plan: 'ONE_COUNTRY',
+        status: 'ACTIVE',
+        isInTrial: true,
+        accessibleCountries: ['DE', 'IT'],
+      },
+    },
   },
 
   '/notifications/unread-count': { count: 1 },

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Page, Layout, Card, Text, Button, Modal, Form, FormLayout,
-  TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box,
+  TextField, Checkbox, InlineStack, BlockStack, Badge, Box,
   Thumbnail, RangeSlider, Tabs, Banner, Tag, OptionList, Scrollable
 } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
