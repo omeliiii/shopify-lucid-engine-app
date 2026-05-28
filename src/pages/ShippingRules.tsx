@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box, Thumbnail } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
+import { getMaterialImage } from '../components/PackagingCard';
 
 interface ShippingRule {
   id: string;
@@ -20,6 +21,7 @@ interface ShippingRule {
 export default function ShippingRules() {
   const [rules, setRules] = useState<ShippingRule[]>([]);
   const [inventory, setInventory] = useState<{ label: string, value: string }[]>([]);
+  const [inventoryRaw, setInventoryRaw] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export default function ShippingRules() {
         apiFetch('/packaging/inventory')
       ]);
       setRules(rulesData);
+      setInventoryRaw(invData);
       setInventory(invData.map((i: any) => ({ label: i.name, value: i.id })));
     } catch (e) {
       console.error("Failed to load rules", e);
@@ -129,12 +132,26 @@ export default function ShippingRules() {
                       Da {item.minItems} a {item.maxItems} articoli per pacco.
                     </Text>
                     <InlineStack gap="400">
-                      {item.secondaryPackagingId && (
-                        <Text as="span" variant="bodySm"><b>Secondario:</b> {item.secondaryPackaging?.name || inventory.find(i => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}</Text>
-                      )}
-                      {item.fillerPackagingId && (
-                        <Text as="span" variant="bodySm"><b>Riempimento:</b> {item.fillerPackaging?.name || inventory.find(i => i.value === item.fillerPackagingId)?.label || item.fillerPackagingId}</Text>
-                      )}
+                      {item.secondaryPackagingId && (() => {
+                        const inv = inventoryRaw.find((i: any) => i.id === item.secondaryPackagingId);
+                        const material = inv?.packagingType?.agnosticMaterial;
+                        return (
+                          <InlineStack gap="200" blockAlign="center">
+                            <Thumbnail source={getMaterialImage(material)} alt={material || 'packaging'} size="small" />
+                            <Text as="span" variant="bodySm"><b>Secondario:</b> {item.secondaryPackaging?.name || inventory.find(i => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}</Text>
+                          </InlineStack>
+                        );
+                      })()}
+                      {item.fillerPackagingId && (() => {
+                        const inv = inventoryRaw.find((i: any) => i.id === item.fillerPackagingId);
+                        const material = inv?.packagingType?.agnosticMaterial;
+                        return (
+                          <InlineStack gap="200" blockAlign="center">
+                            <Thumbnail source={getMaterialImage(material)} alt={material || 'packaging'} size="small" />
+                            <Text as="span" variant="bodySm"><b>Riempimento:</b> {item.fillerPackaging?.name || inventory.find(i => i.value === item.fillerPackagingId)?.label || item.fillerPackagingId}</Text>
+                          </InlineStack>
+                        );
+                      })()}
                     </InlineStack>
                   </BlockStack>
                   <InlineStack gap="200">
