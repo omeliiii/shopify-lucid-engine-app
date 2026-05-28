@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box, Thumbnail } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Checkbox, InlineStack, BlockStack, Badge, Icon, Box, Thumbnail, RangeSlider } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -18,6 +18,15 @@ interface ShippingRule {
   fillerPackaging?: { id: string; name: string };
 }
 
+const PRIORITY_LABELS: Record<number, string> = {
+  1: 'Minima',
+  2: 'Media',
+  3: 'Alta',
+  4: 'Massima',
+};
+
+const getPriorityLabel = (p: number) => PRIORITY_LABELS[p] || p;
+
 export default function ShippingRules() {
   const [rules, setRules] = useState<ShippingRule[]>([]);
   const [inventory, setInventory] = useState<{ label: string, value: string }[]>([]);
@@ -32,7 +41,7 @@ export default function ShippingRules() {
   const [maxItems, setMaxItems] = useState('5');
   const [secondaryPackagingId, setSecondaryPackagingId] = useState('none');
   const [fillerPackagingId, setFillerPackagingId] = useState('none');
-  const [priority, setPriority] = useState('10');
+  const [priority, setPriority] = useState(2);
   const [isActive, setIsActive] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -64,7 +73,7 @@ export default function ShippingRules() {
       maxItems: Number(maxItems),
       secondaryPackagingId: secondaryPackagingId === 'none' ? null : secondaryPackagingId,
       fillerPackagingId: fillerPackagingId === 'none' ? null : fillerPackagingId,
-      priority: Number(priority),
+      priority,
       isActive
     };
 
@@ -83,7 +92,7 @@ export default function ShippingRules() {
     setMaxItems(rule.maxItems?.toString() || '5');
     setSecondaryPackagingId(rule.secondaryPackagingId || 'none');
     setFillerPackagingId(rule.fillerPackagingId || 'none');
-    setPriority(rule.priority?.toString() || '10');
+    setPriority(rule.priority || 2);
     setIsActive(rule.isActive);
     setEditingRuleId(rule.id);
     setModalOpen(true);
@@ -99,7 +108,7 @@ export default function ShippingRules() {
     setMaxItems('5');
     setSecondaryPackagingId('none');
     setFillerPackagingId('none');
-    setPriority('10');
+    setPriority(2);
     setIsActive(true);
     setEditingRuleId(null);
   };
@@ -126,7 +135,7 @@ export default function ShippingRules() {
                     <InlineStack gap="200" blockAlign="center">
                       <Text as="h3" variant="headingMd">{item.name}</Text>
                       <Badge tone={item.isActive ? "success" : "critical"}>{item.isActive ? "Attiva" : "Disattiva"}</Badge>
-                      <Badge tone="info">{'Priorità: ' + item.priority}</Badge>
+                      <Badge tone="info">{'Priorità: ' + getPriorityLabel(item.priority)}</Badge>
                     </InlineStack>
                     <Text as="p" tone="subdued">
                       Da {item.minItems} a {item.maxItems} articoli per pacco.
@@ -190,7 +199,16 @@ export default function ShippingRules() {
               </FormLayout.Group>
               <PolarisSelect label="Imballaggio Secondario (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={secondaryPackagingId} onChange={setSecondaryPackagingId} />
               <PolarisSelect label="Imballaggio di Riempimento (Opzionale)" options={[{ label: 'Nessuno', value: 'none' }, ...inventory]} value={fillerPackagingId} onChange={setFillerPackagingId} />
-              <TextField label="Priorità (numero più alto = più importante)" type="number" value={priority} onChange={setPriority} autoComplete="off" helpText="Le regole con priorità più alta vengono valutate prima." />
+              <RangeSlider
+                label={`Priorità: ${getPriorityLabel(priority)}`}
+                value={priority}
+                min={1}
+                max={4}
+                step={1}
+                output
+                onChange={(val) => setPriority(val as number)}
+                helpText="Le regole con priorità più alta vengono valutate prima."
+              />
               <Checkbox label="Regola Attiva" checked={isActive} onChange={setIsActive} />
             </FormLayout>
           </Form>

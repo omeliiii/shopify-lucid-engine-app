@@ -232,8 +232,8 @@ export const MOCKS: Record<string, any> = {
   },
 
   '/orders/shipping-rules': [
-    { id: 'rule-1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillerPackagingId: 'inv-1', priority: 10, isActive: true },
-    { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', priority: 5, isActive: false }
+    { id: 'rule-1', name: 'Box Calzini Fino a 5 Articoli', minItems: 1, maxItems: 5, secondaryPackagingId: null, fillerPackagingId: 'inv-1', priority: 3, isActive: true },
+    { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', priority: 1, isActive: false }
   ],
 
   '/reports': [
