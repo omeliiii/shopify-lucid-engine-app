@@ -1,11 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, TextField, EmptyState, Icon } from '@shopify/polaris';
+import { Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack, Modal, Form, FormLayout, EmptyState } from '@shopify/polaris';
 import { ExportIcon } from '@shopify/polaris-icons';
 import { apiFetch, apiDownload } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { PolarisDatePicker } from '../components/PolarisDatePicker';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { FlagBadge } from '../components/FlagBadge';
+
+interface ReportExport {
+  id: string;
+  destinationType: string;
+  destinationCode: string;
+  outputFormat: string;
+}
 
 interface Report {
   id: string;
@@ -14,21 +21,31 @@ interface Report {
   periodStart: string;
   periodEnd: string;
   generatedAt: string;
+  downloadedAt: string | null;
+  notificationSentAt: string | null;
+  exports: ReportExport[];
+}
+
+interface ReportListResponse {
+  data: Report[];
+  meta: { totalItems: number; page: number; limit: number; unreadCount?: number };
 }
 
 export default function Reports() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [newReports, setNewReports] = useState<Report[]>([]);
+  const [pastReports, setPastReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  // Pagination & Filters State
+  // Pagination & Filters State (applied to past reports only)
   const [page, setPage] = useState(1);
   const [filterCountry, setFilterCountry] = useState('ALL');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
 
-  // Form State
+  // Form State (manual generation — kept for backfills / testing)
   const [country, setCountry] = useState('DE');
   const [periodType, setPeriodType] = useState('QUARTERLY');
   const [startDate, setStartDate] = useState('2026-01-01');
@@ -42,10 +59,13 @@ export default function Reports() {
       if (filterStartDate) params.append('periodStart', filterStartDate);
       if (filterEndDate) params.append('periodEnd', filterEndDate);
 
-      const data = await apiFetch(`/reports?${params.toString()}`);
-      setReports(Array.isArray(data) ? data : data.data || []);
+      const data: ReportListResponse | Report[] = await apiFetch(`/reports?${params.toString()}`);
+      const items: Report[] = Array.isArray(data) ? data : data.data || [];
+
+      setNewReports(items.filter((r) => !r.downloadedAt));
+      setPastReports(items.filter((r) => r.downloadedAt));
     } catch (e) {
-      console.error("Failed to load reports", e);
+      console.error('Failed to load reports', e);
     } finally {
       setLoading(false);
     }
@@ -64,78 +84,82 @@ export default function Reports() {
           countryCode: country,
           periodType,
           periodStart: startDate,
-          periodEnd: endDate
-        })
+          periodEnd: endDate,
+        }),
       });
       loadData();
     } catch (e) {
-      setReports([{
-        id: `rpt-${Math.random()}`,
-        countryCode: country,
-        periodType,
-        periodStart: startDate,
-        periodEnd: endDate,
-        generatedAt: new Date().toISOString()
-      }, ...reports]);
+      console.error('Failed to generate report', e);
     } finally {
       setSubmitting(false);
       setModalOpen(false);
     }
   };
 
-  const handleDownloadRegistry = async (id: string, countryCode: string) => {
-    const ext = countryCode === 'DE' ? 'xml' : 'csv';
-    const filename = `registro_${countryCode}_${id}.${ext}`;
+  const handleDownloadBundle = async (report: Report) => {
+    setDownloadingId(report.id);
+    const fallback = `${report.countryCode}-${report.periodStart}_${report.periodEnd}.zip`;
     try {
-      await apiDownload(`/reports/${id}/export/registry`, filename);
+      await apiDownload(`/reports/${report.id}/download`, fallback);
+      // Move the report from "new" to "past" optimistically
+      setNewReports((prev) => prev.filter((r) => r.id !== report.id));
+      setPastReports((prev) => [{ ...report, downloadedAt: new Date().toISOString() }, ...prev]);
     } catch (e) {
-      alert('Errore durante il download del file di registro.');
+      console.error('Failed to download report bundle', e);
+      alert('Errore durante il download del report.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
-  const handleDownloadDualSystem = async (id: string) => {
-    try {
-      await apiDownload(`/reports/${id}/export/dual-system`, `dual_system_${id}.csv`);
-    } catch (e) {
-      alert('Errore durante il download del file Dual System.');
-    }
+  const buildRow = (report: Report, isNew: boolean) => {
+    const formatsLabel = report.exports?.length
+      ? report.exports.map((e) => e.outputFormat.toUpperCase()).join(' + ')
+      : '—';
+
+    return [
+      <InlineStack gap="200" align="start" blockAlign="center">
+        <FlagBadge countryCode={report.countryCode} />
+        {isNew && <Badge tone="info">Nuovo</Badge>}
+      </InlineStack>,
+      report.periodType,
+      `${report.periodStart} → ${report.periodEnd}`,
+      new Date(report.generatedAt).toLocaleDateString(),
+      <Text as="span" tone="subdued" variant="bodySm">
+        {formatsLabel}
+      </Text>,
+      <Button
+        size="micro"
+        icon={ExportIcon}
+        variant={isNew ? 'primary' : 'secondary'}
+        loading={downloadingId === report.id}
+        onClick={() => handleDownloadBundle(report)}
+      >
+        Scarica
+      </Button>,
+    ];
   };
 
-  const rows = reports.map((report) => [
-    <FlagBadge countryCode={report.countryCode} />,
-    report.periodType,
-    `${report.periodStart} / ${report.periodEnd}`,
-    new Date(report.generatedAt).toLocaleDateString(),
-    <InlineStack gap="200">
-      <Button
-        size="micro"
-        icon={ExportIcon}
-        onClick={() => handleDownloadRegistry(report.id, report.countryCode)}
-      >
-        Registro
-      </Button>
-      <Button
-        size="micro"
-        icon={ExportIcon}
-        onClick={() => handleDownloadDualSystem(report.id)}
-      >
-        Dual System
-      </Button>
-    </InlineStack>
-  ]);
+  const newRows = newReports.map((r) => buildRow(r, true));
+  const pastRows = pastReports.map((r) => buildRow(r, false));
+
+  const tableHeadings = ['Paese', 'Periodo', 'Date', 'Generato il', 'Formati', 'Download'];
+  const tableColTypes = ['text', 'text', 'text', 'text', 'text', 'text'] as const;
 
   return (
     <Page
       title="Report e Dichiarazioni"
-      primaryAction={{
-        content: 'Genera Nuovo Report',
-        onAction: () => setModalOpen(true)
-      }}
+      subtitle="I report vengono generati automaticamente in base alla cadenza configurata per ciascun paese."
+      secondaryActions={[
+        {
+          content: 'Genera manualmente',
+          onAction: () => setModalOpen(true),
+        },
+      ]}
     >
       <Layout>
         <Layout.Section>
           <Card padding="0">
-            {/* Filters */}
             <div style={{ padding: '16px' }}>
               <CountryDateFilters
                 countryFilter={filterCountry}
@@ -144,31 +168,70 @@ export default function Reports() {
                 onStartDateChange={(val) => { setFilterStartDate(val); setPage(1); }}
                 endDate={filterEndDate}
                 onEndDateChange={(val) => { setFilterEndDate(val); setPage(1); }}
-                onReset={() => { setFilterCountry('ALL'); setFilterStartDate(''); setFilterEndDate(''); setPage(1); }}
-              />
-            </div>
-
-            {reports.length === 0 && !loading ? (
-              <EmptyState
-                heading="Nessun report generato"
-                action={{ content: 'Genera Report', onAction: () => setModalOpen(true) }}
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-              >
-                <p>Genera il tuo primo report LUCID o CONAI per metterti in regola.</p>
-              </EmptyState>
-            ) : (
-              <DataTable
-                columnContentTypes={['text', 'text', 'text', 'text', 'text']}
-                headings={['Paese', 'Periodo', 'Date', 'Generato Il', 'Azioni / Download']}
-                rows={rows}
-                pagination={{
-                  hasNext: reports.length === 10,
-                  hasPrevious: page > 1,
-                  onNext: () => setPage(page + 1),
-                  onPrevious: () => setPage(page - 1),
+                onReset={() => {
+                  setFilterCountry('ALL');
+                  setFilterStartDate('');
+                  setFilterEndDate('');
+                  setPage(1);
                 }}
               />
-            )}
+            </div>
+          </Card>
+        </Layout.Section>
+
+        {/* ── New reports ── */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="300">
+              <InlineStack gap="200" blockAlign="center">
+                <Text as="h2" variant="headingMd">
+                  Nuovi report
+                </Text>
+                {newReports.length > 0 && <Badge tone="info">{`${newReports.length}`}</Badge>}
+              </InlineStack>
+              {newReports.length === 0 && !loading ? (
+                <Text as="p" tone="subdued">
+                  Nessun nuovo report da scaricare. Quando lo scheduler genera un report, comparirà qui.
+                </Text>
+              ) : (
+                <DataTable
+                  columnContentTypes={[...tableColTypes]}
+                  headings={tableHeadings}
+                  rows={newRows}
+                />
+              )}
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        {/* ── Past reports ── */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="300">
+              <Text as="h2" variant="headingMd">
+                Report scaricati
+              </Text>
+              {pastReports.length === 0 && !loading ? (
+                <EmptyState
+                  heading="Nessun report scaricato"
+                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                >
+                  <p>I report già scaricati appariranno qui per consultazione futura.</p>
+                </EmptyState>
+              ) : (
+                <DataTable
+                  columnContentTypes={[...tableColTypes]}
+                  headings={tableHeadings}
+                  rows={pastRows}
+                  pagination={{
+                    hasNext: pastReports.length === 10,
+                    hasPrevious: page > 1,
+                    onNext: () => setPage(page + 1),
+                    onPrevious: () => setPage(page - 1),
+                  }}
+                />
+              )}
+            </BlockStack>
           </Card>
         </Layout.Section>
       </Layout>
@@ -176,7 +239,7 @@ export default function Reports() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Generazione Nuovo Report"
+        title="Generazione manuale del report"
         primaryAction={{ content: 'Genera', onAction: handleGenerate, loading: submitting }}
         secondaryActions={[{ content: 'Annulla', onAction: () => setModalOpen(false) }]}
       >
@@ -184,34 +247,33 @@ export default function Reports() {
           <Form onSubmit={handleGenerate}>
             <FormLayout>
               <PolarisSelect
-                label="Paese di Destinazione (Registro)"
+                label="Paese di destinazione"
                 options={[
                   { label: 'Germania (LUCID)', value: 'DE' },
                   { label: 'Italia (CONAI)', value: 'IT' },
-                  { label: 'Francia (CITEO)', value: 'FR' }
+                  { label: 'Francia (CITEO)', value: 'FR' },
                 ]}
                 value={country}
                 onChange={setCountry}
               />
               <PolarisSelect
-                label="Tipo di Periodo"
+                label="Tipo di periodo"
                 options={[
                   { label: 'Annuale', value: 'ANNUAL' },
                   { label: 'Trimestrale', value: 'QUARTERLY' },
-                  { label: 'Mensile', value: 'MONTHLY' }
+                  { label: 'Mensile', value: 'MONTHLY' },
                 ]}
                 value={periodType}
                 onChange={setPeriodType}
               />
               <FormLayout.Group>
-                <PolarisDatePicker label="Data Inizio" value={startDate} onChange={setStartDate} />
-                <PolarisDatePicker label="Data Fine" value={endDate} onChange={setEndDate} />
+                <PolarisDatePicker label="Data inizio" value={startDate} onChange={setStartDate} />
+                <PolarisDatePicker label="Data fine" value={endDate} onChange={setEndDate} />
               </FormLayout.Group>
-              <BlockStack>
-                <Text as="p" tone="subdued" variant="bodySm">
-                  Il sistema aggregherà tutti gli ordini spediti verso il paese selezionato nel periodo indicato, calcolando i pesi totali per materiale.
-                </Text>
-              </BlockStack>
+              <Text as="p" tone="subdued" variant="bodySm">
+                I report vengono generati automaticamente secondo la cadenza configurata per ciascun
+                paese. Usa questo form solo per backfill o test.
+              </Text>
             </FormLayout>
           </Form>
         </Modal.Section>

@@ -261,8 +261,52 @@ export const MOCKS: Record<string, any> = {
     { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', productGroupId: null, priority: 1, isActive: false, productGroup: null }
   ],
 
-  '/reports': [
-    { id: 'rpt-1', countryCode: 'DE', periodType: 'ANNUAL', periodStart: '2025-01-01', periodEnd: '2025-12-31', generatedAt: '2026-01-10T10:00:00Z' },
-    { id: 'rpt-2', countryCode: 'IT', periodType: 'QUARTERLY', periodStart: '2026-01-01', periodEnd: '2026-03-31', generatedAt: '2026-04-05T14:30:00Z' }
-  ]
+  '/reports': {
+    data: [
+      {
+        id: 'rpt-3',
+        countryCode: 'DE',
+        periodType: 'MONTHLY',
+        periodStart: '2026-04-01',
+        periodEnd: '2026-04-30',
+        generatedAt: '2026-05-01T06:00:00Z',
+        downloadedAt: null,
+        notificationSentAt: '2026-05-01T06:00:05Z',
+        exports: [
+          { id: 'exp-3a', destinationType: 'REGISTRY', destinationCode: 'LUCID', outputFormat: 'xml' },
+          { id: 'exp-3b', destinationType: 'DUAL_SYSTEM', destinationCode: 'GENERIC', outputFormat: 'csv' },
+        ],
+      },
+      {
+        id: 'rpt-1',
+        countryCode: 'DE',
+        periodType: 'ANNUAL',
+        periodStart: '2025-01-01',
+        periodEnd: '2025-12-31',
+        generatedAt: '2026-01-10T10:00:00Z',
+        downloadedAt: '2026-01-12T09:15:00Z',
+        notificationSentAt: '2026-01-10T10:00:05Z',
+        exports: [
+          { id: 'exp-1a', destinationType: 'REGISTRY', destinationCode: 'LUCID', outputFormat: 'xml' },
+          { id: 'exp-1b', destinationType: 'DUAL_SYSTEM', destinationCode: 'GENERIC', outputFormat: 'csv' },
+        ],
+      },
+      {
+        id: 'rpt-2',
+        countryCode: 'IT',
+        periodType: 'QUARTERLY',
+        periodStart: '2026-01-01',
+        periodEnd: '2026-03-31',
+        generatedAt: '2026-04-05T14:30:00Z',
+        downloadedAt: '2026-04-06T11:00:00Z',
+        notificationSentAt: '2026-04-05T14:30:05Z',
+        exports: [
+          { id: 'exp-2a', destinationType: 'REGISTRY', destinationCode: 'GENERIC', outputFormat: 'csv' },
+        ],
+      },
+    ],
+    meta: { totalItems: 3, page: 1, limit: 10, unreadCount: 1 },
+  },
+
+  '/notifications/unread-count': { count: 1 },
 };

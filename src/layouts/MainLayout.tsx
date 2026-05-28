@@ -1,10 +1,28 @@
+import { useEffect, useState } from 'react';
 import { Frame, Navigation } from '@shopify/polaris';
 import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../utils/api';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [unreadReports, setUnreadReports] = useState<number>(0);
+
+  // One-shot fetch at app load — no polling.
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch('/notifications/unread-count')
+      .then((res: { count: number } | number | undefined) => {
+        if (cancelled) return;
+        const count = typeof res === 'number' ? res : res?.count ?? 0;
+        setUnreadReports(count);
+      })
+      .catch((e) => console.warn('[MainLayout] unread-count fetch failed', e));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const navigationMarkup = (
     <Navigation location={location.pathname}>
@@ -42,7 +60,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             url: '/reports',
             label: 'Report e Dichiarazioni',
             icon: FileIcon,
-            onClick: () => navigate('/reports'),
+            badge: unreadReports > 0 ? String(unreadReports) : undefined,
+            onClick: () => {
+              navigate('/reports');
+              setUnreadReports(0);
+            },
             selected: location.pathname === '/reports',
           },
         ]}
