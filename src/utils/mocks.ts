@@ -74,7 +74,7 @@ export const MOCKS: Record<string, any> = {
       calculatedUnitWeightGrams: 7.92,
       role: 'PRIMARY',
       isActive: true,
-      packagingType: { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', formulaType: 'BOX', defaultGsm: 400 }
+      packagingType: { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', category: 'PRIMARY', formulaType: 'BOX', defaultGsm: 400 }
     },
     {
       id: 'inv-2',
@@ -85,16 +85,17 @@ export const MOCKS: Record<string, any> = {
       calculatedUnitWeightGrams: 150,
       role: 'PRIMARY',
       isActive: true,
-      packagingType: { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', formulaType: 'BOX', defaultGsm: 600 }
+      packagingType: { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', category: 'PRIMARY', formulaType: 'BOX', defaultGsm: 600 }
     }
   ],
 
   '/packaging/types': [
-    { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', defaultGsm: 400, formulaType: 'BOX', defaultOverlapFactor: 1.05 },
-    { id: 't2', name: 'Busta Imbottita', agnosticMaterial: 'PAPER', defaultGsm: 150, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
-    { id: 't3', name: 'Busta Polietilene', agnosticMaterial: 'PLASTIC', defaultGsm: 50, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
-    { id: 't4', name: 'Nastro Adesivo', agnosticMaterial: 'PLASTIC', defaultGsm: 30, formulaType: 'STATIC', defaultOverlapFactor: 1.0 },
-    { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', defaultGsm: 600, formulaType: 'BOX', defaultOverlapFactor: 1.05 }
+    { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', category: 'PRIMARY', defaultGsm: 400, formulaType: 'BOX', defaultOverlapFactor: 1.05 },
+    { id: 't2', name: 'Busta Imbottita', agnosticMaterial: 'PAPER', category: 'PRIMARY', defaultGsm: 150, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
+    { id: 't3', name: 'Busta Polietilene', agnosticMaterial: 'PLASTIC', category: 'PRIMARY', defaultGsm: 50, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
+    { id: 't4', name: 'Nastro Adesivo', agnosticMaterial: 'PLASTIC', category: 'TAPE', defaultGsm: 30, formulaType: 'STATIC', defaultOverlapFactor: 1.0 },
+    { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', category: 'PRIMARY', defaultGsm: 600, formulaType: 'BOX', defaultOverlapFactor: 1.05 },
+    { id: 't6', name: 'Carta Velina', agnosticMaterial: 'PAPER', category: 'FILLER', defaultGsm: 20, formulaType: 'STATIC', defaultOverlapFactor: 1.0 }
   ],
 
   '/products/mappings': {

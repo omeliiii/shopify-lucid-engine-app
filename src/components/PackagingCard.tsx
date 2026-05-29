@@ -1,10 +1,13 @@
 import { Card, Box, BlockStack, Text, InlineStack, Badge, Button } from '@shopify/polaris';
 import { DeleteIcon, EditIcon, CheckIcon } from '@shopify/polaris-icons';
 
+export type PackagingCategory = 'PRIMARY' | 'TAPE' | 'FILLER';
+
 interface PackagingType {
   id: string;
   name: string;
   agnosticMaterial: string;
+  category: PackagingCategory;
   imageUrl?: string;
 }
 
@@ -17,12 +20,18 @@ export interface InventoryItem {
   hMm: number | null;
   customGsm: number | null;
   calculatedUnitWeightGrams: number;
-  role: 'PRIMARY' | 'SECONDARY' | 'FILLER';
+  role: 'PRIMARY' | 'SECONDARY';
   isActive: boolean;
   packagingType: PackagingType;
   isAiSuggested: boolean;
   isConfirmed: boolean;
 }
+
+const CATEGORY_LABELS: Record<PackagingCategory, string> = {
+  PRIMARY: 'Primario',
+  TAPE: 'Tape',
+  FILLER: 'Filler',
+};
 
 interface PackagingCardProps {
   item: InventoryItem;
@@ -35,6 +44,9 @@ interface PackagingCardProps {
 export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested }: PackagingCardProps) {
   const material = item.packagingType?.agnosticMaterial || 'PAPER';
   const imageUrl = item.packagingType?.imageUrl || '';
+  const category = item.packagingType?.category || 'PRIMARY';
+  const categoryTone: 'attention' | 'magic' | undefined =
+    category === 'TAPE' ? 'attention' : category === 'FILLER' ? 'magic' : undefined;
 
   if (isAiSuggested) {
     return (
@@ -48,7 +60,12 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           <BlockStack gap="150">
             <Text as="h3" variant="headingXs" truncate>{item.name}</Text>
             <InlineStack gap="100" align="space-between">
-              <Badge tone={material === 'PAPER' ? 'success' : 'info'} size="small">{material}</Badge>
+              <InlineStack gap="100">
+                <Badge tone={material === 'PAPER' ? 'success' : 'info'} size="small">{material}</Badge>
+                {category !== 'PRIMARY' && (
+                  <Badge tone={categoryTone} size="small">{CATEGORY_LABELS[category]}</Badge>
+                )}
+              </InlineStack>
               <Text as="span" tone="subdued" variant="bodySm">{Number(item.calculatedUnitWeightGrams.toFixed(2))}g</Text>
             </InlineStack>
             {(item.lMm || item.wMm || item.hMm) && (
@@ -78,7 +95,12 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
         <BlockStack gap="200">
           <Text as="h3" variant="headingSm" truncate>{item.name}</Text>
           <InlineStack gap="200" align="space-between">
-            <Badge tone={material === 'PAPER' ? 'success' : 'info'}>{material}</Badge>
+            <InlineStack gap="100">
+              <Badge tone={material === 'PAPER' ? 'success' : 'info'}>{material}</Badge>
+              {category !== 'PRIMARY' && (
+                <Badge tone={categoryTone}>{CATEGORY_LABELS[category]}</Badge>
+              )}
+            </InlineStack>
             <Text as="span" tone="subdued" variant="bodySm">{Number(item.calculatedUnitWeightGrams.toFixed(2))}g</Text>
           </InlineStack>
           <Text as="span" tone="subdued" variant="bodySm">

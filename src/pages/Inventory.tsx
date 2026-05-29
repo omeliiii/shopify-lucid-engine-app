@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, Modal, Form, FormLayout, TextField, Icon, Box, BlockStack, InlineStack, EmptyState, Tabs } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Icon, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
 import { MagicIcon, ArrowLeftIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -10,6 +10,7 @@ interface PackagingType {
   id: string;
   name: string;
   agnosticMaterial: string;
+  category: 'PRIMARY' | 'TAPE' | 'FILLER';
   defaultGsm?: number;
   formulaType?: string;
   defaultOverlapFactor?: number;
@@ -35,6 +36,7 @@ export default function Inventory() {
   const [customGsm, setCustomGsm] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'PRIMARY' | 'TAPE' | 'FILLER'>('ALL');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -105,6 +107,7 @@ export default function Inventory() {
     setEditingItemId(null);
     setShowCustomForm(false);
     setSelectedTab(0);
+    setCategoryFilter('ALL');
     if (standardTypes.length > 0) {
       setPackagingTypeId(standardTypes[0].id);
       setLength(standardTypes[0].defaultLMm?.toString() || '');
@@ -181,7 +184,11 @@ export default function Inventory() {
     setItems(items.filter(i => i.id !== id));
   };
 
-  const groupedTypes = standardTypes.reduce((acc, curr) => {
+  const filteredStandardTypes = standardTypes.filter(
+    t => categoryFilter === 'ALL' || t.category === categoryFilter
+  );
+
+  const groupedTypes = filteredStandardTypes.reduce((acc, curr) => {
     if (!acc[curr.agnosticMaterial]) acc[curr.agnosticMaterial] = [];
     acc[curr.agnosticMaterial].push(curr);
     return acc;
@@ -196,6 +203,12 @@ export default function Inventory() {
 
   const activeItems = items.filter(i => i.isActive && (!i.isAiSuggested || i.isConfirmed));
   const suggestedItems = items.filter(i => i.isAiSuggested && !i.isConfirmed);
+
+  const hasTape = activeItems.some(i => i.packagingType?.category === 'TAPE');
+  const hasFiller = activeItems.some(i => i.packagingType?.category === 'FILLER');
+  const missingCategories: Array<{ key: 'TAPE' | 'FILLER'; label: string }> = [];
+  if (!hasTape) missingCategories.push({ key: 'TAPE', label: 'nastro adesivo (tape)' });
+  if (!hasFiller) missingCategories.push({ key: 'FILLER', label: 'materiale di riempimento (filler)' });
 
   const isCustomFormVisible = editingItemId !== null || showCustomForm;
 
@@ -214,6 +227,23 @@ export default function Inventory() {
       }}
     >
       <Layout>
+        {!loading && activeItems.length > 0 && missingCategories.length > 0 && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title="Imballaggi mancanti"
+              action={{
+                content: 'Aggiungi imballaggio',
+                onAction: () => { resetForm(); setModalOpen(true); },
+              }}
+            >
+              <p>
+                Non hai ancora aggiunto: <b>{missingCategories.map(m => m.label).join(' e ')}</b>.
+                Senza questi elementi i calcoli di peso del pacco potrebbero essere incompleti.
+              </p>
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Card padding="0">
             {items.length === 0 && !loading ? (
@@ -290,7 +320,27 @@ export default function Inventory() {
         <Modal.Section>
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
-              {materialTabs.length > 0 && (
+              <InlineStack gap="200" blockAlign="center">
+                <Text as="span" variant="bodySm" tone="subdued">Categoria:</Text>
+                <ButtonGroup variant="segmented">
+                  {([
+                    { value: 'ALL', label: 'Tutti' },
+                    { value: 'PRIMARY', label: 'Primari' },
+                    { value: 'TAPE', label: 'Tape' },
+                    { value: 'FILLER', label: 'Filler' },
+                  ] as const).map(opt => (
+                    <Button
+                      key={opt.value}
+                      size="slim"
+                      pressed={categoryFilter === opt.value}
+                      onClick={() => { setCategoryFilter(opt.value); setSelectedTab(0); }}
+                    >
+                      {opt.label}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </InlineStack>
+              {materialTabs.length > 0 ? (
                 <Tabs tabs={materialTabs} selected={selectedTab} onSelect={setSelectedTab}>
                   <Box paddingBlockStart="400">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
@@ -311,6 +361,10 @@ export default function Inventory() {
                     </div>
                   </Box>
                 </Tabs>
+              ) : (
+                <Box paddingBlockStart="200" paddingBlockEnd="200">
+                  <Text as="p" tone="subdued">Nessun tipo disponibile per la categoria selezionata.</Text>
+                </Box>
               )}
               <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
                 <Button onClick={() => setShowCustomForm(true)}>Crea imballaggio personalizzato</Button>
