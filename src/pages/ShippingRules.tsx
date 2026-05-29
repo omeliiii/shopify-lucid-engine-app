@@ -7,7 +7,7 @@ import {
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
-import { getMaterialImage } from '../components/PackagingCard';
+
 
 // ── Types ──
 
@@ -341,20 +341,20 @@ export default function ShippingRules() {
                           <InlineStack gap="400">
                             {item.secondaryPackagingId && (() => {
                               const inv = inventoryRaw.find((i: any) => i.id === item.secondaryPackagingId);
-                              const material = inv?.packagingType?.agnosticMaterial;
+                              const imgUrl = inv?.packagingType?.imageUrl;
                               return (
                                 <InlineStack gap="200" blockAlign="center">
-                                  <Thumbnail source={getMaterialImage(material)} alt={material || 'packaging'} size="small" />
+                                  {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                                   <Text as="span" variant="bodySm"><b>Secondario:</b> {item.secondaryPackaging?.name || inventory.find(i => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}</Text>
                                 </InlineStack>
                               );
                             })()}
                             {item.fillerPackagingId && (() => {
                               const inv = inventoryRaw.find((i: any) => i.id === item.fillerPackagingId);
-                              const material = inv?.packagingType?.agnosticMaterial;
+                              const imgUrl = inv?.packagingType?.imageUrl;
                               return (
                                 <InlineStack gap="200" blockAlign="center">
-                                  <Thumbnail source={getMaterialImage(material)} alt={material || 'packaging'} size="small" />
+                                  {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                                   <Text as="span" variant="bodySm"><b>Riempimento:</b> {item.fillerPackaging?.name || inventory.find(i => i.value === item.fillerPackagingId)?.label || item.fillerPackagingId}</Text>
                                 </InlineStack>
                               );

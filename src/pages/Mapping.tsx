@@ -24,7 +24,7 @@ import {
 import { DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
-import { getMaterialImage } from '../components/PackagingCard';
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +38,7 @@ interface PackagingComponent {
   packagingId: string;
   packagingName: string;
   packagingMaterial?: string;
+  packagingImageUrl?: string;
   purpose: 'WRAP' | 'CONTAINER' | 'SEAL' | 'LABEL' | 'CUSHION';
   quantityPerUnit: number;
   unitWeightGrams: number;
@@ -388,7 +389,7 @@ export default function Mapping() {
             {product.confirmedComponents.map((comp) => (
               <InlineStack key={comp.mappingId} gap="200" blockAlign="center" wrap={false}>
                 <Thumbnail
-                  source={getMaterialImage(comp.packagingMaterial)}
+                  source={comp.packagingImageUrl || ''}
                   alt={comp.packagingName}
                   size="extraSmall"
                 />
@@ -423,7 +424,7 @@ export default function Mapping() {
                 <BlockStack gap="200">
                   <InlineStack gap="200" blockAlign="center" wrap={false}>
                     <Thumbnail
-                      source={getMaterialImage(comp.packagingMaterial)}
+                      source={comp.packagingImageUrl || ''}
                       alt={comp.packagingName}
                       size="extraSmall"
                     />

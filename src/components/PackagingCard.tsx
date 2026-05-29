@@ -5,6 +5,7 @@ interface PackagingType {
   id: string;
   name: string;
   agnosticMaterial: string;
+  imageUrl?: string;
 }
 
 export interface InventoryItem {
@@ -31,23 +32,15 @@ interface PackagingCardProps {
   isAiSuggested?: boolean;
 }
 
-export const getMaterialImage = (material?: string) => {
-  switch (material) {
-    case 'PAPER': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
-    case 'PLASTIC': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
-    case 'COMPOSITE': return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
-    default: return 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png';
-  }
-};
-
 export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested }: PackagingCardProps) {
   const material = item.packagingType?.agnosticMaterial || 'PAPER';
+  const imageUrl = item.packagingType?.imageUrl || '';
 
   if (isAiSuggested) {
     return (
       <Card padding="0">
         <img
-          src={getMaterialImage(material)}
+          src={imageUrl}
           alt={material}
           style={{ width: '100%', height: '90px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
         />
@@ -77,7 +70,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
   return (
     <Card padding="0">
       <img
-        src={getMaterialImage(material)}
+        src={imageUrl}
         alt={material}
         style={{ width: '100%', height: '160px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
       />
