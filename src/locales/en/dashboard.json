@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Dashboard & orders",
+    "subtitle": "Keep an eye on packaging weight and your EPR setup at a glance."
+  },
+  "kpis": {
+    "weight_by_country": {
+      "title": "Packaging weight by country",
+      "tooltip_label": "Weight",
+      "value_unit": "kg"
+    },
+    "tracked_orders": {
+      "title": "Tracked orders (last 5 days)",
+      "tooltip_label": "Orders",
+      "tooltip_value": "{{value}} orders"
+    },
+    "material_breakdown": {
+      "title": "Material breakdown",
+      "empty": "Nothing here yet — finish setting up the app to see your material mix."
+    }
+  },
+  "logs": {
+    "section_title": "Latest tracked orders",
+    "table": {
+      "order_id": "Order",
+      "date": "Date",
+      "country": "Country",
+      "total_weight": "Total weight",
+      "components": "Packaging components"
+    },
+    "empty": {
+      "heading": "No tracked orders yet",
+      "body": "New orders with calculated packaging will show up here as soon as they come in."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "inventory": {
+        "title": "Add your packaging items",
+        "description": "List the boxes, tapes and void fillers you actually use to ship orders.",
+        "cta": "Go to inventory"
+      },
+      "mapping": {
+        "title": "Match packaging to products",
+        "description": "Tell us which primary packaging holds each product (mailer, tray, blister…).",
+        "cta": "Go to mapping"
+      },
+      "rules": {
+        "title": "Set your shipping rules",
+        "description": "Decide which outer box, tape and filler you use based on how many items the order has.",
+        "cta": "Go to rules"
+      },
+      "backfill": {
+        "title": "Import your order history",
+        "description_first_run": "We import paid orders from Jan 1st until today to recalculate EPR weights. One-time job, may take a few minutes.",
+        "description_rerun": "History has already been imported. Run it again to pick up the most recent orders.",
+        "cta_first_run": "Import this year's orders",
+        "cta_rerun": "Re-run import"
+      }
+    }
+  },
+  "backfill": {
+    "summary": "{{processed}} orders imported · {{duplicates}} already there · {{excluded}} skipped (country not handled).",
+    "progress": {
+      "initializing": "Starting up…",
+      "details": "Fetched {{fetched}} · Saved {{processed}} · Duplicates {{duplicates}} · Skipped {{excluded}}",
+      "details_compact": "Fetched {{fetched}} · Saved {{processed}}"
+    },
+    "banners": {
+      "running_title": "Importing order history",
+      "completed_title": "Import complete",
+      "failed_title": "Import didn't finish",
+      "failed_body": "The import didn't complete: {{error}}. You can try again whenever you like.",
+      "network_warning": "Connection lost, retrying automatically…"
+    },
+    "toasts": {
+      "already_running": "Import is already running — track the progress below.",
+      "started": "Import started. Feel free to keep using the app.",
+      "start_failed": "We couldn't start the import."
+    },
+    "errors": {
+      "load_dashboard": "We couldn't load the dashboard data. Please try again in a moment.",
+      "unknown": "Unknown error during import."
+    }
+  }
+}

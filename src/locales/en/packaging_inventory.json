@@ -1,0 +1,66 @@
+{
+  "page": {
+    "title": "Packaging inventory",
+    "subtitle": "Catalog the materials you actually use to ship: boxes, tapes, void fillers. We'll use them to calculate the EPR weight of every order.",
+    "primary_action": "Add packaging"
+  },
+  "warnings": {
+    "missing_categories_title": "Some shipping materials are missing",
+    "missing_categories_body": "You haven't added: <strong>{{categories}}</strong>. Without them, parcel weight in your EPR reports may be incomplete.",
+    "missing_categories_cta": "Add now",
+    "categories": {
+      "TAPE": "tape",
+      "FILLER": "void filler"
+    },
+    "join_and": " and "
+  },
+  "empty_state": {
+    "heading": "Your packaging inventory is empty",
+    "body": "Add the boxes, tape and void fillers you use to ship. It only takes a few minutes to get started.",
+    "cta": "Add your first packaging"
+  },
+  "ai_section": {
+    "subtitle": "We analysed your catalog and suggested a few packaging options. Review them and accept the ones you actually use."
+  },
+  "modal": {
+    "title_add": "Add packaging",
+    "title_customize": "Customize packaging",
+    "title_edit": "Edit packaging",
+    "category_label": "Category",
+    "category_filters": {
+      "ALL": "All",
+      "PRIMARY": "Primary",
+      "TAPE": "Tape",
+      "FILLER": "Filler"
+    },
+    "no_types_for_category": "No templates available for this category. Create a custom packaging below.",
+    "create_custom_cta": "Create custom packaging",
+    "back_to_standard_cta": "Back to standard templates",
+    "standard_card": {
+      "customize_cta": "Customize",
+      "add_cta": "Add"
+    },
+    "form": {
+      "name_label": "Custom name",
+      "name_placeholder": "e.g. Branded sock mailer",
+      "name_help": "Use a name you'll recognize: you'll match products against it.",
+      "type_label": "Packaging type",
+      "length_label": "Length (mm)",
+      "width_label": "Width (mm)",
+      "height_label": "Height (mm)",
+      "custom_gsm_label": "Custom grammage (g/m²)",
+      "custom_gsm_help": "Leave empty to use the material's default grammage."
+    }
+  },
+  "toasts": {
+    "load_failed": "We couldn't load your inventory. Refresh the page.",
+    "added": "Packaging added to your inventory.",
+    "updated": "Packaging updated.",
+    "deleted": "Packaging deleted.",
+    "save_failed": "We couldn't save your changes. Check the fields and try again.",
+    "delete_failed": "Delete didn't go through. Please try again.",
+    "add_failed": "We couldn't add the packaging.",
+    "suggestion_accepted": "Suggestion accepted and added to inventory.",
+    "suggestion_accept_failed": "We couldn't accept the suggestion."
+  }
+}

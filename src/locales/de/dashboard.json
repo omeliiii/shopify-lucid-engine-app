@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Dashboard & Bestellungen",
+    "subtitle": "Behalte das Verpackungsgewicht deiner Sendungen und den Stand deiner EPR-Einrichtung im Blick."
+  },
+  "kpis": {
+    "weight_by_country": {
+      "title": "Verpackungsgewicht nach Land",
+      "tooltip_label": "Gewicht",
+      "value_unit": "kg"
+    },
+    "tracked_orders": {
+      "title": "Erfasste Bestellungen (letzte 5 Tage)",
+      "tooltip_label": "Bestellungen",
+      "tooltip_value": "{{value}} Bestellungen"
+    },
+    "material_breakdown": {
+      "title": "Materialverteilung",
+      "empty": "Noch keine Daten – schließe die Einrichtung ab, um deinen Materialmix zu sehen."
+    }
+  },
+  "logs": {
+    "section_title": "Zuletzt erfasste Bestellungen",
+    "table": {
+      "order_id": "Bestellung",
+      "date": "Datum",
+      "country": "Land",
+      "total_weight": "Gesamtgewicht",
+      "components": "Verpackungskomponenten"
+    },
+    "empty": {
+      "heading": "Noch keine erfassten Bestellungen",
+      "body": "Sobald neue Bestellungen mit berechneter Verpackung eingehen, erscheinen sie hier."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "inventory": {
+        "title": "Verpackungen hinzufügen",
+        "description": "Erfasse die Kartons, Klebebänder und Füllmaterialien, die du tatsächlich nutzt.",
+        "cta": "Zum Bestand"
+      },
+      "mapping": {
+        "title": "Verpackungen den Produkten zuordnen",
+        "description": "Gib an, welche Primärverpackung jedes Produkt umhüllt (z. B. Versandtasche, Tray, Blister).",
+        "cta": "Zur Zuordnung"
+      },
+      "rules": {
+        "title": "Versandregeln festlegen",
+        "description": "Lege fest, welcher Außenkarton, welches Klebeband und Füllmaterial je nach Anzahl der Artikel verwendet wird.",
+        "cta": "Zu den Regeln"
+      },
+      "backfill": {
+        "title": "Bestellhistorie importieren",
+        "description_first_run": "Wir importieren bezahlte Bestellungen vom 1. Januar bis heute, um die EPR-Gewichte neu zu berechnen. Einmaliger Vorgang, kann einige Minuten dauern.",
+        "description_rerun": "Die Historie wurde bereits importiert. Starte den Import erneut, um neue Bestellungen nachzutragen.",
+        "cta_first_run": "Bestellungen dieses Jahres importieren",
+        "cta_rerun": "Import erneut starten"
+      }
+    }
+  },
+  "backfill": {
+    "summary": "{{processed}} Bestellungen importiert · {{duplicates}} bereits vorhanden · {{excluded}} übersprungen (Land nicht abgedeckt).",
+    "progress": {
+      "initializing": "Wird gestartet…",
+      "details": "Geladen {{fetched}} · Gespeichert {{processed}} · Duplikate {{duplicates}} · Übersprungen {{excluded}}",
+      "details_compact": "Geladen {{fetched}} · Gespeichert {{processed}}"
+    },
+    "banners": {
+      "running_title": "Bestellhistorie wird importiert",
+      "completed_title": "Import abgeschlossen",
+      "failed_title": "Import nicht erfolgreich",
+      "failed_body": "Der Import konnte nicht abgeschlossen werden: {{error}}. Du kannst es jederzeit erneut versuchen.",
+      "network_warning": "Verbindung verloren, wir versuchen es erneut…"
+    },
+    "toasts": {
+      "already_running": "Der Import läuft bereits – den Fortschritt siehst du unten.",
+      "started": "Import gestartet. Du kannst die App weiter benutzen.",
+      "start_failed": "Der Import konnte nicht gestartet werden."
+    },
+    "errors": {
+      "load_dashboard": "Die Dashboard-Daten konnten nicht geladen werden. Bitte versuche es gleich noch einmal.",
+      "unknown": "Unbekannter Fehler beim Import."
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Tableau de bord et commandes",
+    "subtitle": "Garde un œil sur le poids des emballages expédiés et l'avancement de ta configuration REP."
+  },
+  "kpis": {
+    "weight_by_country": {
+      "title": "Poids des emballages par pays",
+      "tooltip_label": "Poids",
+      "value_unit": "kg"
+    },
+    "tracked_orders": {
+      "title": "Commandes suivies (5 derniers jours)",
+      "tooltip_label": "Commandes",
+      "tooltip_value": "{{value}} commandes"
+    },
+    "material_breakdown": {
+      "title": "Répartition des matériaux",
+      "empty": "Aucune donnée pour l'instant — termine la configuration pour voir ton mix de matériaux."
+    }
+  },
+  "logs": {
+    "section_title": "Dernières commandes suivies",
+    "table": {
+      "order_id": "Commande",
+      "date": "Date",
+      "country": "Pays",
+      "total_weight": "Poids total",
+      "components": "Composants d'emballage"
+    },
+    "empty": {
+      "heading": "Aucune commande suivie",
+      "body": "Les nouvelles commandes avec emballage calculé apparaîtront ici dès leur arrivée."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "inventory": {
+        "title": "Ajoute tes emballages",
+        "description": "Recense les cartons, rubans adhésifs et calages que tu utilises réellement pour expédier.",
+        "cta": "Aller à l'inventaire"
+      },
+      "mapping": {
+        "title": "Associe les emballages aux produits",
+        "description": "Indique pour chaque produit l'emballage primaire qui le contient (pochette, plateau, blister…).",
+        "cta": "Aller à l'association"
+      },
+      "rules": {
+        "title": "Définis tes règles d'expédition",
+        "description": "Choisis quel carton extérieur, ruban et calage utiliser selon le nombre d'articles dans la commande.",
+        "cta": "Aller aux règles"
+      },
+      "backfill": {
+        "title": "Importe l'historique des commandes",
+        "description_first_run": "Nous importons les commandes payées depuis le 1er janvier pour recalculer les poids REP. Action unique, cela peut prendre quelques minutes.",
+        "description_rerun": "L'historique a déjà été importé. Tu peux le relancer pour récupérer les commandes les plus récentes.",
+        "cta_first_run": "Importer les commandes de l'année",
+        "cta_rerun": "Relancer l'import"
+      }
+    }
+  },
+  "backfill": {
+    "summary": "{{processed}} commandes importées · {{duplicates}} déjà présentes · {{excluded}} ignorées (pays non géré).",
+    "progress": {
+      "initializing": "Démarrage…",
+      "details": "Récupérées {{fetched}} · Enregistrées {{processed}} · Doublons {{duplicates}} · Ignorées {{excluded}}",
+      "details_compact": "Récupérées {{fetched}} · Enregistrées {{processed}}"
+    },
+    "banners": {
+      "running_title": "Import de l'historique en cours",
+      "completed_title": "Import terminé",
+      "failed_title": "Import non abouti",
+      "failed_body": "L'import ne s'est pas terminé : {{error}}. Tu peux réessayer quand tu veux.",
+      "network_warning": "Connexion perdue, nouvelle tentative en cours…"
+    },
+    "toasts": {
+      "already_running": "L'import est déjà en cours — suis l'avancement ci-dessous.",
+      "started": "Import lancé. Tu peux continuer à utiliser l'app.",
+      "start_failed": "Impossible de lancer l'import."
+    },
+    "errors": {
+      "load_dashboard": "Impossible de charger les données du tableau de bord. Réessaie dans un instant.",
+      "unknown": "Erreur inconnue pendant l'import."
+    }
+  }
+}

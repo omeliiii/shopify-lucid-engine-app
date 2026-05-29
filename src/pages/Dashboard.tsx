@@ -16,6 +16,7 @@ import {
   ProgressBar,
 } from '@shopify/polaris';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, CartesianGrid, AreaChart, Area } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { shopKey } from '../utils/storage';
 import { useToast } from '../utils/toast';
@@ -85,10 +86,6 @@ function isNotFoundError(err: unknown): boolean {
   return err instanceof Error && err.message.includes('404');
 }
 
-function formatBackfillSummary(p: BackfillProgress): string {
-  return `Importati ${p.processed} ordini. ${p.skippedDuplicate} già presenti, ${p.skippedNonDe} esclusi (non-DE).`;
-}
-
 interface DashboardCardProps {
   title: string;
   value?: React.ReactNode;
@@ -119,6 +116,11 @@ function DashboardCard({ title, value, children, chartHeight = 200 }: DashboardC
 export default function Dashboard() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { t, i18n } = useTranslation('dashboard');
+  const { t: tCommon } = useTranslation('common');
+  const numberLocale = i18n.language?.startsWith('en') ? 'en-GB' : i18n.language || 'it';
+  const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
+
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<ShippingLog[]>([]);
   const [kpis, setKpis] = useState<KPI | null>(null);
@@ -146,6 +148,16 @@ export default function Dashboard() {
   const [hasRunBackfillBefore, setHasRunBackfillBefore] = useState(false);
   const [pollNetworkBanner, setPollNetworkBanner] = useState(false);
 
+  const formatBackfillSummary = useCallback(
+    (p: BackfillProgress) =>
+      t('backfill.summary', {
+        processed: p.processed,
+        duplicates: p.skippedDuplicate,
+        excluded: p.skippedNonDe,
+      }),
+    [t],
+  );
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -161,12 +173,12 @@ export default function Dashboard() {
       setKpis(kpisData);
     } catch (err) {
       setError(true);
-      toast.error('Impossibile caricare i dati della dashboard');
+      toast.error(t('backfill.errors.load_dashboard'));
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [page, countryFilter, startDate, endDate, toast]);
+  }, [page, countryFilter, startDate, endDate, toast, t]);
 
   const loadDataRef = useRef(loadData);
   useEffect(() => {
@@ -254,7 +266,7 @@ export default function Dashboard() {
           setBackfillState('completed');
           loadDataRef.current();
         } else if (status.state === 'failed') {
-          setBackfillErrorMessage(status.failedReason || 'Errore sconosciuto');
+          setBackfillErrorMessage(status.failedReason || t('backfill.errors.unknown'));
           localStorage.removeItem(BACKFILL_JOB_STORAGE_KEY);
           setBackfillState('failed');
         }
@@ -282,7 +294,7 @@ export default function Dashboard() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [backfillState, backfillJobId]);
+  }, [backfillState, backfillJobId, formatBackfillSummary, t]);
 
   const handleStartBackfill = async () => {
     setBackfillStarting(true);
@@ -294,12 +306,12 @@ export default function Dashboard() {
       setBackfillProgress(null);
       setPollNetworkBanner(false);
       setBackfillState('running');
-      toast.success(res.alreadyRunning ? 'Recupero già in corso' : 'Recupero avviato');
+      toast.success(res.alreadyRunning ? t('backfill.toasts.already_running') : t('backfill.toasts.started'));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Errore di rete';
+      const msg = err instanceof Error ? err.message : tCommon('errors.network');
       setBackfillErrorMessage(msg);
       setBackfillState('failed');
-      toast.error('Impossibile avviare il recupero');
+      toast.error(t('backfill.toasts.start_failed'));
     } finally {
       setBackfillStarting(false);
     }
@@ -325,71 +337,75 @@ export default function Dashboard() {
       {backfillProgress ? (
         <>
           <Text as="p" tone="subdued" variant="bodySm">
-            Scaricati {backfillProgress.fetched.toLocaleString('it-IT')} ·
-            Salvati {backfillProgress.processed.toLocaleString('it-IT')} ·
-            Duplicati {backfillProgress.skippedDuplicate.toLocaleString('it-IT')} ·
-            Esclusi {backfillProgress.skippedNonDe.toLocaleString('it-IT')}
+            {t('backfill.progress.details', {
+              fetched: backfillProgress.fetched.toLocaleString(numberLocale),
+              processed: backfillProgress.processed.toLocaleString(numberLocale),
+              duplicates: backfillProgress.skippedDuplicate.toLocaleString(numberLocale),
+              excluded: backfillProgress.skippedNonDe.toLocaleString(numberLocale),
+            })}
           </Text>
           {backfillProgress.fetched > 0 && (
             <ProgressBar progress={backfillProgressPercent} size="small" />
           )}
         </>
       ) : (
-        <Text as="p" tone="subdued" variant="bodySm">Inizializzazione…</Text>
+        <Text as="p" tone="subdued" variant="bodySm">{t('backfill.progress.initializing')}</Text>
       )}
       {pollNetworkBanner && (
         <Banner tone="warning">
-          <p>Connessione persa, riprovo…</p>
+          <p>{t('backfill.banners.network_warning')}</p>
         </Banner>
       )}
     </BlockStack>
   ) : backfillState === 'completed' && backfillFinalMessage ? (
-    <Banner tone="success" title="Recupero completato" onDismiss={handleDismissBackfillResult}>
+    <Banner tone="success" title={t('backfill.banners.completed_title')} onDismiss={handleDismissBackfillResult}>
       <p>{backfillFinalMessage}</p>
     </Banner>
   ) : backfillState === 'failed' ? (
-    <Banner tone="critical" title="Recupero non riuscito" onDismiss={handleDismissBackfillResult}>
-      <p>Il recupero non è andato a buon fine: {backfillErrorMessage}. Riprova.</p>
+    <Banner tone="critical" title={t('backfill.banners.failed_title')} onDismiss={handleDismissBackfillResult}>
+      <p>{t('backfill.banners.failed_body', { error: backfillErrorMessage ?? '' })}</p>
     </Banner>
   ) : null;
 
   const steps: OnboardingStep[] = [
     {
       id: 'inventory',
-      title: 'Aggiungi i tuoi imballaggi',
-      description: 'Censisci scatole, nastro adesivo e materiale di riempimento usati per le tue spedizioni.',
+      title: t('onboarding.steps.inventory.title'),
+      description: t('onboarding.steps.inventory.description'),
       done: hasInventory,
-      ctaLabel: 'Vai a Inventario',
+      ctaLabel: t('onboarding.steps.inventory.cta'),
       onAction: () => navigate('/inventory'),
     },
     {
       id: 'mapping',
-      title: 'Mappa gli imballaggi ai prodotti',
-      description: 'Associa a ogni prodotto uno o più imballaggi primari.',
+      title: t('onboarding.steps.mapping.title'),
+      description: t('onboarding.steps.mapping.description'),
       done: hasMappings,
       disabled: !hasInventory,
-      ctaLabel: 'Vai a Mappatura',
+      ctaLabel: t('onboarding.steps.mapping.cta'),
       onAction: () => navigate('/mapping'),
     },
     {
       id: 'rules',
-      title: 'Definisci le regole di spedizione',
-      description: 'Crea le regole per scatole esterne, nastro e filler in base alla quantità di articoli.',
+      title: t('onboarding.steps.rules.title'),
+      description: t('onboarding.steps.rules.description'),
       done: hasRules,
       disabled: !hasMappings,
-      ctaLabel: 'Vai a Regole',
+      ctaLabel: t('onboarding.steps.rules.cta'),
       onAction: () => navigate('/shipping-rules'),
     },
     {
       id: 'backfill',
-      title: 'Recupera lo storico ordini',
+      title: t('onboarding.steps.backfill.title'),
       description: hasRunBackfillBefore
-        ? 'Backfill già eseguito. Puoi rilanciarlo per recuperare nuovi ordini.'
-        : "Importa gli ordini pagati dal 1° gennaio fino a oggi. Operazione una tantum, può richiedere alcuni minuti.",
+        ? t('onboarding.steps.backfill.description_rerun')
+        : t('onboarding.steps.backfill.description_first_run'),
       done: hasRunBackfillBefore && backfillState !== 'running',
       disabled: !hasRules || backfillStarting,
       inProgress: backfillState === 'running',
-      ctaLabel: hasRunBackfillBefore ? 'Rilancia recupero' : "Recupera ordini di quest'anno",
+      ctaLabel: hasRunBackfillBefore
+        ? t('onboarding.steps.backfill.cta_rerun')
+        : t('onboarding.steps.backfill.cta_first_run'),
       onAction: handleStartBackfill,
       extra: backfillExtra,
     },
@@ -426,13 +442,13 @@ export default function Dashboard() {
       <Text as="span" fontWeight="bold">{log.shopifyOrderName}</Text>,
       log.orderDate,
       <FlagBadge countryCode={log.shippingCountryCode} />,
-      `${log.totalWeightGrams} g`,
+      tCommon('units.weight_g', { value: log.totalWeightGrams }),
       componentsLabel
     ];
   });
 
   return (
-    <Page title="Dashboard & Logs">
+    <Page title={t('page.title')}>
       <Layout>
         {/* Onboarding checklist — shown until every step is done */}
         {!setupLoading && !setupComplete && (
@@ -444,19 +460,21 @@ export default function Dashboard() {
         {/* Compact "in progress" banner when backfill is running and checklist is hidden */}
         {setupComplete && backfillState === 'running' && (
           <Layout.Section>
-            <Banner tone="info" title="Recupero ordini in corso">
+            <Banner tone="info" title={t('backfill.banners.running_title')}>
               {backfillProgress ? (
                 <BlockStack gap="200">
                   <Text as="p" variant="bodySm">
-                    Scaricati {backfillProgress.fetched.toLocaleString('it-IT')} ·
-                    Salvati {backfillProgress.processed.toLocaleString('it-IT')}
+                    {t('backfill.progress.details_compact', {
+                      fetched: backfillProgress.fetched.toLocaleString(numberLocale),
+                      processed: backfillProgress.processed.toLocaleString(numberLocale),
+                    })}
                   </Text>
                   {backfillProgress.fetched > 0 && (
                     <ProgressBar progress={backfillProgressPercent} size="small" />
                   )}
                 </BlockStack>
               ) : (
-                <Text as="p" variant="bodySm">Inizializzazione…</Text>
+                <Text as="p" variant="bodySm">{t('backfill.progress.initializing')}</Text>
               )}
             </Banner>
           </Layout.Section>
@@ -465,30 +483,30 @@ export default function Dashboard() {
         {/* Backfill completed/failed banners once setup is complete and checklist is hidden */}
         {setupComplete && backfillState === 'completed' && backfillFinalMessage && (
           <Layout.Section>
-            <Banner tone="success" title="Recupero completato" onDismiss={handleDismissBackfillResult}>
+            <Banner tone="success" title={t('backfill.banners.completed_title')} onDismiss={handleDismissBackfillResult}>
               <p>{backfillFinalMessage}</p>
             </Banner>
           </Layout.Section>
         )}
         {setupComplete && backfillState === 'failed' && (
           <Layout.Section>
-            <Banner tone="critical" title="Recupero non riuscito" onDismiss={handleDismissBackfillResult}>
-              <p>Il recupero non è andato a buon fine: {backfillErrorMessage}. Riprova.</p>
+            <Banner tone="critical" title={t('backfill.banners.failed_title')} onDismiss={handleDismissBackfillResult}>
+              <p>{t('backfill.banners.failed_body', { error: backfillErrorMessage ?? '' })}</p>
             </Banner>
           </Layout.Section>
         )}
 
         {/* KPI Section */}
         <DashboardCard
-          title="Peso Totale per Paese"
-          value={<>{kpis?.totalWeightKg} kg</>}
+          title={t('kpis.weight_by_country.title')}
+          value={<>{kpis?.totalWeightKg} {t('kpis.weight_by_country.value_unit')}</>}
         >
           {kpis?.weightByCountry ? (
             <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 100, height: 200 }}>
               <BarChart data={kpis.weightByCountry} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e5e7" />
                 <XAxis dataKey="countryCode" axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
-                <Tooltip formatter={(value) => [`${value} kg`, 'Peso']} cursor={{ fill: '#f4f6f8' }} />
+                <Tooltip formatter={(value) => [`${value} kg`, t('kpis.weight_by_country.tooltip_label')]} cursor={{ fill: '#f4f6f8' }} />
                 <Bar dataKey="weightKg" fill="#005bd3" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
@@ -496,7 +514,7 @@ export default function Dashboard() {
         </DashboardCard>
 
         <DashboardCard
-          title="Ordini Tracciati (Ultimi 5 gg)"
+          title={t('kpis.tracked_orders.title')}
           value={kpis?.totalOrders}
         >
           {kpis?.ordersHistory ? (
@@ -509,8 +527,8 @@ export default function Dashboard() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e5e7" />
-                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString('it-IT', { weekday: 'short' })} axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
-                <Tooltip formatter={(value) => [`${value} ordini`, 'Ordini']} />
+                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString(dateLocale, { weekday: 'short' })} axisLine={false} tickLine={false} tick={{ fill: '#6d7175', fontSize: 12 }} />
+                <Tooltip formatter={(value) => [t('kpis.tracked_orders.tooltip_value', { value }), t('kpis.tracked_orders.tooltip_label')]} />
                 <Area type="monotone" dataKey="count" stroke="#1c7100" fillOpacity={1} fill="url(#colorOrders)" strokeWidth={3} />
               </AreaChart>
             </ResponsiveContainer>
@@ -518,7 +536,7 @@ export default function Dashboard() {
         </DashboardCard>
 
         <DashboardCard
-          title="Distribuzione Materiali"
+          title={t('kpis.material_breakdown.title')}
           chartHeight={250}
         >
           {kpis?.materialBreakdown && kpis.materialBreakdown.length > 0 ? (
@@ -544,7 +562,7 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <Text as="p" tone="subdued">Nessun dato disponibile</Text>
+            <Text as="p" tone="subdued">{t('kpis.material_breakdown.empty')}</Text>
           )}
         </DashboardCard>
 
@@ -553,7 +571,7 @@ export default function Dashboard() {
           <Card padding="0">
             <BlockStack gap="400">
               <Box paddingInlineStart="400" paddingInlineEnd="400" paddingBlockStart="400">
-                <Text as="h2" variant="headingMd">Ultimi Log di Spedizione</Text>
+                <Text as="h2" variant="headingMd">{t('logs.section_title')}</Text>
               </Box>
 
               {/* Filters */}
@@ -572,7 +590,13 @@ export default function Dashboard() {
               {logs.length > 0 ? (
                 <DataTable
                   columnContentTypes={['text', 'text', 'text', 'numeric', 'text']}
-                  headings={['ID Ordine', 'Data', 'Paese', 'Peso Totale', 'Componenti']}
+                  headings={[
+                    t('logs.table.order_id'),
+                    t('logs.table.date'),
+                    t('logs.table.country'),
+                    t('logs.table.total_weight'),
+                    t('logs.table.components'),
+                  ]}
                   rows={logRows}
                   pagination={{
                     hasNext: logs.length === 10,
@@ -583,10 +607,10 @@ export default function Dashboard() {
                 />
               ) : (
                 <EmptyState
-                  heading="Nessun log disponibile"
+                  heading={t('logs.empty.heading')}
                   image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                 >
-                  <Text as="p">Non ci sono ancora ordini tracciati con i calcoli dell'imballaggio.</Text>
+                  <Text as="p">{t('logs.empty.body')}</Text>
                 </EmptyState>
               )}
             </BlockStack>

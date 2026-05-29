@@ -1,0 +1,66 @@
+{
+  "page": {
+    "title": "Verpackungsbestand",
+    "subtitle": "Katalogisiere die Materialien, die du wirklich für den Versand nutzt: Kartons, Klebebänder, Füllmaterial. Wir berechnen damit das EPR-Gewicht jeder Bestellung.",
+    "primary_action": "Verpackung hinzufügen"
+  },
+  "warnings": {
+    "missing_categories_title": "Einige Versandmaterialien fehlen",
+    "missing_categories_body": "Es fehlen noch: <strong>{{categories}}</strong>. Ohne diese Angaben kann das Paketgewicht in deinen EPR-Berichten unvollständig sein.",
+    "missing_categories_cta": "Jetzt hinzufügen",
+    "categories": {
+      "TAPE": "Klebeband",
+      "FILLER": "Füllmaterial"
+    },
+    "join_and": " und "
+  },
+  "empty_state": {
+    "heading": "Dein Verpackungsbestand ist leer",
+    "body": "Füge die Kartons, das Klebeband und das Füllmaterial hinzu, mit denen du verschickst. Du brauchst nur ein paar Minuten.",
+    "cta": "Erste Verpackung hinzufügen"
+  },
+  "ai_section": {
+    "subtitle": "Wir haben deinen Katalog analysiert und Vorschläge erstellt. Prüfe sie und übernimm die, die du wirklich nutzt."
+  },
+  "modal": {
+    "title_add": "Verpackung hinzufügen",
+    "title_customize": "Verpackung anpassen",
+    "title_edit": "Verpackung bearbeiten",
+    "category_label": "Kategorie",
+    "category_filters": {
+      "ALL": "Alle",
+      "PRIMARY": "Primär",
+      "TAPE": "Klebeband",
+      "FILLER": "Füllmaterial"
+    },
+    "no_types_for_category": "Keine Vorlagen für diese Kategorie. Erstelle unten eine benutzerdefinierte Verpackung.",
+    "create_custom_cta": "Benutzerdefinierte Verpackung erstellen",
+    "back_to_standard_cta": "Zurück zu Standardvorlagen",
+    "standard_card": {
+      "customize_cta": "Anpassen",
+      "add_cta": "Hinzufügen"
+    },
+    "form": {
+      "name_label": "Eigener Name",
+      "name_placeholder": "z. B. Sock-Mailer Marke X",
+      "name_help": "Wähle einen wiedererkennbaren Namen – du ordnest später Produkte zu.",
+      "type_label": "Verpackungstyp",
+      "length_label": "Länge (mm)",
+      "width_label": "Breite (mm)",
+      "height_label": "Höhe (mm)",
+      "custom_gsm_label": "Flächengewicht individuell (g/m²)",
+      "custom_gsm_help": "Leer lassen, um das Standardgewicht des Materials zu nutzen."
+    }
+  },
+  "toasts": {
+    "load_failed": "Der Bestand konnte nicht geladen werden. Bitte aktualisiere die Seite.",
+    "added": "Verpackung zum Bestand hinzugefügt.",
+    "updated": "Verpackung aktualisiert.",
+    "deleted": "Verpackung gelöscht.",
+    "save_failed": "Speichern fehlgeschlagen. Prüfe die Felder und versuche es erneut.",
+    "delete_failed": "Löschen fehlgeschlagen. Bitte erneut versuchen.",
+    "add_failed": "Die Verpackung konnte nicht hinzugefügt werden.",
+    "suggestion_accepted": "Vorschlag übernommen und zum Bestand hinzugefügt.",
+    "suggestion_accept_failed": "Der Vorschlag konnte nicht übernommen werden."
+  }
+}

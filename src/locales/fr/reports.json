@@ -1,0 +1,119 @@
+{
+  "page": {
+    "title": "Rapports et déclarations REP",
+    "subtitle": "Génère les bundles prêts à téléverser sur les portails REP (LUCID pour l'Allemagne, CONAI pour l'Italie, CITEO pour la France). Chaque rapport contient tous les fichiers attendus par l'éco-organisme.",
+    "secondary_action_manual": "Générer manuellement"
+  },
+  "schemes": {
+    "DE": "Allemagne (LUCID)",
+    "IT": "Italie (CONAI)",
+    "FR": "France (CITEO)",
+    "ES": "Espagne (Ecoembes)"
+  },
+  "period_types": {
+    "ANNUAL": "Annuelle",
+    "QUARTERLY": "Trimestrielle",
+    "MONTHLY": "Mensuelle"
+  },
+  "status": {
+    "processing": "En cours de génération",
+    "ready": "Prêt",
+    "error": "Erreur",
+    "new_badge": "Nouveau"
+  },
+  "sections": {
+    "new_reports_title": "À télécharger",
+    "new_reports_empty": "Aucun nouveau rapport à télécharger. Nous en générons un automatiquement à la fin de chaque période configurée.",
+    "past_reports_title": "Déjà téléchargés"
+  },
+  "table": {
+    "columns": {
+      "country": "Pays",
+      "status": "Statut",
+      "period_type": "Période",
+      "dates": "Dates",
+      "generated_at": "Généré le",
+      "formats": "Formats",
+      "download": "Téléchargement"
+    }
+  },
+  "actions": {
+    "download": "Télécharger",
+    "download_unavailable": "Indisponible",
+    "download_locked": "Verrouillé",
+    "renew": "Renouveler",
+    "subscribe": "S'abonner",
+    "add_country": "Ajouter {{country}} ({{currency}}{{amount}})"
+  },
+  "tooltips": {
+    "processing": "Le rapport sera disponible dès la fin du traitement.",
+    "error_default": "Une erreur est survenue lors de la génération du rapport.",
+    "trial_locked": "Mets fin à la période d'essai ou passe à une offre payante pour télécharger les rapports."
+  },
+  "empty_state": {
+    "past_heading": "Aucun rapport téléchargé",
+    "past_body": "Les rapports déjà téléchargés s'afficheront ici pour consultation future."
+  },
+  "manual_modal": {
+    "title": "Générer un rapport manuellement",
+    "primary": "Générer le rapport",
+    "form": {
+      "country_label": "Pays de destination",
+      "period_type_label": "Type de période",
+      "start_date_label": "Date de début",
+      "end_date_label": "Date de fin",
+      "footer_note": "Les rapports sont générés automatiquement à la cadence configurée. N'utilise ce formulaire que pour des rattrapages, des tests ou des périodes personnalisées."
+    }
+  },
+  "addon_modal": {
+    "title": "Pays non inclus dans ton offre",
+    "body": "Ce rapport nécessite l'accès à <strong>{{country}}</strong>, non inclus dans ton offre actuelle. Ajoute-le en pays supplémentaire pour {{currency}}{{amount}} par an.",
+    "primary": "Ajouter {{country}} ({{currency}}{{amount}}/an)"
+  },
+  "toasts": {
+    "load_failed": "Impossible de charger les rapports.",
+    "generate_failed": "La génération du rapport a échoué.",
+    "download_failed": "Le téléchargement du rapport a échoué.",
+    "trial_blocked": "Mets fin à la période d'essai ou passe à une offre payante pour télécharger les rapports.",
+    "expired_blocked": "Ton abonnement a expiré. Renouvelle-le pour continuer à télécharger les rapports.",
+    "shopify_billing_issue": "Shopify a rencontré un souci, réessaie dans un instant.",
+    "addon_failed": "Une erreur est survenue. Réessaie dans un instant."
+  },
+  "upload_guides": {
+    "title": "Comment téléverser le rapport sur le portail {{authority}}",
+    "view_guide": "Voir comment téléverser sur {{authority}}",
+    "DE": {
+      "authority": "LUCID (Stiftung Zentrale Stelle)",
+      "intro": "Le rapport allemand contient les données de Mengenmeldung à déposer sur LUCID conformément à la VerpackG.",
+      "steps": [
+        "Connecte-toi au portail LUCID avec les identifiants de ton entreprise.",
+        "Va dans « Datenmeldung » → « Mengenmeldung » pour la période concernée.",
+        "Téléverse le fichier <strong>{{file}}</strong> contenu dans le ZIP, ou copie les valeurs ligne par ligne dans le formulaire en ligne.",
+        "Confirme et envoie la déclaration. Conserve l'accusé de réception."
+      ],
+      "tip": "Astuce : téléverse d'abord en mode brouillon (Entwurf) pour vérifier les totaux avant l'envoi définitif."
+    },
+    "IT": {
+      "authority": "CONAI",
+      "intro": "Le rapport italien contient les données des déclarations 6.1/6.2 et les formulaires pour le Contributo Ambientale CONAI.",
+      "steps": [
+        "Connecte-toi à l'espace réservé CONAI avec les identifiants du Consorzio.",
+        "Ouvre « Dichiarazioni online » → le formulaire de la période concernée.",
+        "Importe le fichier <strong>{{file}}</strong> ou recopie les totaux depuis la feuille « Riepilogo ».",
+        "Joins le récapitulatif à ta comptabilité et envoie la déclaration."
+      ],
+      "tip": "Astuce : compare le « total kg par matériau » du rapport avec tes DDT avant de valider l'envoi."
+    },
+    "FR": {
+      "authority": "CITEO",
+      "intro": "Le rapport français suit le format de la déclaration annuelle CITEO pour l'éco-contribution sur les emballages ménagers.",
+      "steps": [
+        "Connecte-toi au portail CITEO avec ton numéro d'adhérent.",
+        "Va dans « Mes déclarations » → « Saisir une déclaration ».",
+        "Importe le fichier <strong>{{file}}</strong> ou recopie les totaux dans les champs du formulaire.",
+        "Vérifie les totaux par matériau, valide et envoie la déclaration."
+      ],
+      "tip": "Astuce : garde ton numéro SIRET sous la main, il te sera demandé pour rattacher la déclaration."
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "page": {
+    "title": "Versandregeln",
+    "subtitle": "Lege fest, wie du Pakete (Außenkarton, Füllmaterial, Klebeband) je nach Anzahl der Artikel zusammenstellst. Damit berechnen wir das EPR-Gewicht jeder Sendung.",
+    "primary_action": "Neue Regel",
+    "secondary_action_groups": "Produktgruppen verwalten"
+  },
+  "no_inventory_banner": {
+    "title": "Lege zuerst deinen Verpackungsbestand an",
+    "body": "Bevor du Versandregeln erstellst, brauchst du im Bestand mindestens einen Außenkarton, ein Klebeband und ein Füllmaterial.",
+    "cta": "Zum Bestand"
+  },
+  "empty_state": {
+    "heading": "Noch keine Versandregeln",
+    "body": "Erstelle die erste Regel, um zu definieren, wie Pakete je nach Artikelanzahl zusammengestellt werden."
+  },
+  "priority": {
+    "label": "Priorität",
+    "labels": {
+      "1": "Niedrigste",
+      "2": "Mittel",
+      "3": "Hoch",
+      "4": "Höchste"
+    },
+    "with_label": "Priorität: {{level}}"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Pausiert",
+    "catch_all": "Catch-all"
+  },
+  "rule_card": {
+    "range_with_max": "Gilt für Bestellungen mit {{min}} bis {{max}} Artikeln.",
+    "range_without_max": "Gilt für Bestellungen mit mindestens {{min}} Artikeln.",
+    "catch_all_suffix": " (gilt für alle Produkte)",
+    "scope_group_suffix": " Beschränkt auf die Gruppe \"{{group}}\".",
+    "secondary_label": "Außenkarton",
+    "filler_label": "Füllmaterial",
+    "tape_label": "Klebeband",
+    "no_components": "Keine Verpackung in dieser Regel konfiguriert.",
+    "actions": {
+      "suspend": "Pausieren",
+      "activate": "Reaktivieren"
+    }
+  },
+  "modal": {
+    "title_new": "Neue Versandregel",
+    "title_edit": "Versandregel bearbeiten",
+    "primary": "Regel speichern",
+    "form": {
+      "name_label": "Regelname",
+      "name_placeholder": "z. B. Kleine Pakete (1-3 Artikel)",
+      "name_help": "Gib der Regel einen Namen, an dem du sie wiedererkennst.",
+      "min_items_label": "Mindestanzahl Artikel",
+      "max_items_label": "Maximalanzahl Artikel",
+      "max_items_help": "Setze denselben Wert wie das Minimum, um die Regel auf eine exakte Artikelzahl anzuwenden.",
+      "range_help": "Regeln werden anhand der Artikelanzahl in der Bestellung ausgelöst.",
+      "group_label": "Produktgruppe (optional)",
+      "group_help_with_groups": "Lasse \"Keine\", um die Regel auf alle Produkte anzuwenden (catch-all).",
+      "group_help_empty": "Du hast noch keine Produktgruppen. Erstelle eine auf der Gruppenseite, um Regeln einzugrenzen.",
+      "group_none_option": "Keine (gilt für alle Produkte)",
+      "secondary_label": "Außenkarton oder Versandtasche",
+      "secondary_help": "Die Verpackung, die das Paket vor dem Versand umhüllt.",
+      "filler_label": "Füllmaterial",
+      "filler_help": "Material, das den Hohlraum im Karton füllt (Luftpolsterfolie, Papier, Chips …).",
+      "tape_label": "Klebeband",
+      "tape_help": "Das Klebeband, mit dem du den Karton verschließt.",
+      "none_option": "Keines",
+      "priority_label": "Regelpriorität",
+      "priority_help": "Wenn sich zwei Regeln überschneiden, gewinnt die mit der höheren Priorität.",
+      "active_label": "Regel aktiv"
+    }
+  },
+  "delete_modal": {
+    "title": "Regel löschen?",
+    "body": "Soll die Regel <strong>{{name}}</strong> wirklich gelöscht werden?",
+    "irreversible_note": "Dieser Schritt kann nicht rückgängig gemacht werden.",
+    "primary": "Regel löschen"
+  },
+  "toasts": {
+    "load_failed": "Die Regeln konnten nicht geladen werden.",
+    "name_required": "Bitte vor dem Speichern einen Regelnamen vergeben.",
+    "created": "Regel erstellt.",
+    "updated": "Regel aktualisiert.",
+    "save_failed": "Speichern fehlgeschlagen.",
+    "deleted": "Regel gelöscht.",
+    "delete_failed": "Die Regel konnte nicht gelöscht werden.",
+    "activated": "Regel reaktiviert.",
+    "suspended": "Regel pausiert: gilt nicht mehr für neue Bestellungen.",
+    "toggle_failed": "Aktualisierung fehlgeschlagen."
+  }
+}

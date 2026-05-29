@@ -1,0 +1,203 @@
+{
+  "mapping": {
+    "page": {
+      "title": "Match products to packaging",
+      "subtitle": "Tell us which primary packaging holds each product. Without this we can't compute EPR weight per order.",
+      "primary_action": "Sync products from Shopify",
+      "secondary_action_assign_group": "Apply to a group"
+    },
+    "no_inventory_banner": {
+      "title": "Set up your packaging inventory first",
+      "body": "Before matching products you need at least one packaging in your inventory.",
+      "cta": "Go to inventory"
+    },
+    "tabs": {
+      "all": "All ({{count}})",
+      "mapped": "Matched ({{count}})",
+      "pending": "To review ({{count}})",
+      "unmapped": "No packaging ({{count}})"
+    },
+    "status": {
+      "mapped": "Matched",
+      "pending": "AI suggestion",
+      "unmapped": "Not matched"
+    },
+    "table": {
+      "resource_singular": "product",
+      "resource_plural": "products",
+      "columns": {
+        "product": "Product",
+        "status": "Status",
+        "packaging": "Packaging",
+        "action": "Action"
+      },
+      "row": {
+        "no_packaging": "No packaging assigned",
+        "add_cta": "Add",
+        "remove_accessibility": "Remove this match",
+        "quantity_suffix": "×{{count}}",
+        "ai_accept": "Confirm",
+        "ai_reject": "Reject"
+      },
+      "pagination": "Page {{current}} of {{total}} · {{count}} products"
+    },
+    "search_placeholder": "Search a product…",
+    "empty_state": {
+      "all_mapped_heading": "Every product is matched",
+      "all_mapped_body": "Nice work — every product in your catalog has at least one packaging assigned.",
+      "no_search_results_heading": "No results",
+      "no_search_results_body": "No product matches \"{{query}}\".",
+      "no_products_heading": "No products found",
+      "no_products_body": "Sync your Shopify catalog to start matching packaging."
+    },
+    "bulk_actions": {
+      "assign_packaging": "Assign packaging",
+      "confirm_ai_suggestions": "Confirm AI suggestions"
+    },
+    "purposes": {
+      "CONTAINER": "Container",
+      "WRAP": "Wrap",
+      "SEAL": "Seal",
+      "LABEL": "Label",
+      "CUSHION": "Cushion",
+      "CONTAINER_hint": "The packaging that holds the product (box, mailer)",
+      "WRAP_hint": "Material wrapping the product (tissue, blister)",
+      "SEAL_hint": "Seal or tape that closes the packaging",
+      "LABEL_hint": "Label applied on the packaging",
+      "CUSHION_hint": "Inner protective padding"
+    },
+    "modal": {
+      "single": {
+        "title": "Match packaging — {{product}}",
+        "primary": "Save",
+        "form": {
+          "packaging_label": "Packaging",
+          "purpose_label": "Packaging role",
+          "quantity_label": "Quantity per product unit",
+          "quantity_help": "How many units of this packaging are needed for one product.",
+          "apply_to_groups_hint_single": "This product belongs to a group. You can apply the packaging to the other products in the group too:",
+          "apply_to_groups_hint_multi": "This product belongs to several groups. You can apply the packaging to the other products in those groups:",
+          "apply_to_group_checkbox": "Apply to every product in group \"{{group}}\""
+        }
+      },
+      "bulk_group": {
+        "title": "Apply packaging to a group",
+        "primary": "Apply to group",
+        "form": {
+          "group_label": "Product group",
+          "packaging_label": "Packaging",
+          "purpose_label": "Packaging role",
+          "quantity_label": "Quantity per product unit",
+          "overwrite_label": "Replace existing packaging with the same role",
+          "overwrite_help": "If on, we'll remove the group's packaging that plays the same role before applying the new one."
+        }
+      },
+      "bulk_selection": {
+        "title": "Apply packaging to {{count}} selected products",
+        "primary": "Apply",
+        "info_banner": "We'll add this packaging to <strong>{{count}}</strong> products. Existing matches won't be touched.",
+        "form": {
+          "packaging_label": "Packaging",
+          "purpose_label": "Packaging role",
+          "quantity_label": "Quantity per product unit"
+        }
+      },
+      "delete": {
+        "title": "Remove match",
+        "primary": "Remove",
+        "body": "Do you really want to remove the match with <strong>{{name}}</strong>? The product won't carry this packaging in your EPR calculations anymore.",
+        "irreversible_note": "This can't be undone."
+      }
+    },
+    "toasts": {
+      "load_failed": "We couldn't load your products.",
+      "sync_started": "Sync started. Give it a few seconds.",
+      "sync_failed": "Sync failed.",
+      "ai_confirmed": "Suggestion confirmed.",
+      "ai_confirm_failed": "We couldn't confirm that suggestion.",
+      "mapping_removed": "Match removed.",
+      "mapping_remove_failed": "We couldn't remove the match.",
+      "mapping_added": "Packaging matched to the product.",
+      "mapping_add_to_groups": "Packaging applied to the selected groups.",
+      "mapping_add_failed": "We couldn't add the match.",
+      "bulk_group_applied": "Packaging applied to every product in the group.",
+      "bulk_group_failed": "We couldn't apply packaging to the group.",
+      "bulk_selection_applied": "Packaging applied to {{count}} products.",
+      "bulk_selection_partial": "{{failed}} of {{total}} products weren't updated.",
+      "bulk_confirm_all_done": "{{count}} suggestions confirmed.",
+      "bulk_confirm_partial": "{{failed}} of {{total}} suggestions weren't confirmed.",
+      "bulk_confirm_no_pending": "The selected products have no suggestions to confirm."
+    }
+  },
+  "groups": {
+    "page": {
+      "title": "Product groups",
+      "subtitle": "Create groups to apply shipping rules and packaging matches to several products in one shot.",
+      "primary_action": "New group",
+      "secondary_action_sync": "Import types from Shopify catalog"
+    },
+    "info_banner": "Choose how to populate the group: <strong>Shopify product type</strong> creates one group per <code>product_type</code>. <strong>Tag</strong> groups by product tag. <strong>Manual selection</strong> lets you hand-pick products.",
+    "match_types": {
+      "MANUAL": "Manual selection",
+      "PRODUCT_TYPE": "Shopify product type",
+      "TAG": "Product tag",
+      "MANUAL_option": "Manual selection",
+      "PRODUCT_TYPE_option": "Shopify product type (automatic)",
+      "TAG_option": "Product tag (automatic)"
+    },
+    "tabs": {
+      "all": "All ({{count}})",
+      "product_type": "By type ({{count}})",
+      "tag": "By tag ({{count}})",
+      "manual": "Manual ({{count}})"
+    },
+    "empty_state": {
+      "heading_all": "No groups yet",
+      "heading_category": "No groups in this category",
+      "body": "Groups let you apply packaging and shipping rules to many products at once. Create your first group to get started.",
+      "cta": "Create the first group"
+    },
+    "card": {
+      "match_value_label": "Match value",
+      "manual_count": "{{count}} manually selected products",
+      "manual_count_one": "1 manually selected product",
+      "used_in": "Used in rules:",
+      "no_rules": "No shipping rule uses this group yet."
+    },
+    "modal": {
+      "title_new": "New group",
+      "title_edit": "Edit group",
+      "primary": "Save",
+      "form": {
+        "name_label": "Group name",
+        "name_placeholder": "e.g. Apparel, Fragile electronics…",
+        "match_type_label": "How to fill the group",
+        "match_value_label_product_type": "Product type (e.g. Electronics, Clothing)",
+        "match_value_label_tag": "Product tag (e.g. fragile, heavy)",
+        "match_value_help_product_type": "Must match the \"Product Type\" field on Shopify exactly.",
+        "match_value_help_tag": "Must match a Shopify product tag exactly.",
+        "manual_section_title": "Pick products"
+      }
+    },
+    "delete_modal": {
+      "title": "Delete group?",
+      "body": "Do you really want to delete the group <strong>{{name}}</strong>?",
+      "rules_warning": "This group is used by <strong>{{count}}</strong> shipping rules. Deleting it will turn those rules into catch-alls (applied to every product).",
+      "rules_warning_one": "This group is used by <strong>1</strong> shipping rule. Deleting it will turn it into a catch-all.",
+      "irreversible_note": "This can't be undone.",
+      "primary": "Delete"
+    },
+    "toasts": {
+      "load_failed": "We couldn't load your groups.",
+      "name_required": "Please enter a group name.",
+      "created": "Group created.",
+      "updated": "Group updated.",
+      "create_failed": "We couldn't create the group.",
+      "update_failed": "We couldn't update the group.",
+      "deleted": "Group deleted.",
+      "delete_failed": "We couldn't delete the group.",
+      "sync_done": "Product types imported from your Shopify catalog.",
+      "sync_failed": "Import from catalog failed."
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Dashboard e ordini",
+    "subtitle": "Tieni d'occhio i pesi degli imballaggi spediti e lo stato della tua configurazione EPR."
+  },
+  "kpis": {
+    "weight_by_country": {
+      "title": "Peso imballaggi per paese",
+      "tooltip_label": "Peso",
+      "value_unit": "kg"
+    },
+    "tracked_orders": {
+      "title": "Ordini tracciati (ultimi 5 giorni)",
+      "tooltip_label": "Ordini",
+      "tooltip_value": "{{value}} ordini"
+    },
+    "material_breakdown": {
+      "title": "Distribuzione dei materiali",
+      "empty": "Nessun dato disponibile: completa la configurazione per vedere il mix di materiali."
+    }
+  },
+  "logs": {
+    "section_title": "Ultimi ordini tracciati",
+    "table": {
+      "order_id": "Ordine",
+      "date": "Data",
+      "country": "Paese",
+      "total_weight": "Peso totale",
+      "components": "Componenti imballaggio"
+    },
+    "empty": {
+      "heading": "Nessun ordine tracciato",
+      "body": "Quando arriveranno nuovi ordini con i calcoli dell'imballaggio applicati, li vedrai qui."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "inventory": {
+        "title": "Aggiungi i tuoi imballaggi",
+        "description": "Censisci scatole, nastro adesivo e materiale di riempimento che usi per spedire.",
+        "cta": "Vai all'inventario"
+      },
+      "mapping": {
+        "title": "Associa gli imballaggi ai prodotti",
+        "description": "Indica per ogni prodotto quale imballaggio primario lo contiene (es. busta, vassoio, blister).",
+        "cta": "Vai alla mappatura"
+      },
+      "rules": {
+        "title": "Imposta le regole di spedizione",
+        "description": "Decidi quale scatola esterna, nastro e materiale di riempimento usi in base al numero di articoli.",
+        "cta": "Vai alle regole"
+      },
+      "backfill": {
+        "title": "Importa lo storico degli ordini",
+        "description_first_run": "Importiamo gli ordini pagati dal 1° gennaio fino a oggi per ricalcolare i pesi EPR. Operazione una tantum, può richiedere alcuni minuti.",
+        "description_rerun": "Lo storico è stato già importato. Puoi rilanciarlo per recuperare gli ordini più recenti.",
+        "cta_first_run": "Importa gli ordini di quest'anno",
+        "cta_rerun": "Rilancia l'importazione"
+      }
+    }
+  },
+  "backfill": {
+    "summary": "Importati {{processed}} ordini · {{duplicates}} già presenti · {{excluded}} esclusi (paese non gestito).",
+    "progress": {
+      "initializing": "Avvio in corso…",
+      "details": "Scaricati {{fetched}} · Salvati {{processed}} · Duplicati {{duplicates}} · Esclusi {{excluded}}",
+      "details_compact": "Scaricati {{fetched}} · Salvati {{processed}}"
+    },
+    "banners": {
+      "running_title": "Importazione storico in corso",
+      "completed_title": "Importazione completata",
+      "failed_title": "Importazione non riuscita",
+      "failed_body": "L'importazione non è andata a buon fine: {{error}}. Riprova quando vuoi.",
+      "network_warning": "Connessione persa, riprovo automaticamente…"
+    },
+    "toasts": {
+      "already_running": "L'importazione è già in corso, segui l'avanzamento qui sotto.",
+      "started": "Importazione avviata. Puoi continuare a usare l'app.",
+      "start_failed": "Non siamo riusciti ad avviare l'importazione."
+    },
+    "errors": {
+      "load_dashboard": "Non siamo riusciti a caricare i dati della dashboard. Riprova tra qualche istante.",
+      "unknown": "Errore sconosciuto durante l'importazione."
+    }
+  }
+}

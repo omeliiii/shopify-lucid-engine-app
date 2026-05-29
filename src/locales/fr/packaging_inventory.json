@@ -1,0 +1,66 @@
+{
+  "page": {
+    "title": "Inventaire des emballages",
+    "subtitle": "Catalogue les matériaux que tu utilises réellement pour expédier : cartons, rubans, calages. Nous nous en servons pour calculer le poids REP de chaque commande.",
+    "primary_action": "Ajouter un emballage"
+  },
+  "warnings": {
+    "missing_categories_title": "Il manque des matériaux d'expédition",
+    "missing_categories_body": "Tu n'as pas encore ajouté : <strong>{{categories}}</strong>. Sans cela, le poids du colis dans tes rapports REP risque d'être incomplet.",
+    "missing_categories_cta": "Ajouter maintenant",
+    "categories": {
+      "TAPE": "ruban adhésif",
+      "FILLER": "calage"
+    },
+    "join_and": " et "
+  },
+  "empty_state": {
+    "heading": "Ton inventaire d'emballages est vide",
+    "body": "Ajoute les cartons, le ruban et le calage que tu utilises pour expédier. Quelques minutes suffisent.",
+    "cta": "Ajouter le premier emballage"
+  },
+  "ai_section": {
+    "subtitle": "Nous avons analysé ton catalogue et proposé quelques emballages. Vérifie-les et accepte ceux que tu utilises vraiment."
+  },
+  "modal": {
+    "title_add": "Ajouter un emballage",
+    "title_customize": "Personnaliser l'emballage",
+    "title_edit": "Modifier l'emballage",
+    "category_label": "Catégorie",
+    "category_filters": {
+      "ALL": "Tous",
+      "PRIMARY": "Primaires",
+      "TAPE": "Ruban",
+      "FILLER": "Calage"
+    },
+    "no_types_for_category": "Aucun modèle disponible pour cette catégorie. Crée un emballage personnalisé ci-dessous.",
+    "create_custom_cta": "Créer un emballage personnalisé",
+    "back_to_standard_cta": "Revenir aux modèles standards",
+    "standard_card": {
+      "customize_cta": "Personnaliser",
+      "add_cta": "Ajouter"
+    },
+    "form": {
+      "name_label": "Nom personnalisé",
+      "name_placeholder": "ex. Pochette chaussettes marque",
+      "name_help": "Donne-lui un nom reconnaissable : tu l'associeras ensuite aux produits.",
+      "type_label": "Type d'emballage",
+      "length_label": "Longueur (mm)",
+      "width_label": "Largeur (mm)",
+      "height_label": "Hauteur (mm)",
+      "custom_gsm_label": "Grammage personnalisé (g/m²)",
+      "custom_gsm_help": "Laisse vide pour utiliser le grammage standard du matériau."
+    }
+  },
+  "toasts": {
+    "load_failed": "Impossible de charger l'inventaire. Actualise la page.",
+    "added": "Emballage ajouté à l'inventaire.",
+    "updated": "Emballage mis à jour.",
+    "deleted": "Emballage supprimé.",
+    "save_failed": "L'enregistrement a échoué. Vérifie les champs et réessaie.",
+    "delete_failed": "La suppression a échoué. Réessaie.",
+    "add_failed": "Impossible d'ajouter l'emballage.",
+    "suggestion_accepted": "Suggestion acceptée et ajoutée à l'inventaire.",
+    "suggestion_accept_failed": "Impossible d'accepter la suggestion."
+  }
+}

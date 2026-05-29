@@ -1,0 +1,119 @@
+{
+  "page": {
+    "title": "EPR-Berichte & Meldungen",
+    "subtitle": "Erstelle die fertigen Pakete für die EPR-Portale (LUCID für Deutschland, CONAI für Italien, CITEO für Frankreich). Jeder Bericht enthält alle vom Register geforderten Dateien.",
+    "secondary_action_manual": "Manuell erstellen"
+  },
+  "schemes": {
+    "DE": "Deutschland (LUCID)",
+    "IT": "Italien (CONAI)",
+    "FR": "Frankreich (CITEO)",
+    "ES": "Spanien (Ecoembes)"
+  },
+  "period_types": {
+    "ANNUAL": "Jährlich",
+    "QUARTERLY": "Quartalsweise",
+    "MONTHLY": "Monatlich"
+  },
+  "status": {
+    "processing": "Wird erstellt",
+    "ready": "Bereit",
+    "error": "Fehler",
+    "new_badge": "Neu"
+  },
+  "sections": {
+    "new_reports_title": "Bereit zum Herunterladen",
+    "new_reports_empty": "Keine neuen Berichte. Wir erstellen automatisch einen neuen Bericht am Ende jedes konfigurierten Zeitraums.",
+    "past_reports_title": "Bereits heruntergeladen"
+  },
+  "table": {
+    "columns": {
+      "country": "Land",
+      "status": "Status",
+      "period_type": "Zeitraum",
+      "dates": "Daten",
+      "generated_at": "Erstellt am",
+      "formats": "Formate",
+      "download": "Download"
+    }
+  },
+  "actions": {
+    "download": "Herunterladen",
+    "download_unavailable": "Nicht verfügbar",
+    "download_locked": "Gesperrt",
+    "renew": "Verlängern",
+    "subscribe": "Abonnieren",
+    "add_country": "{{country}} hinzufügen ({{currency}}{{amount}})"
+  },
+  "tooltips": {
+    "processing": "Der Bericht steht zur Verfügung, sobald die Erstellung abgeschlossen ist.",
+    "error_default": "Beim Erstellen des Berichts ist ein Fehler aufgetreten.",
+    "trial_locked": "Beende die Testphase oder wechsle zu einem bezahlten Tarif, um Berichte herunterzuladen."
+  },
+  "empty_state": {
+    "past_heading": "Noch keine heruntergeladenen Berichte",
+    "past_body": "Bereits heruntergeladene Berichte erscheinen hier zum späteren Nachschlagen."
+  },
+  "manual_modal": {
+    "title": "Bericht manuell erstellen",
+    "primary": "Bericht erstellen",
+    "form": {
+      "country_label": "Zielland",
+      "period_type_label": "Zeitraumtyp",
+      "start_date_label": "Startdatum",
+      "end_date_label": "Enddatum",
+      "footer_note": "Wir erstellen Berichte automatisch im konfigurierten Takt. Nutze dieses Formular nur für Nachträge, Tests oder eigene Zeiträume."
+    }
+  },
+  "addon_modal": {
+    "title": "Land nicht im Tarif enthalten",
+    "body": "Dieser Bericht benötigt Zugriff auf <strong>{{country}}</strong>, was nicht in deinem aktuellen Tarif enthalten ist. Füge es als zusätzliches Land für {{currency}}{{amount}} pro Jahr hinzu.",
+    "primary": "{{country}} hinzufügen ({{currency}}{{amount}}/Jahr)"
+  },
+  "toasts": {
+    "load_failed": "Die Berichte konnten nicht geladen werden.",
+    "generate_failed": "Berichtserstellung fehlgeschlagen.",
+    "download_failed": "Der Download des Berichts ist fehlgeschlagen.",
+    "trial_blocked": "Beende die Testphase oder wechsle zu einem bezahlten Tarif, um Berichte herunterzuladen.",
+    "expired_blocked": "Dein Abonnement ist abgelaufen. Verlängere es, um weiter Berichte herunterzuladen.",
+    "shopify_billing_issue": "Bei Shopify ist gerade ein Problem aufgetreten – bitte gleich noch einmal versuchen.",
+    "addon_failed": "Etwas ist schiefgelaufen. Bitte gleich noch einmal versuchen."
+  },
+  "upload_guides": {
+    "title": "So lädst du den Bericht im Portal {{authority}} hoch",
+    "view_guide": "So funktioniert der Upload bei {{authority}}",
+    "DE": {
+      "authority": "LUCID (Stiftung Zentrale Stelle)",
+      "intro": "Der deutsche Bericht enthält die Mengenmeldung-Daten, die im LUCID-Portal gemäß VerpackG einzureichen sind.",
+      "steps": [
+        "Melde dich mit deinen Unternehmenszugangsdaten bei LUCID an.",
+        "Gehe zu \"Datenmeldung\" → \"Mengenmeldung\" für den gewünschten Zeitraum.",
+        "Lade die Datei <strong>{{file}}</strong> aus dem ZIP hoch oder übertrage die Werte Zeile für Zeile.",
+        "Bestätige und übermittle die Meldung. Bewahre die Bestätigung für deine Unterlagen auf."
+      ],
+      "tip": "Tipp: Lade den Bericht zuerst als Entwurf hoch, um die Summen vor der endgültigen Übermittlung zu prüfen."
+    },
+    "IT": {
+      "authority": "CONAI",
+      "intro": "Der italienische Bericht enthält die 6.1/6.2-Meldedaten sowie ergänzende Formulare für den Contributo Ambientale CONAI.",
+      "steps": [
+        "Melde dich mit deinen Consorzio-Zugangsdaten im geschützten CONAI-Bereich an.",
+        "Öffne \"Dichiarazioni online\" → das Formular für den relevanten Zeitraum.",
+        "Importiere die Datei <strong>{{file}}</strong> oder übernimm die Summen aus dem Riepilogo-Blatt.",
+        "Hänge das Riepilogo an deine Buchhaltungsunterlagen und sende die Meldung ab."
+      ],
+      "tip": "Tipp: Vergleiche die \"Gesamt-kg pro Material\" im Bericht vor dem Absenden mit deinen DDT."
+    },
+    "FR": {
+      "authority": "CITEO",
+      "intro": "Der französische Bericht folgt dem CITEO-Format für die jährliche Meldung der Eco-Contribution auf emballages ménagers.",
+      "steps": [
+        "Melde dich mit deiner adhérent-Nummer im CITEO-Portal an.",
+        "Gehe zu \"Mes déclarations\" → \"Saisir une déclaration\".",
+        "Importiere die Datei <strong>{{file}}</strong> oder übertrage die Summen in die Formularfelder.",
+        "Prüfe die Summen pro Material, validiere und sende die Meldung ab."
+      ],
+      "tip": "Tipp: Halte deine SIRET-Nummer bereit – sie wird zur Zuordnung der Meldung benötigt."
+    }
+  }
+}

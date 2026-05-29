@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { 
-  Popover, 
-  ActionList, 
-  Button, 
+import {
+  Popover,
+  ActionList,
+  Button,
   BlockStack,
   Text
 } from '@shopify/polaris';
+import { useTranslation } from 'react-i18next';
 
 interface Option {
   label: string;
@@ -21,6 +22,7 @@ interface PolarisSelectProps {
 
 export function PolarisSelect({ label, options, value, onChange }: PolarisSelectProps) {
   const [popoverActive, setPopoverActive] = useState(false);
+  const { t } = useTranslation('common');
   const selectedOption = options.find(o => o.value === value);
 
   return (
@@ -36,13 +38,13 @@ export function PolarisSelect({ label, options, value, onChange }: PolarisSelect
         onClose={() => setPopoverActive(false)}
         activator={
           <div style={{ minWidth: '180px' }}>
-            <Button 
-              onClick={() => setPopoverActive(!popoverActive)} 
+            <Button
+              onClick={() => setPopoverActive(!popoverActive)}
               disclosure
               textAlign="left"
               fullWidth
             >
-              {selectedOption?.label || 'Seleziona...'}
+              {selectedOption?.label || t('actions.select_placeholder')}
             </Button>
           </div>
         }

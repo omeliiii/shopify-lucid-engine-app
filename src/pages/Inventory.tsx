@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
 import { ArrowLeftIcon } from '@shopify/polaris-icons';
+import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -23,6 +24,8 @@ interface PackagingType {
 
 export default function Inventory() {
   const toast = useToast();
+  const { t } = useTranslation('packaging_inventory');
+  const { t: tCommon } = useTranslation('common');
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [standardTypes, setStandardTypes] = useState<PackagingType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,12 +55,12 @@ export default function Inventory() {
         setPackagingTypeId(typesData[0].id);
       }
     } catch (e) {
-      toast.error('Impossibile caricare l\'inventario');
+      toast.error(t('toasts.load_failed'));
       console.error('Failed to load inventory', e);
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     loadData();
@@ -81,18 +84,18 @@ export default function Inventory() {
           method: 'PATCH',
           body: JSON.stringify(bodyParams)
         });
-        toast.success('Imballaggio aggiornato');
+        toast.success(t('toasts.updated'));
       } else {
         await apiFetch('/packaging/inventory', {
           method: 'POST',
           body: JSON.stringify(bodyParams)
         });
-        toast.success('Imballaggio aggiunto');
+        toast.success(t('toasts.added'));
       }
       closeModal();
       loadData();
     } catch (e) {
-      toast.error('Errore durante il salvataggio');
+      toast.error(t('toasts.save_failed'));
       console.error(e);
       closeModal();
     } finally {
@@ -153,10 +156,10 @@ export default function Inventory() {
         method: 'PATCH',
         body: JSON.stringify({ isActive: true })
       });
-      toast.success('Suggerimento accettato');
+      toast.success(t('toasts.suggestion_accepted'));
       loadData();
     } catch (e) {
-      toast.error('Errore durante l\'accettazione');
+      toast.error(t('toasts.suggestion_accept_failed'));
       console.error(e);
     } finally {
       setSubmitting(false);
@@ -176,11 +179,11 @@ export default function Inventory() {
     };
     try {
       await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
-      toast.success('Imballaggio aggiunto');
+      toast.success(t('toasts.added'));
       closeModal();
       loadData();
     } catch (e) {
-      toast.error('Errore durante l\'aggiunta');
+      toast.error(t('toasts.add_failed'));
       console.error(e);
       closeModal();
     } finally {
@@ -193,11 +196,11 @@ export default function Inventory() {
     setItems(items.filter(i => i.id !== id));
     try {
       await apiFetch(`/packaging/inventory/${id}`, { method: 'DELETE' });
-      toast.success('Imballaggio eliminato');
+      toast.success(t('toasts.deleted'));
     } catch (e) {
       // rollback
       setItems(optimistic);
-      toast.error('Errore durante l\'eliminazione');
+      toast.error(t('toasts.delete_failed'));
       console.error(e);
     }
   };
@@ -214,9 +217,10 @@ export default function Inventory() {
 
   const materialTabs = Object.keys(groupedTypes).map((material, index) => ({
     id: `tab-${index}`,
-    content: material,
+    content: tCommon(`materials.${material}` as 'materials.PAPER'),
     accessibilityLabel: material,
     panelID: `panel-${index}`,
+    _material: material,
   }));
 
   const activeItems = items.filter(i => i.isActive && (!i.isAiSuggested || i.isConfirmed));
@@ -224,23 +228,35 @@ export default function Inventory() {
 
   const hasTape = activeItems.some(i => i.packagingType?.category === 'TAPE');
   const hasFiller = activeItems.some(i => i.packagingType?.category === 'FILLER');
-  const missingCategories: Array<{ key: 'TAPE' | 'FILLER'; label: string }> = [];
-  if (!hasTape) missingCategories.push({ key: 'TAPE', label: 'nastro adesivo (tape)' });
-  if (!hasFiller) missingCategories.push({ key: 'FILLER', label: 'materiale di riempimento (filler)' });
+  const missingCategories: Array<'TAPE' | 'FILLER'> = [];
+  if (!hasTape) missingCategories.push('TAPE');
+  if (!hasFiller) missingCategories.push('FILLER');
 
   const isCustomFormVisible = editingItemId !== null || showCustomForm;
 
   const modalTitle = editingItemId
-    ? "Modifica Imballaggio"
+    ? t('modal.title_edit')
     : showCustomForm
-      ? "Personalizza Imballaggio"
-      : "Aggiungi Imballaggio";
+      ? t('modal.title_customize')
+      : t('modal.title_add');
+
+  const categoryFilters: Array<{ value: 'ALL' | 'PRIMARY' | 'TAPE' | 'FILLER'; label: string }> = [
+    { value: 'ALL', label: t('modal.category_filters.ALL') },
+    { value: 'PRIMARY', label: t('modal.category_filters.PRIMARY') },
+    { value: 'TAPE', label: t('modal.category_filters.TAPE') },
+    { value: 'FILLER', label: t('modal.category_filters.FILLER') },
+  ];
+
+  const missingCategoriesText = missingCategories
+    .map((key) => t(`warnings.categories.${key}` as 'warnings.categories.TAPE'))
+    .join(t('warnings.join_and'));
 
   return (
     <Page
-      title="Inventario Imballaggi"
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       primaryAction={{
-        content: 'Aggiungi Imballaggio',
+        content: t('page.primary_action'),
         onAction: () => { resetForm(); setModalOpen(true); }
       }}
     >
@@ -249,15 +265,19 @@ export default function Inventory() {
           <Layout.Section>
             <Banner
               tone="warning"
-              title="Imballaggi mancanti"
+              title={t('warnings.missing_categories_title')}
               action={{
-                content: 'Aggiungi imballaggio',
+                content: t('warnings.missing_categories_cta'),
                 onAction: () => { resetForm(); setModalOpen(true); },
               }}
             >
               <p>
-                Non hai ancora aggiunto: <b>{missingCategories.map(m => m.label).join(' e ')}</b>.
-                Senza questi elementi i calcoli di peso del pacco potrebbero essere incompleti.
+                <Trans
+                  ns="packaging_inventory"
+                  i18nKey="warnings.missing_categories_body"
+                  values={{ categories: missingCategoriesText }}
+                  components={{ strong: <strong /> }}
+                />
               </p>
             </Banner>
           </Layout.Section>
@@ -266,17 +286,17 @@ export default function Inventory() {
           <Card padding="0">
             {items.length === 0 && !loading ? (
               <EmptyState
-                heading="Nessun imballaggio presente"
-                action={{ content: 'Aggiungi', onAction: () => { resetForm(); setModalOpen(true); } }}
+                heading={t('empty_state.heading')}
+                action={{ content: t('empty_state.cta'), onAction: () => { resetForm(); setModalOpen(true); } }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
-                <Text as="p">Aggiungi il tuo primo imballaggio personalizzato.</Text>
+                <Text as="p">{t('empty_state.body')}</Text>
               </EmptyState>
             ) : (
               <BlockStack gap="025">
                 {suggestedItems.length > 0 && (
                   <AISuggestion.Section
-                    subtitle="Imballaggi proposti dall'IA in base ai tuoi prodotti. Accetta quelli rilevanti per aggiungerli all'inventario."
+                    subtitle={t('ai_section.subtitle')}
                     count={suggestedItems.length}
                   >
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
@@ -319,13 +339,13 @@ export default function Inventory() {
         onClose={closeModal}
         title={modalTitle}
         primaryAction={isCustomFormVisible ? {
-          content: 'Salva',
+          content: tCommon('actions.save'),
           onAction: handleSubmit,
           loading: submitting,
         } : undefined}
         secondaryActions={[
           {
-            content: 'Annulla',
+            content: tCommon('actions.cancel'),
             onAction: closeModal,
           },
         ]}
@@ -334,14 +354,9 @@ export default function Inventory() {
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
               <InlineStack gap="200" blockAlign="center">
-                <Text as="span" variant="bodySm" tone="subdued">Categoria:</Text>
+                <Text as="span" variant="bodySm" tone="subdued">{t('modal.category_label')}:</Text>
                 <ButtonGroup variant="segmented">
-                  {([
-                    { value: 'ALL', label: 'Tutti' },
-                    { value: 'PRIMARY', label: 'Primari' },
-                    { value: 'TAPE', label: 'Tape' },
-                    { value: 'FILLER', label: 'Filler' },
-                  ] as const).map(opt => (
+                  {categoryFilters.map(opt => (
                     <Button
                       key={opt.value}
                       size="slim"
@@ -357,16 +372,16 @@ export default function Inventory() {
                 <Tabs tabs={materialTabs} selected={selectedTab} onSelect={setSelectedTab}>
                   <Box paddingBlockStart="400">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
-                      {groupedTypes[materialTabs[selectedTab]?.content]?.map(type => (
+                      {groupedTypes[materialTabs[selectedTab]?._material]?.map(type => (
                         <Card key={type.id} padding="300" background="bg-surface-secondary">
                           <BlockStack gap="150">
                             <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
                             {type.defaultGsm && (
-                              <Text as="span" tone="subdued" variant="bodySm">{type.defaultGsm} g/m²</Text>
+                              <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
                             )}
                             <InlineStack gap="100" align="end">
-                              <Button size="micro" onClick={() => handleEditStandardType(type)}>Modifica</Button>
-                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>Aggiungi</Button>
+                              <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
+                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>{t('modal.standard_card.add_cta')}</Button>
                             </InlineStack>
                           </BlockStack>
                         </Card>
@@ -376,11 +391,11 @@ export default function Inventory() {
                 </Tabs>
               ) : (
                 <Box paddingBlockStart="200" paddingBlockEnd="200">
-                  <Text as="p" tone="subdued">Nessun tipo disponibile per la categoria selezionata.</Text>
+                  <Text as="p" tone="subdued">{t('modal.no_types_for_category')}</Text>
                 </Box>
               )}
               <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
-                <Button onClick={() => setShowCustomForm(true)}>Crea imballaggio personalizzato</Button>
+                <Button onClick={() => setShowCustomForm(true)}>{t('modal.create_custom_cta')}</Button>
               </Box>
             </BlockStack>
           ) : (
@@ -391,20 +406,21 @@ export default function Inventory() {
                   variant="plain"
                   onClick={() => setShowCustomForm(false)}
                 >
-                  Torna ai tipi standard
+                  {t('modal.back_to_standard_cta')}
                 </Button>
               )}
               <Form onSubmit={handleSubmit}>
                 <FormLayout>
                   <TextField
-                    label="Nome Personalizzato"
+                    label={t('modal.form.name_label')}
                     value={name}
                     onChange={setName}
                     autoComplete="off"
-                    placeholder="es. Bustina Calzini Custom"
+                    placeholder={t('modal.form.name_placeholder')}
+                    helpText={t('modal.form.name_help')}
                   />
                   <PolarisSelect
-                    label="Tipo di Imballaggio"
+                    label={t('modal.form.type_label')}
                     options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
                     value={packagingTypeId}
                     onChange={(val) => {
@@ -418,18 +434,18 @@ export default function Inventory() {
                     }}
                   />
                   <FormLayout.Group>
-                    <TextField label="Lunghezza (mm)" value={length} onChange={setLength} type="number" autoComplete="off" />
-                    <TextField label="Larghezza (mm)" value={width} onChange={setWidth} type="number" autoComplete="off" />
+                    <TextField label={t('modal.form.length_label')} value={length} onChange={setLength} type="number" autoComplete="off" />
+                    <TextField label={t('modal.form.width_label')} value={width} onChange={setWidth} type="number" autoComplete="off" />
                     {standardTypes.find(t => t.id === packagingTypeId)?.defaultHMm !== null && (
-                      <TextField label="Altezza (mm)" value={height} onChange={setHeight} type="number" autoComplete="off" />
+                      <TextField label={t('modal.form.height_label')} value={height} onChange={setHeight} type="number" autoComplete="off" />
                     )}
                     <TextField
-                      label="Grammatura Personalizzata (g/m²)"
+                      label={t('modal.form.custom_gsm_label')}
                       value={customGsm}
                       onChange={setCustomGsm}
                       type="number"
                       autoComplete="off"
-                      helpText="Lascia vuoto per usare la grammatura standard del materiale"
+                      helpText={t('modal.form.custom_gsm_help')}
                     />
                   </FormLayout.Group>
                 </FormLayout>

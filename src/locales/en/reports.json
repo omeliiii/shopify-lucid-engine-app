@@ -1,0 +1,119 @@
+{
+  "page": {
+    "title": "EPR reports & declarations",
+    "subtitle": "Generate the bundles ready to upload to the EPR portals (LUCID for Germany, CONAI for Italy, CITEO for France). Each report contains every file the authority asks for.",
+    "secondary_action_manual": "Generate manually"
+  },
+  "schemes": {
+    "DE": "Germany (LUCID)",
+    "IT": "Italy (CONAI)",
+    "FR": "France (CITEO)",
+    "ES": "Spain (Ecoembes)"
+  },
+  "period_types": {
+    "ANNUAL": "Annual",
+    "QUARTERLY": "Quarterly",
+    "MONTHLY": "Monthly"
+  },
+  "status": {
+    "processing": "Processing",
+    "ready": "Ready",
+    "error": "Error",
+    "new_badge": "New"
+  },
+  "sections": {
+    "new_reports_title": "Waiting to be downloaded",
+    "new_reports_empty": "No new reports to download. We generate a fresh report automatically at the end of each configured period.",
+    "past_reports_title": "Already downloaded"
+  },
+  "table": {
+    "columns": {
+      "country": "Country",
+      "status": "Status",
+      "period_type": "Period",
+      "dates": "Dates",
+      "generated_at": "Generated on",
+      "formats": "Formats",
+      "download": "Download"
+    }
+  },
+  "actions": {
+    "download": "Download",
+    "download_unavailable": "Unavailable",
+    "download_locked": "Locked",
+    "renew": "Renew",
+    "subscribe": "Subscribe",
+    "add_country": "Add {{country}} ({{currency}}{{amount}})"
+  },
+  "tooltips": {
+    "processing": "The report will be available as soon as processing is complete.",
+    "error_default": "Something went wrong while generating this report.",
+    "trial_locked": "End your free trial or move to a paid plan to download reports."
+  },
+  "empty_state": {
+    "past_heading": "No downloaded reports yet",
+    "past_body": "Reports you've already downloaded will appear here for future reference."
+  },
+  "manual_modal": {
+    "title": "Generate a report manually",
+    "primary": "Generate report",
+    "form": {
+      "country_label": "Destination country",
+      "period_type_label": "Period type",
+      "start_date_label": "Start date",
+      "end_date_label": "End date",
+      "footer_note": "We generate reports automatically at the cadence set for each country. Use this form only for backfills, tests or custom periods."
+    }
+  },
+  "addon_modal": {
+    "title": "Country not in your plan",
+    "body": "This report needs access to <strong>{{country}}</strong>, which isn't in your current plan. Add it as an extra country for {{currency}}{{amount}} per year.",
+    "primary": "Add {{country}} ({{currency}}{{amount}}/year)"
+  },
+  "toasts": {
+    "load_failed": "We couldn't load your reports.",
+    "generate_failed": "Report generation failed.",
+    "download_failed": "The report download didn't go through.",
+    "trial_blocked": "End your free trial or move to a paid plan to download reports.",
+    "expired_blocked": "Your subscription has expired. Renew it to keep downloading reports.",
+    "shopify_billing_issue": "Shopify hit a hiccup, please try again in a moment.",
+    "addon_failed": "Something went wrong. Please try again shortly."
+  },
+  "upload_guides": {
+    "title": "How to upload the report to {{authority}}",
+    "view_guide": "See how to upload to {{authority}}",
+    "DE": {
+      "authority": "LUCID (Stiftung Zentrale Stelle)",
+      "intro": "The German report contains the Mengenmeldung data required by the LUCID portal under VerpackG.",
+      "steps": [
+        "Log into the LUCID portal with your company credentials.",
+        "Go to \"Datenmeldung\" → \"Mengenmeldung\" for the relevant period.",
+        "Upload the file <strong>{{file}}</strong> from the ZIP, or copy the values into the online form row by row.",
+        "Confirm and submit the declaration. Keep the receipt for your records."
+      ],
+      "tip": "Tip: upload the report as a draft (Entwurf) first to double-check the totals before the final submission."
+    },
+    "IT": {
+      "authority": "CONAI",
+      "intro": "The Italian report contains the 6.1/6.2 declaration data and supporting forms for CONAI's Contributo Ambientale.",
+      "steps": [
+        "Log into the CONAI reserved area with your Consorzio credentials.",
+        "Open \"Dichiarazioni online\" → the form for the relevant period.",
+        "Import the file <strong>{{file}}</strong> or copy the totals from the \"Riepilogo\" sheet.",
+        "Attach the summary to your accounting documents and submit."
+      ],
+      "tip": "Tip: cross-check the report's \"total kg per material\" against your DDTs before confirming the submission."
+    },
+    "FR": {
+      "authority": "CITEO",
+      "intro": "The French report follows the CITEO annual declaration format for the eco-contribution on emballages ménagers.",
+      "steps": [
+        "Log into the CITEO portal using your adhérent number.",
+        "Go to \"Mes déclarations\" → \"Saisir une déclaration\".",
+        "Import the file <strong>{{file}}</strong> or copy the totals into the form fields.",
+        "Check totals per material, validate and submit the declaration."
+      ],
+      "tip": "Tip: keep your SIRET number at hand — you'll need it to attach the declaration."
+    }
+  }
+}

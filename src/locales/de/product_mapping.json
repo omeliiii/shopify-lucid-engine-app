@@ -1,0 +1,203 @@
+{
+  "mapping": {
+    "page": {
+      "title": "Produkte mit Verpackungen verknüpfen",
+      "subtitle": "Gib für jedes Produkt an, welche Primärverpackung es umgibt. Ohne diese Zuordnung können wir das EPR-Gewicht pro Bestellung nicht berechnen.",
+      "primary_action": "Produkte aus Shopify synchronisieren",
+      "secondary_action_assign_group": "Auf eine Gruppe anwenden"
+    },
+    "no_inventory_banner": {
+      "title": "Lege zuerst deinen Verpackungsbestand an",
+      "body": "Bevor du Produkte verknüpfst, brauchst du mindestens eine Verpackung im Bestand.",
+      "cta": "Zum Bestand"
+    },
+    "tabs": {
+      "all": "Alle ({{count}})",
+      "mapped": "Zugeordnet ({{count}})",
+      "pending": "Zu prüfen ({{count}})",
+      "unmapped": "Ohne Verpackung ({{count}})"
+    },
+    "status": {
+      "mapped": "Zugeordnet",
+      "pending": "KI-Vorschlag",
+      "unmapped": "Nicht zugeordnet"
+    },
+    "table": {
+      "resource_singular": "Produkt",
+      "resource_plural": "Produkte",
+      "columns": {
+        "product": "Produkt",
+        "status": "Status",
+        "packaging": "Verpackung",
+        "action": "Aktion"
+      },
+      "row": {
+        "no_packaging": "Keine Verpackung zugewiesen",
+        "add_cta": "Hinzufügen",
+        "remove_accessibility": "Diese Zuordnung entfernen",
+        "quantity_suffix": "×{{count}}",
+        "ai_accept": "Bestätigen",
+        "ai_reject": "Ablehnen"
+      },
+      "pagination": "Seite {{current}} von {{total}} · {{count}} Produkte"
+    },
+    "search_placeholder": "Produkt suchen…",
+    "empty_state": {
+      "all_mapped_heading": "Alle Produkte sind zugeordnet",
+      "all_mapped_body": "Super – jedes Produkt im Katalog hat mindestens eine Verpackung zugewiesen.",
+      "no_search_results_heading": "Keine Ergebnisse",
+      "no_search_results_body": "Kein Produkt passt zu \"{{query}}\".",
+      "no_products_heading": "Keine Produkte gefunden",
+      "no_products_body": "Synchronisiere deinen Shopify-Katalog, um Verpackungen zuzuordnen."
+    },
+    "bulk_actions": {
+      "assign_packaging": "Verpackung zuweisen",
+      "confirm_ai_suggestions": "KI-Vorschläge bestätigen"
+    },
+    "purposes": {
+      "CONTAINER": "Behälter",
+      "WRAP": "Umhüllung",
+      "SEAL": "Verschluss",
+      "LABEL": "Etikett",
+      "CUSHION": "Polster",
+      "CONTAINER_hint": "Die Verpackung, die das Produkt aufnimmt (Karton, Versandtasche)",
+      "WRAP_hint": "Material, das das Produkt umhüllt (Seidenpapier, Blister)",
+      "SEAL_hint": "Verschluss oder Klebeband, das die Verpackung schließt",
+      "LABEL_hint": "Etikett auf der Verpackung",
+      "CUSHION_hint": "Innere Schutzpolsterung"
+    },
+    "modal": {
+      "single": {
+        "title": "Verpackung zuordnen — {{product}}",
+        "primary": "Speichern",
+        "form": {
+          "packaging_label": "Verpackung",
+          "purpose_label": "Rolle der Verpackung",
+          "quantity_label": "Menge pro Produkteinheit",
+          "quantity_help": "Wie viele Einheiten dieser Verpackung pro Produkt benötigt werden.",
+          "apply_to_groups_hint_single": "Dieses Produkt gehört zu einer Gruppe. Du kannst die Verpackung auch den anderen Produkten der Gruppe zuweisen:",
+          "apply_to_groups_hint_multi": "Dieses Produkt gehört zu mehreren Gruppen. Du kannst die Verpackung auch den anderen Produkten dieser Gruppen zuweisen:",
+          "apply_to_group_checkbox": "Auf alle Produkte der Gruppe \"{{group}}\" anwenden"
+        }
+      },
+      "bulk_group": {
+        "title": "Verpackung auf eine Gruppe anwenden",
+        "primary": "Auf Gruppe anwenden",
+        "form": {
+          "group_label": "Produktgruppe",
+          "packaging_label": "Verpackung",
+          "purpose_label": "Rolle der Verpackung",
+          "quantity_label": "Menge pro Produkteinheit",
+          "overwrite_label": "Vorhandene Verpackungen mit gleicher Rolle ersetzen",
+          "overwrite_help": "Wenn aktiviert, entfernen wir vor dem Anwenden die Verpackungen der Gruppe mit derselben Rolle."
+        }
+      },
+      "bulk_selection": {
+        "title": "Verpackung auf {{count}} ausgewählte Produkte anwenden",
+        "primary": "Anwenden",
+        "info_banner": "Wir fügen diese Verpackung zu <strong>{{count}}</strong> Produkten hinzu. Vorhandene Zuordnungen bleiben unberührt.",
+        "form": {
+          "packaging_label": "Verpackung",
+          "purpose_label": "Rolle der Verpackung",
+          "quantity_label": "Menge pro Produkteinheit"
+        }
+      },
+      "delete": {
+        "title": "Zuordnung entfernen",
+        "primary": "Entfernen",
+        "body": "Soll die Zuordnung zu <strong>{{name}}</strong> wirklich entfernt werden? Das Produkt trägt diese Verpackung dann nicht mehr in den EPR-Berechnungen.",
+        "irreversible_note": "Dieser Schritt kann nicht rückgängig gemacht werden."
+      }
+    },
+    "toasts": {
+      "load_failed": "Die Produkte konnten nicht geladen werden.",
+      "sync_started": "Synchronisierung gestartet. Bitte einen Moment warten.",
+      "sync_failed": "Synchronisierung fehlgeschlagen.",
+      "ai_confirmed": "Vorschlag bestätigt.",
+      "ai_confirm_failed": "Vorschlag konnte nicht bestätigt werden.",
+      "mapping_removed": "Zuordnung entfernt.",
+      "mapping_remove_failed": "Die Zuordnung konnte nicht entfernt werden.",
+      "mapping_added": "Verpackung dem Produkt zugeordnet.",
+      "mapping_add_to_groups": "Verpackung auf die ausgewählten Gruppen angewendet.",
+      "mapping_add_failed": "Zuordnung fehlgeschlagen.",
+      "bulk_group_applied": "Verpackung auf alle Produkte der Gruppe angewendet.",
+      "bulk_group_failed": "Die Verpackung konnte nicht auf die Gruppe angewendet werden.",
+      "bulk_selection_applied": "Verpackung auf {{count}} Produkte angewendet.",
+      "bulk_selection_partial": "{{failed}} von {{total}} Produkten wurden nicht aktualisiert.",
+      "bulk_confirm_all_done": "{{count}} Vorschläge bestätigt.",
+      "bulk_confirm_partial": "{{failed}} von {{total}} Vorschlägen nicht bestätigt.",
+      "bulk_confirm_no_pending": "Die ausgewählten Produkte haben keine Vorschläge zum Bestätigen."
+    }
+  },
+  "groups": {
+    "page": {
+      "title": "Produktgruppen",
+      "subtitle": "Erstelle Gruppen, um Versandregeln und Verpackungszuordnungen mit einem Klick auf mehrere Produkte anzuwenden.",
+      "primary_action": "Neue Gruppe",
+      "secondary_action_sync": "Typen aus Shopify-Katalog importieren"
+    },
+    "info_banner": "Wähle, wie die Gruppe befüllt wird: <strong>Shopify-Produkttyp</strong> erstellt eine Gruppe pro <code>product_type</code>. <strong>Tag</strong> gruppiert nach Produkt-Tag. <strong>Manuelle Auswahl</strong> erlaubt dir, Produkte einzeln zu wählen.",
+    "match_types": {
+      "MANUAL": "Manuelle Auswahl",
+      "PRODUCT_TYPE": "Shopify-Produkttyp",
+      "TAG": "Produkt-Tag",
+      "MANUAL_option": "Manuelle Auswahl",
+      "PRODUCT_TYPE_option": "Shopify-Produkttyp (automatisch)",
+      "TAG_option": "Produkt-Tag (automatisch)"
+    },
+    "tabs": {
+      "all": "Alle ({{count}})",
+      "product_type": "Nach Typ ({{count}})",
+      "tag": "Nach Tag ({{count}})",
+      "manual": "Manuell ({{count}})"
+    },
+    "empty_state": {
+      "heading_all": "Noch keine Gruppen",
+      "heading_category": "Keine Gruppen in dieser Kategorie",
+      "body": "Mit Gruppen wendest du Verpackungen und Versandregeln auf viele Produkte gleichzeitig an. Erstelle deine erste Gruppe.",
+      "cta": "Erste Gruppe erstellen"
+    },
+    "card": {
+      "match_value_label": "Match-Wert",
+      "manual_count": "{{count}} manuell ausgewählte Produkte",
+      "manual_count_one": "1 manuell ausgewähltes Produkt",
+      "used_in": "Verwendet in Regeln:",
+      "no_rules": "Noch keine Versandregel nutzt diese Gruppe."
+    },
+    "modal": {
+      "title_new": "Neue Gruppe",
+      "title_edit": "Gruppe bearbeiten",
+      "primary": "Speichern",
+      "form": {
+        "name_label": "Gruppenname",
+        "name_placeholder": "z. B. Bekleidung, Empfindliche Elektronik…",
+        "match_type_label": "Wie soll die Gruppe gefüllt werden",
+        "match_value_label_product_type": "Produkttyp (z. B. Electronics, Clothing)",
+        "match_value_label_tag": "Produkt-Tag (z. B. fragile, heavy)",
+        "match_value_help_product_type": "Muss exakt mit dem Feld \"Product Type\" in Shopify übereinstimmen.",
+        "match_value_help_tag": "Muss exakt einem Shopify-Produkt-Tag entsprechen.",
+        "manual_section_title": "Produkte auswählen"
+      }
+    },
+    "delete_modal": {
+      "title": "Gruppe löschen?",
+      "body": "Soll die Gruppe <strong>{{name}}</strong> wirklich gelöscht werden?",
+      "rules_warning": "Diese Gruppe wird von <strong>{{count}}</strong> Versandregeln genutzt. Wird sie gelöscht, gelten diese Regeln für alle Produkte.",
+      "rules_warning_one": "Diese Gruppe wird von <strong>1</strong> Versandregel genutzt. Wird sie gelöscht, gilt diese Regel für alle Produkte.",
+      "irreversible_note": "Dieser Schritt kann nicht rückgängig gemacht werden.",
+      "primary": "Löschen"
+    },
+    "toasts": {
+      "load_failed": "Die Gruppen konnten nicht geladen werden.",
+      "name_required": "Bitte einen Gruppennamen angeben.",
+      "created": "Gruppe erstellt.",
+      "updated": "Gruppe aktualisiert.",
+      "create_failed": "Gruppe konnte nicht erstellt werden.",
+      "update_failed": "Gruppe konnte nicht aktualisiert werden.",
+      "deleted": "Gruppe gelöscht.",
+      "delete_failed": "Gruppe konnte nicht gelöscht werden.",
+      "sync_done": "Produkttypen aus dem Shopify-Katalog importiert.",
+      "sync_failed": "Import aus dem Katalog fehlgeschlagen."
+    }
+  }
+}

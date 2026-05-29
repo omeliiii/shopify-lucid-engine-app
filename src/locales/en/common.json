@@ -1,0 +1,275 @@
+{
+  "app": {
+    "name": "EPR Manager",
+    "tagline": "EPR compliance without the headache"
+  },
+  "actions": {
+    "save": "Save",
+    "save_changes": "Save changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Remove",
+    "duplicate": "Duplicate",
+    "accept": "Accept",
+    "reject": "Reject",
+    "approve": "Approve",
+    "review": "Review",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "reset_filters": "Reset filters",
+    "apply": "Apply",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "view_details": "View details",
+    "view_all": "View all",
+    "open": "Open",
+    "select": "Select",
+    "select_placeholder": "Select…",
+    "learn_more": "Learn more",
+    "got_it": "Got it"
+  },
+  "states": {
+    "loading": "Loading…",
+    "loading_data": "Loading data…",
+    "saving": "Saving…",
+    "processing": "Processing…",
+    "in_progress": "In progress…",
+    "completed": "Completed",
+    "failed": "Failed",
+    "pending": "Pending",
+    "active": "Active",
+    "inactive": "Inactive",
+    "draft": "Draft",
+    "empty": "No data available",
+    "no_results": "No results found",
+    "no_results_hint": "Try adjusting your filters or broadening the date range.",
+    "coming_soon": "Coming soon"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again in a moment.",
+    "network": "We couldn't reach the server. Check your connection and try again.",
+    "load_failed": "We couldn't load the data. Refresh the page or try again later.",
+    "save_failed": "We couldn't save your changes. Check the fields and try again.",
+    "delete_failed": "We couldn't delete this item. Please try again.",
+    "required_field": "This field is required.",
+    "invalid_value": "The value you entered is not valid.",
+    "billing_load_failed": "We couldn't load your subscription. Please refresh the page."
+  },
+  "navigation": {
+    "dashboard": "Dashboard & orders",
+    "inventory": "Packaging inventory",
+    "mapping": "Match products to packaging",
+    "groups": "Product groups",
+    "shipping_rules": "Shipping rules",
+    "reports": "Reports & declarations",
+    "subscription": "Subscription"
+  },
+  "countries": {
+    "all": "All countries",
+    "select_country": "Select a country",
+    "IT": "Italy",
+    "DE": "Germany",
+    "FR": "France",
+    "ES": "Spain",
+    "with_code": {
+      "IT": "Italy (IT)",
+      "DE": "Germany (DE)",
+      "FR": "France (FR)",
+      "ES": "Spain (ES)"
+    }
+  },
+  "materials": {
+    "PAPER": "Paper",
+    "PLASTIC": "Plastic",
+    "GLASS": "Glass",
+    "METAL": "Metal",
+    "WOOD": "Wood",
+    "COMPOSITE": "Composite",
+    "OTHER": "Other"
+  },
+  "categories": {
+    "PRIMARY": "Primary",
+    "SECONDARY": "Secondary",
+    "TAPE": "Tape",
+    "FILLER": "Filler",
+    "PRIMARY_hint": "Packaging in direct contact with the product",
+    "SECONDARY_hint": "Outer box, mailer or wrap used for shipping",
+    "TAPE_hint": "Adhesive tape used to seal the shipment",
+    "FILLER_hint": "Void fill material (e.g. paper, bubble wrap, chips)"
+  },
+  "ai": {
+    "section_title": "AI suggestions",
+    "section_subtitle": "Review and accept each suggestion before it's applied.",
+    "badge": "AI",
+    "confidence": "Confidence",
+    "confidence_value": "{{value}}%",
+    "accept": "Accept",
+    "reject": "Reject",
+    "regenerate": "Regenerate"
+  },
+  "paywall": {
+    "subscription_required_title": "An active subscription is required",
+    "subscription_required_body": "Pick a plan to keep using the app and generating EPR reports.",
+    "go_to_plans": "See the plans",
+    "subscription_activated": "Subscription activated. Welcome back!",
+    "subscription_verifying": "Verifying your subscription…",
+    "subscription_processing": "Your subscription is being processed. Refresh the page in a moment.",
+    "trial_banner": "You're on a free trial — {{days}} days left.",
+    "trial_ended": "Free trial ended."
+  },
+  "filters": {
+    "country_label": "Country",
+    "start_date": "Start date",
+    "end_date": "End date",
+    "date_placeholder": "Pick a date",
+    "search_placeholder": "Search…"
+  },
+  "onboarding": {
+    "checklist_title": "Finish setting things up",
+    "progress": "{{completed}} of {{total}} done",
+    "step_in_progress": "In progress…",
+    "step_review": "Review",
+    "step_locked_hint": "Complete the previous steps to unlock this one."
+  },
+  "units": {
+    "mm": "mm",
+    "cm": "cm",
+    "g": "g",
+    "kg": "kg",
+    "dimensions_lwh": "{{l}} × {{w}} × {{h}} mm",
+    "weight_g": "{{value}} g",
+    "weight_kg": "{{value}} kg",
+    "gsm": "{{value}} g/m²",
+    "gsm_label": "Grammage"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last_7_days": "Last 7 days",
+    "last_30_days": "Last 30 days",
+    "last_90_days": "Last 90 days",
+    "this_month": "This month",
+    "last_month": "Last month",
+    "custom_range": "Custom range"
+  },
+  "billing": {
+    "plan_selection": {
+      "page_title": "Pick the plan that fits you",
+      "trial_banner": "Start with a <strong>{{days}}-day free trial</strong> — full access to every feature. Report downloads kick in after the trial ends.",
+      "cta_start_trial": "Start the {{days}}-day free trial",
+      "cta_subscribe_now": "Subscribe now",
+      "country_picker_label": "Select your primary country",
+      "country_picker_placeholder": "Choose a country…",
+      "country_lock_note": "The country you pick stays locked until your annual renewal.",
+      "country_picker_tooltip": "Pick a country first.",
+      "checkout_failed": "Something went wrong. Please try again in a moment.",
+      "no_trial_note": "Your free trial has already been used — you'll be charged right away.",
+      "trial_badge": "{{days}}-day trial"
+    },
+    "plans": {
+      "one_country": {
+        "name": "Basic",
+        "amount_unit": "/year",
+        "features": [
+          "Dashboard & order tracking",
+          "Full packaging inventory management",
+          "AI-powered product mapping",
+          "Shipping rules engine",
+          "Automated EPR report generation",
+          "1 country for exports & dashboard",
+          "Extra countries at {{currency}}{{amount}}/year"
+        ]
+      },
+      "multi_country": {
+        "name": "Unlimited",
+        "amount_unit": "/year",
+        "best_value_badge": "Best value",
+        "features": [
+          "Everything in Basic, plus:",
+          "All available countries included",
+          "No per-country add-on fees",
+          "Switch countries any time",
+          "Best fit for multi-market sellers"
+        ]
+      }
+    },
+    "subscription_page": {
+      "title": "Your subscription",
+      "no_plan": "No active plan",
+      "renews_on": "Renews on {{date}}",
+      "trial_banner_body": "You're on a free trial until <strong>{{date}}</strong>. Report downloads kick in after the trial ends.",
+      "end_trial_cta": "End trial and activate billing",
+      "selected_country_title": "Primary country",
+      "no_country_selected": "No country selected",
+      "change_country_cta": "Change",
+      "country_locked_badge": "Locked",
+      "country_locked_tooltip": "Country stays locked until your next renewal ({{date}}).",
+      "extra_countries_title": "Extra countries",
+      "no_extra_countries": "No extra countries yet.",
+      "add_country_cta": "Add another country ({{currency}}{{amount}}/year)",
+      "upgrade_title": "Move to Unlimited",
+      "upgrade_body": "Unlock every available country for {{currency}}{{amount}}/year. Shopify handles the prorated charge — you can upgrade mid-cycle any time.",
+      "upgrade_cta": "Upgrade now",
+      "danger_zone_title": "Danger zone",
+      "danger_zone_body": "Cancel your subscription. You keep access until the end of the current billing period ({{date}}).",
+      "cancel_cta": "Cancel subscription"
+    },
+    "subscription_status": {
+      "unknown": "Unknown",
+      "trial": "Trial ({{days}} days left)",
+      "trial_one": "Trial (1 day left)",
+      "active": "Active",
+      "cancelled_until": "Cancelled — access until {{date}}",
+      "expired": "Expired",
+      "pending": "Awaiting confirmation",
+      "declined": "Payment declined"
+    },
+    "modals": {
+      "change_country": {
+        "title": "Change primary country",
+        "primary": "Confirm change",
+        "body": "Your current country is <strong>{{country}}</strong>. Pick a new primary country below.",
+        "select_label": "New country",
+        "placeholder": "Choose…",
+        "toast_changed": "Primary country updated to {{country}}.",
+        "toast_locked": "You can't change country until the next renewal ({{date}}).",
+        "toast_unsupported": "Country not available.",
+        "toast_failed": "Something went wrong. Please try again."
+      },
+      "addon": {
+        "title": "Add an extra country",
+        "primary": "Add country ({{currency}}{{amount}}/year)",
+        "body": "Add a country to your Basic plan for {{currency}}{{amount}}/year. The add-on renews together with your main subscription.",
+        "select_label": "Country to add",
+        "placeholder": "Choose…",
+        "toast_failed": "Something went wrong. Please try again."
+      },
+      "cancel": {
+        "title": "Cancel subscription?",
+        "primary": "Yes, cancel",
+        "keep": "Keep subscription",
+        "body": "Your access continues until <strong>{{date}}</strong>. After that, every feature is locked. You can resubscribe any time.",
+        "toast_confirmed": "Your subscription will end on {{date}}.",
+        "toast_failed": "Something went wrong. Please try again."
+      },
+      "end_trial": {
+        "toast_failed": "We couldn't end the trial. Please try again."
+      },
+      "upgrade": {
+        "toast_failed": "Something went wrong during the upgrade. Please try again."
+      }
+    }
+  }
+}

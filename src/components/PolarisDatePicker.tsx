@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { 
-  Popover, 
-  DatePicker, 
-  Box, 
+import {
+  Popover,
+  DatePicker,
+  Box,
   BlockStack,
   Text,
   Button
 } from '@shopify/polaris';
 import { CalendarIcon } from '@shopify/polaris-icons';
+import { useTranslation } from 'react-i18next';
 
 interface PolarisDatePickerProps {
   label: string;
@@ -17,9 +18,10 @@ interface PolarisDatePickerProps {
 
 export function PolarisDatePicker({ label, value, onChange }: PolarisDatePickerProps) {
   const [popoverActive, setPopoverActive] = useState(false);
-  const [date, setDate] = useState({ 
-    month: value ? new Date(value).getMonth() : new Date().getMonth(), 
-    year: value ? new Date(value).getFullYear() : new Date().getFullYear() 
+  const { t, i18n } = useTranslation('common');
+  const [date, setDate] = useState({
+    month: value ? new Date(value).getMonth() : new Date().getMonth(),
+    year: value ? new Date(value).getFullYear() : new Date().getFullYear()
   });
 
   useEffect(() => {
@@ -35,7 +37,8 @@ export function PolarisDatePicker({ label, value, onChange }: PolarisDatePickerP
     setPopoverActive(false);
   };
 
-  const displayValue = value ? new Date(value).toLocaleDateString('it-IT') : 'Seleziona data';
+  const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
+  const displayValue = value ? new Date(value).toLocaleDateString(dateLocale) : t('filters.date_placeholder');
 
   return (
     <BlockStack gap="100">

@@ -1,0 +1,275 @@
+{
+  "app": {
+    "name": "EPR Manager",
+    "tagline": "La conformité REP sans prise de tête"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "save_changes": "Enregistrer les modifications",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "duplicate": "Dupliquer",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "approve": "Approuver",
+    "review": "Vérifier",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "next": "Suivant",
+    "continue": "Continuer",
+    "submit": "Envoyer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "reset": "Réinitialiser",
+    "reset_filters": "Réinitialiser les filtres",
+    "apply": "Appliquer",
+    "download": "Télécharger",
+    "upload": "Importer",
+    "refresh": "Actualiser",
+    "view_details": "Voir les détails",
+    "view_all": "Tout voir",
+    "open": "Ouvrir",
+    "select": "Sélectionner",
+    "select_placeholder": "Sélectionner…",
+    "learn_more": "En savoir plus",
+    "got_it": "Compris"
+  },
+  "states": {
+    "loading": "Chargement…",
+    "loading_data": "Chargement des données…",
+    "saving": "Enregistrement…",
+    "processing": "Traitement en cours…",
+    "in_progress": "En cours…",
+    "completed": "Terminé",
+    "failed": "Échec",
+    "pending": "En attente",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "draft": "Brouillon",
+    "empty": "Aucune donnée disponible",
+    "no_results": "Aucun résultat trouvé",
+    "no_results_hint": "Essaie d'ajuster les filtres ou d'élargir la période.",
+    "coming_soon": "Bientôt disponible"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Réessaie dans un instant.",
+    "network": "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.",
+    "load_failed": "Impossible de charger les données. Actualise la page ou réessaie plus tard.",
+    "save_failed": "L'enregistrement a échoué. Vérifie les champs et réessaie.",
+    "delete_failed": "La suppression a échoué. Réessaie dans un instant.",
+    "required_field": "Ce champ est obligatoire.",
+    "invalid_value": "La valeur saisie n'est pas valide.",
+    "billing_load_failed": "Impossible de charger ton abonnement. Actualise la page."
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord et commandes",
+    "inventory": "Inventaire des emballages",
+    "mapping": "Associer produits et emballages",
+    "groups": "Groupes de produits",
+    "shipping_rules": "Règles d'expédition",
+    "reports": "Rapports et déclarations",
+    "subscription": "Abonnement"
+  },
+  "countries": {
+    "all": "Tous les pays",
+    "select_country": "Choisis un pays",
+    "IT": "Italie",
+    "DE": "Allemagne",
+    "FR": "France",
+    "ES": "Espagne",
+    "with_code": {
+      "IT": "Italie (IT)",
+      "DE": "Allemagne (DE)",
+      "FR": "France (FR)",
+      "ES": "Espagne (ES)"
+    }
+  },
+  "materials": {
+    "PAPER": "Papier",
+    "PLASTIC": "Plastique",
+    "GLASS": "Verre",
+    "METAL": "Métal",
+    "WOOD": "Bois",
+    "COMPOSITE": "Composite",
+    "OTHER": "Autre"
+  },
+  "categories": {
+    "PRIMARY": "Primaire",
+    "SECONDARY": "Secondaire",
+    "TAPE": "Ruban adhésif",
+    "FILLER": "Calage",
+    "PRIMARY_hint": "Emballage en contact direct avec le produit",
+    "SECONDARY_hint": "Carton, pochette ou film extérieur utilisé pour l'expédition",
+    "TAPE_hint": "Ruban adhésif servant à fermer le colis",
+    "FILLER_hint": "Matériau de calage (papier, papier bulle, frisure…)"
+  },
+  "ai": {
+    "section_title": "Suggestions IA",
+    "section_subtitle": "Vérifie et accepte chaque suggestion avant qu'elle soit appliquée.",
+    "badge": "IA",
+    "confidence": "Confiance",
+    "confidence_value": "{{value}} %",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "regenerate": "Régénérer"
+  },
+  "paywall": {
+    "subscription_required_title": "Un abonnement actif est requis",
+    "subscription_required_body": "Choisis un plan pour continuer à utiliser l'app et générer tes déclarations REP.",
+    "go_to_plans": "Voir les plans",
+    "subscription_activated": "Abonnement activé. Heureux de te revoir !",
+    "subscription_verifying": "Nous vérifions ton abonnement…",
+    "subscription_processing": "Ton abonnement est en cours de traitement. Actualise la page dans un instant.",
+    "trial_banner": "Tu es en période d'essai — il te reste {{days}} jours.",
+    "trial_ended": "Période d'essai terminée."
+  },
+  "filters": {
+    "country_label": "Pays",
+    "start_date": "Date de début",
+    "end_date": "Date de fin",
+    "date_placeholder": "Choisis une date",
+    "search_placeholder": "Rechercher…"
+  },
+  "onboarding": {
+    "checklist_title": "Finalise la configuration",
+    "progress": "{{completed}} sur {{total}} terminés",
+    "step_in_progress": "En cours…",
+    "step_review": "Vérifier",
+    "step_locked_hint": "Termine les étapes précédentes pour débloquer celle-ci."
+  },
+  "units": {
+    "mm": "mm",
+    "cm": "cm",
+    "g": "g",
+    "kg": "kg",
+    "dimensions_lwh": "{{l}} × {{w}} × {{h}} mm",
+    "weight_g": "{{value}} g",
+    "weight_kg": "{{value}} kg",
+    "gsm": "{{value}} g/m²",
+    "gsm_label": "Grammage"
+  },
+  "time": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "last_7_days": "7 derniers jours",
+    "last_30_days": "30 derniers jours",
+    "last_90_days": "90 derniers jours",
+    "this_month": "Ce mois-ci",
+    "last_month": "Mois dernier",
+    "custom_range": "Période personnalisée"
+  },
+  "billing": {
+    "plan_selection": {
+      "page_title": "Choisis l'offre qui te convient",
+      "trial_banner": "Commence avec <strong>{{days}} jours d'essai gratuit</strong> — accès complet à toutes les fonctionnalités. Les téléchargements de rapports s'activent à la fin de l'essai.",
+      "cta_start_trial": "Commencer l'essai gratuit de {{days}} jours",
+      "cta_subscribe_now": "S'abonner",
+      "country_picker_label": "Sélectionne ton pays principal",
+      "country_picker_placeholder": "Choisis un pays…",
+      "country_lock_note": "Le pays sélectionné reste verrouillé jusqu'au renouvellement annuel.",
+      "country_picker_tooltip": "Choisis d'abord un pays.",
+      "checkout_failed": "Une erreur est survenue. Réessaie dans un instant.",
+      "no_trial_note": "Ton essai gratuit a déjà été utilisé — le paiement sera immédiat.",
+      "trial_badge": "Essai de {{days}} jours"
+    },
+    "plans": {
+      "one_country": {
+        "name": "Basic",
+        "amount_unit": "/an",
+        "features": [
+          "Tableau de bord et suivi des commandes",
+          "Gestion complète de l'inventaire d'emballages",
+          "Association produits/emballages assistée par IA",
+          "Moteur de règles d'expédition",
+          "Génération automatique des rapports REP",
+          "1 pays pour l'export et le tableau de bord",
+          "Pays supplémentaires à {{currency}}{{amount}}/an"
+        ]
+      },
+      "multi_country": {
+        "name": "Unlimited",
+        "amount_unit": "/an",
+        "best_value_badge": "Meilleur rapport qualité-prix",
+        "features": [
+          "Tout l'offre Basic, plus :",
+          "Tous les pays disponibles inclus",
+          "Aucun supplément par pays",
+          "Change de pays autant que tu veux",
+          "Idéal pour les vendeurs multi-marchés"
+        ]
+      }
+    },
+    "subscription_page": {
+      "title": "Ton abonnement",
+      "no_plan": "Aucune offre active",
+      "renews_on": "Se renouvelle le {{date}}",
+      "trial_banner_body": "Tu es en période d'essai jusqu'au <strong>{{date}}</strong>. Les téléchargements de rapports s'activeront à la fin de l'essai.",
+      "end_trial_cta": "Terminer l'essai et activer le paiement",
+      "selected_country_title": "Pays principal",
+      "no_country_selected": "Aucun pays sélectionné",
+      "change_country_cta": "Changer",
+      "country_locked_badge": "Verrouillé",
+      "country_locked_tooltip": "Pays verrouillé jusqu'au prochain renouvellement ({{date}}).",
+      "extra_countries_title": "Pays supplémentaires",
+      "no_extra_countries": "Aucun pays supplémentaire pour l'instant.",
+      "add_country_cta": "Ajouter un autre pays ({{currency}}{{amount}}/an)",
+      "upgrade_title": "Passer à Unlimited",
+      "upgrade_body": "Débloque tous les pays disponibles pour {{currency}}{{amount}}/an. Shopify gère la facturation au prorata — tu peux passer à l'offre à tout moment.",
+      "upgrade_cta": "Faire l'upgrade",
+      "danger_zone_title": "Zone sensible",
+      "danger_zone_body": "Annule ton abonnement. Tu conserves l'accès jusqu'à la fin de la période en cours ({{date}}).",
+      "cancel_cta": "Annuler l'abonnement"
+    },
+    "subscription_status": {
+      "unknown": "Inconnu",
+      "trial": "En essai ({{days}} jours restants)",
+      "trial_one": "En essai (1 jour restant)",
+      "active": "Actif",
+      "cancelled_until": "Annulé — accès jusqu'au {{date}}",
+      "expired": "Expiré",
+      "pending": "En attente de confirmation",
+      "declined": "Paiement refusé"
+    },
+    "modals": {
+      "change_country": {
+        "title": "Changer de pays principal",
+        "primary": "Confirmer le changement",
+        "body": "Ton pays actuel est <strong>{{country}}</strong>. Choisis un nouveau pays principal ci-dessous.",
+        "select_label": "Nouveau pays",
+        "placeholder": "Choisis…",
+        "toast_changed": "Pays principal mis à jour vers {{country}}.",
+        "toast_locked": "Le pays ne peut pas être changé avant le prochain renouvellement ({{date}}).",
+        "toast_unsupported": "Pays non disponible.",
+        "toast_failed": "Une erreur est survenue. Réessaie."
+      },
+      "addon": {
+        "title": "Ajouter un pays supplémentaire",
+        "primary": "Ajouter un pays ({{currency}}{{amount}}/an)",
+        "body": "Ajoute un pays à ton offre Basic pour {{currency}}{{amount}}/an. L'add-on se renouvelle avec ton abonnement principal.",
+        "select_label": "Pays à ajouter",
+        "placeholder": "Choisis…",
+        "toast_failed": "Une erreur est survenue. Réessaie."
+      },
+      "cancel": {
+        "title": "Annuler l'abonnement ?",
+        "primary": "Oui, annuler",
+        "keep": "Conserver l'abonnement",
+        "body": "Ton accès continue jusqu'au <strong>{{date}}</strong>. Après cette date, toutes les fonctionnalités seront verrouillées. Tu peux te réabonner à tout moment.",
+        "toast_confirmed": "Ton abonnement se terminera le {{date}}.",
+        "toast_failed": "Une erreur est survenue. Réessaie."
+      },
+      "end_trial": {
+        "toast_failed": "Impossible de terminer l'essai. Réessaie."
+      },
+      "upgrade": {
+        "toast_failed": "Une erreur est survenue lors de l'upgrade. Réessaie."
+      }
+    }
+  }
+}

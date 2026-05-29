@@ -10,6 +10,7 @@ import {
   Spinner,
 } from '@shopify/polaris';
 import { CheckCircleIcon, CircleChevronRightIcon } from '@shopify/polaris-icons';
+import { useTranslation } from 'react-i18next';
 
 export interface OnboardingStep {
   id: string;
@@ -31,7 +32,9 @@ interface OnboardingChecklistProps {
   title?: string;
 }
 
-export function OnboardingChecklist({ steps, title = 'Completa la configurazione' }: OnboardingChecklistProps) {
+export function OnboardingChecklist({ steps, title }: OnboardingChecklistProps) {
+  const { t } = useTranslation('common');
+  const resolvedTitle = title ?? t('onboarding.checklist_title');
   const completed = steps.filter((s) => s.done).length;
   const progress = Math.round((completed / steps.length) * 100);
 
@@ -40,9 +43,9 @@ export function OnboardingChecklist({ steps, title = 'Completa la configurazione
       <BlockStack gap="400">
         <BlockStack gap="200">
           <InlineStack align="space-between" blockAlign="center">
-            <Text as="h2" variant="headingMd">{title}</Text>
+            <Text as="h2" variant="headingMd">{resolvedTitle}</Text>
             <Text as="span" tone="subdued" variant="bodySm">
-              {completed} di {steps.length} completati
+              {t('onboarding.progress', { completed, total: steps.length })}
             </Text>
           </InlineStack>
           <ProgressBar progress={progress} size="small" tone="primary" />
@@ -63,7 +66,7 @@ export function OnboardingChecklist({ steps, title = 'Completa la configurazione
                     {step.done ? (
                       <Icon source={CheckCircleIcon} tone="success" />
                     ) : step.inProgress ? (
-                      <Spinner size="small" accessibilityLabel="In corso" />
+                      <Spinner size="small" accessibilityLabel={t('states.in_progress')} />
                     ) : (
                       <Icon source={CircleChevronRightIcon} tone={step.disabled ? 'subdued' : 'base'} />
                     )}
@@ -88,7 +91,7 @@ export function OnboardingChecklist({ steps, title = 'Completa la configurazione
                     disabled={step.disabled || step.inProgress}
                     onClick={step.onAction}
                   >
-                    {step.inProgress ? 'In corso…' : step.done ? 'Rivedi' : step.ctaLabel}
+                    {step.inProgress ? t('onboarding.step_in_progress') : step.done ? t('onboarding.step_review') : step.ctaLabel}
                   </Button>
                 </Box>
               </InlineStack>

@@ -1,0 +1,203 @@
+{
+  "mapping": {
+    "page": {
+      "title": "Associa prodotti agli imballaggi",
+      "subtitle": "Indica per ogni prodotto quale imballaggio primario lo contiene. Senza questa mappatura non possiamo calcolare il peso EPR.",
+      "primary_action": "Sincronizza prodotti da Shopify",
+      "secondary_action_assign_group": "Applica a un gruppo"
+    },
+    "no_inventory_banner": {
+      "title": "Configura prima il tuo inventario imballaggi",
+      "body": "Per associare gli imballaggi ai prodotti devi prima aggiungerli all'inventario.",
+      "cta": "Vai all'inventario"
+    },
+    "tabs": {
+      "all": "Tutti ({{count}})",
+      "mapped": "Mappati ({{count}})",
+      "pending": "Da rivedere ({{count}})",
+      "unmapped": "Senza imballaggio ({{count}})"
+    },
+    "status": {
+      "mapped": "Mappato",
+      "pending": "Suggerimento IA",
+      "unmapped": "Da mappare"
+    },
+    "table": {
+      "resource_singular": "prodotto",
+      "resource_plural": "prodotti",
+      "columns": {
+        "product": "Prodotto",
+        "status": "Stato",
+        "packaging": "Imballaggio",
+        "action": "Azione"
+      },
+      "row": {
+        "no_packaging": "Nessun imballaggio associato",
+        "add_cta": "Aggiungi",
+        "remove_accessibility": "Rimuovi questa associazione",
+        "quantity_suffix": "×{{count}}",
+        "ai_accept": "Conferma",
+        "ai_reject": "Rifiuta"
+      },
+      "pagination": "Pagina {{current}} di {{total}} · {{count}} prodotti"
+    },
+    "search_placeholder": "Cerca un prodotto…",
+    "empty_state": {
+      "all_mapped_heading": "Tutti i prodotti sono mappati",
+      "all_mapped_body": "Ottimo lavoro: ogni prodotto del catalogo ha almeno un imballaggio associato.",
+      "no_search_results_heading": "Nessun risultato",
+      "no_search_results_body": "Nessun prodotto corrisponde a \"{{query}}\".",
+      "no_products_heading": "Nessun prodotto trovato",
+      "no_products_body": "Sincronizza il tuo catalogo Shopify per iniziare a mappare gli imballaggi."
+    },
+    "bulk_actions": {
+      "assign_packaging": "Assegna un imballaggio",
+      "confirm_ai_suggestions": "Conferma suggerimenti IA"
+    },
+    "purposes": {
+      "CONTAINER": "Contenitore",
+      "WRAP": "Involucro",
+      "SEAL": "Sigillo",
+      "LABEL": "Etichetta",
+      "CUSHION": "Cuscinetto",
+      "CONTAINER_hint": "L'imballaggio che racchiude il prodotto (scatola, busta)",
+      "WRAP_hint": "Materiale che avvolge il prodotto (carta velina, blister)",
+      "SEAL_hint": "Sigillo o nastro che chiude la confezione",
+      "LABEL_hint": "Etichetta applicata sull'imballaggio",
+      "CUSHION_hint": "Imbottitura protettiva interna"
+    },
+    "modal": {
+      "single": {
+        "title": "Associa imballaggio — {{product}}",
+        "primary": "Salva",
+        "form": {
+          "packaging_label": "Imballaggio",
+          "purpose_label": "Ruolo dell'imballaggio",
+          "quantity_label": "Quantità per unità di prodotto",
+          "quantity_help": "Quante unità di questo imballaggio servono per un singolo prodotto.",
+          "apply_to_groups_hint_single": "Questo prodotto appartiene a un gruppo. Puoi applicare l'imballaggio anche agli altri prodotti del gruppo:",
+          "apply_to_groups_hint_multi": "Questo prodotto appartiene a più gruppi. Puoi applicare l'imballaggio anche agli altri prodotti dei gruppi:",
+          "apply_to_group_checkbox": "Applica anche ai prodotti del gruppo \"{{group}}\""
+        }
+      },
+      "bulk_group": {
+        "title": "Applica un imballaggio a un gruppo",
+        "primary": "Applica al gruppo",
+        "form": {
+          "group_label": "Gruppo di prodotti",
+          "packaging_label": "Imballaggio",
+          "purpose_label": "Ruolo dell'imballaggio",
+          "quantity_label": "Quantità per unità di prodotto",
+          "overwrite_label": "Sostituisci gli imballaggi esistenti con lo stesso ruolo",
+          "overwrite_help": "Se attivo, prima di applicare quello nuovo rimuoviamo gli imballaggi del gruppo che ricoprono lo stesso ruolo."
+        }
+      },
+      "bulk_selection": {
+        "title": "Applica un imballaggio a {{count}} prodotti selezionati",
+        "primary": "Applica",
+        "info_banner": "Aggiungiamo questo imballaggio a <strong>{{count}}</strong> prodotti. Gli imballaggi già associati non verranno toccati.",
+        "form": {
+          "packaging_label": "Imballaggio",
+          "purpose_label": "Ruolo dell'imballaggio",
+          "quantity_label": "Quantità per unità di prodotto"
+        }
+      },
+      "delete": {
+        "title": "Rimuovi associazione",
+        "primary": "Rimuovi",
+        "body": "Vuoi davvero rimuovere l'associazione con <strong>{{name}}</strong>? Il prodotto non avrà più questo imballaggio nei calcoli EPR.",
+        "irreversible_note": "Questa azione non può essere annullata."
+      }
+    },
+    "toasts": {
+      "load_failed": "Non siamo riusciti a caricare i prodotti.",
+      "sync_started": "Sincronizzazione avviata. Attendi qualche secondo.",
+      "sync_failed": "Sincronizzazione non riuscita.",
+      "ai_confirmed": "Suggerimento confermato.",
+      "ai_confirm_failed": "Conferma non riuscita.",
+      "mapping_removed": "Associazione rimossa.",
+      "mapping_remove_failed": "Non siamo riusciti a rimuovere l'associazione.",
+      "mapping_added": "Imballaggio associato al prodotto.",
+      "mapping_add_to_groups": "Imballaggio applicato ai gruppi selezionati.",
+      "mapping_add_failed": "Associazione non riuscita.",
+      "bulk_group_applied": "Imballaggio applicato a tutti i prodotti del gruppo.",
+      "bulk_group_failed": "Non siamo riusciti ad applicare l'imballaggio al gruppo.",
+      "bulk_selection_applied": "Imballaggio applicato a {{count}} prodotti.",
+      "bulk_selection_partial": "{{failed}} di {{total}} prodotti non sono stati aggiornati.",
+      "bulk_confirm_all_done": "{{count}} suggerimenti confermati.",
+      "bulk_confirm_partial": "{{failed}} di {{total}} suggerimenti non confermati.",
+      "bulk_confirm_no_pending": "I prodotti selezionati non hanno suggerimenti da confermare."
+    }
+  },
+  "groups": {
+    "page": {
+      "title": "Gruppi di prodotti",
+      "subtitle": "Crea gruppi per applicare regole di spedizione e mappature di imballaggio a più prodotti in un solo passo.",
+      "primary_action": "Nuovo gruppo",
+      "secondary_action_sync": "Importa tipi dal catalogo Shopify"
+    },
+    "info_banner": "Scegli come popolare il gruppo: <strong>Tipo prodotto Shopify</strong> ne crea uno per ciascun <code>product_type</code>. <strong>Tag</strong> raggruppa per tag prodotto. <strong>Selezione manuale</strong> ti permette di scegliere a mano i prodotti.",
+    "match_types": {
+      "MANUAL": "Selezione manuale",
+      "PRODUCT_TYPE": "Tipo prodotto Shopify",
+      "TAG": "Tag prodotto",
+      "MANUAL_option": "Selezione manuale",
+      "PRODUCT_TYPE_option": "Tipo prodotto Shopify (automatico)",
+      "TAG_option": "Tag prodotto (automatico)"
+    },
+    "tabs": {
+      "all": "Tutti ({{count}})",
+      "product_type": "Per tipo ({{count}})",
+      "tag": "Per tag ({{count}})",
+      "manual": "Manuali ({{count}})"
+    },
+    "empty_state": {
+      "heading_all": "Nessun gruppo creato",
+      "heading_category": "Nessun gruppo in questa categoria",
+      "body": "I gruppi ti permettono di applicare imballaggi e regole di spedizione a più prodotti contemporaneamente. Crea il primo gruppo per iniziare.",
+      "cta": "Crea il primo gruppo"
+    },
+    "card": {
+      "match_value_label": "Valore di match",
+      "manual_count": "{{count}} prodotti selezionati manualmente",
+      "manual_count_one": "1 prodotto selezionato manualmente",
+      "used_in": "Usato nelle regole:",
+      "no_rules": "Nessuna regola di spedizione usa ancora questo gruppo."
+    },
+    "modal": {
+      "title_new": "Nuovo gruppo",
+      "title_edit": "Modifica gruppo",
+      "primary": "Salva",
+      "form": {
+        "name_label": "Nome del gruppo",
+        "name_placeholder": "es. Abbigliamento, Elettronica fragile…",
+        "match_type_label": "Come popolare il gruppo",
+        "match_value_label_product_type": "Tipo prodotto (es. Electronics, Clothing)",
+        "match_value_label_tag": "Tag prodotto (es. fragile, heavy)",
+        "match_value_help_product_type": "Deve corrispondere esattamente al campo \"Product Type\" su Shopify.",
+        "match_value_help_tag": "Deve corrispondere esattamente a un tag del prodotto su Shopify.",
+        "manual_section_title": "Seleziona i prodotti"
+      }
+    },
+    "delete_modal": {
+      "title": "Elimina gruppo?",
+      "body": "Vuoi davvero eliminare il gruppo <strong>{{name}}</strong>?",
+      "rules_warning": "Questo gruppo è usato da <strong>{{count}}</strong> regole di spedizione. Eliminandolo, queste regole diventeranno catch-all (si applicheranno a tutti i prodotti).",
+      "rules_warning_one": "Questo gruppo è usato da <strong>1</strong> regola di spedizione. Eliminandolo, diventerà catch-all.",
+      "irreversible_note": "Questa azione non può essere annullata.",
+      "primary": "Elimina"
+    },
+    "toasts": {
+      "load_failed": "Non siamo riusciti a caricare i gruppi.",
+      "name_required": "Inserisci un nome per il gruppo.",
+      "created": "Gruppo creato.",
+      "updated": "Gruppo aggiornato.",
+      "create_failed": "Creazione gruppo non riuscita.",
+      "update_failed": "Aggiornamento gruppo non riuscito.",
+      "deleted": "Gruppo eliminato.",
+      "delete_failed": "Eliminazione gruppo non riuscita.",
+      "sync_done": "Tipi prodotto importati dal catalogo Shopify.",
+      "sync_failed": "Importazione dal catalogo non riuscita."
+    }
+  }
+}

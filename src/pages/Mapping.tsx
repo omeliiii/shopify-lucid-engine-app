@@ -25,6 +25,7 @@ import {
 } from '@shopify/polaris';
 import { DeleteIcon, PlusIcon, CheckIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -81,40 +82,34 @@ interface ProductGroup {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const PURPOSE_OPTIONS = [
-  { label: 'Contenitore', value: 'CONTAINER' },
-  { label: 'Involucro', value: 'WRAP' },
-  { label: 'Sigillo', value: 'SEAL' },
-  { label: 'Etichetta', value: 'LABEL' },
-  { label: 'Cuscinetto', value: 'CUSHION' },
-];
+const PURPOSE_VALUES: PackagingComponent['purpose'][] = ['CONTAINER', 'WRAP', 'SEAL', 'LABEL', 'CUSHION'];
 
 const STATUS_FILTER_MAP: Record<number, MappingStatus | undefined> = {
-  0: undefined,    // "Tutti"
-  1: 'mapped',     // "Mappati"
-  2: 'pending',    // "Da Revisionare"
-  3: 'unmapped',   // "Senza Imballaggio"
+  0: undefined,    // "All"
+  1: 'mapped',     // "Matched"
+  2: 'pending',    // "To review"
+  3: 'unmapped',   // "No packaging"
 };
 
 const PAGE_LIMIT = 25;
-
-function purposeLabel(purpose: string): string {
-  return PURPOSE_OPTIONS.find((o) => o.value === purpose)?.label ?? purpose;
-}
-
-// ─── Status badge ─────────────────────────────────────────────────────────────
-
-function StatusCell({ status }: { status: MappingStatus }) {
-  if (status === 'mapped') return <Badge tone="success">Mappato</Badge>;
-  if (status === 'pending') return <Badge tone="info">Suggerimento AI</Badge>;
-  return <Badge tone="critical">Non Mappato</Badge>;
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Mapping() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { t } = useTranslation('product_mapping');
+  const { t: tCommon } = useTranslation('common');
+
+  const purposeLabel = useCallback(
+    (purpose: string) => t(`mapping.purposes.${purpose}` as 'mapping.purposes.CONTAINER'),
+    [t],
+  );
+
+  const purposeOptions = useMemo(
+    () => PURPOSE_VALUES.map((p) => ({ value: p, label: purposeLabel(p) })),
+    [purposeLabel],
+  );
 
   const [products, setProducts] = useState<MergedProduct[]>([]);
   const [meta, setMeta] = useState<MergedViewMeta>({
@@ -207,7 +202,7 @@ export default function Mapping() {
         });
       } else {
         setProducts([]);
-        toast.error('Impossibile caricare i prodotti');
+        toast.error(t('mapping.toasts.load_failed'));
       }
 
       if (inventoryResult.status === 'fulfilled') {
@@ -216,7 +211,7 @@ export default function Mapping() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, selectedTab, queryDebounced, toast]);
+  }, [currentPage, selectedTab, queryDebounced, toast, t]);
 
   useEffect(() => {
     loadData();
@@ -247,9 +242,9 @@ export default function Mapping() {
     setSyncing(true);
     try {
       await apiFetch('/products/sync', { method: 'POST' });
-      toast.success('Sincronizzazione avviata');
+      toast.success(t('mapping.toasts.sync_started'));
     } catch (e) {
-      toast.error('Errore durante la sincronizzazione');
+      toast.error(t('mapping.toasts.sync_failed'));
       console.error(e);
     }
     setTimeout(() => {
@@ -261,9 +256,9 @@ export default function Mapping() {
   const handleConfirm = async (productId: number, mappingId: string) => {
     try {
       await apiFetch(`/products/${productId}/packaging/${mappingId}/confirm`, { method: 'PATCH' });
-      toast.success('Suggerimento confermato');
+      toast.success(t('mapping.toasts.ai_confirmed'));
     } catch (e) {
-      toast.error('Errore durante la conferma');
+      toast.error(t('mapping.toasts.ai_confirm_failed'));
       console.error(e);
       return;
     }
@@ -291,9 +286,9 @@ export default function Mapping() {
       await apiFetch(`/products/${deleteTarget.productId}/packaging/${deleteTarget.mappingId}`, {
         method: 'DELETE',
       });
-      toast.success('Associazione rimossa');
+      toast.success(t('mapping.toasts.mapping_removed'));
     } catch (e) {
-      toast.error('Errore durante la rimozione');
+      toast.error(t('mapping.toasts.mapping_remove_failed'));
       console.error(e);
       setDeleteLoading(false);
       setDeleteModalOpen(false);
@@ -359,11 +354,11 @@ export default function Mapping() {
           overwrite: bulkGroupForm.overwrite,
         }),
       });
-      toast.success('Imballaggio applicato al gruppo');
+      toast.success(t('mapping.toasts.bulk_group_applied'));
       setBulkGroupModalOpen(false);
       loadData();
     } catch (e) {
-      toast.error('Errore durante l\'applicazione al gruppo');
+      toast.error(t('mapping.toasts.bulk_group_failed'));
       console.error(e);
     } finally {
       setBulkGroupLoading(false);
@@ -390,9 +385,9 @@ export default function Mapping() {
       const failed = results.filter((r) => r.status === 'rejected').length;
       const ok = results.length - failed;
       if (failed === 0) {
-        toast.success(`Imballaggio applicato a ${ok} prodotti`);
+        toast.success(t('mapping.toasts.bulk_selection_applied', { count: ok }));
       } else {
-        toast.error(`${failed} su ${results.length} prodotti non aggiornati`);
+        toast.error(t('mapping.toasts.bulk_selection_partial', { failed, total: results.length }));
       }
       setBulkSelectionModalOpen(false);
       clearSelection();
@@ -413,7 +408,7 @@ export default function Mapping() {
     });
 
     if (pairs.length === 0) {
-      toast.error('I prodotti selezionati non hanno suggerimenti da confermare');
+      toast.error(t('mapping.toasts.bulk_confirm_no_pending'));
       return;
     }
 
@@ -427,9 +422,9 @@ export default function Mapping() {
     const failed = results.filter((r) => r.status === 'rejected').length;
     const ok = results.length - failed;
     if (failed === 0) {
-      toast.success(`${ok} suggerimenti confermati`);
+      toast.success(t('mapping.toasts.bulk_confirm_all_done', { count: ok }));
     } else {
-      toast.error(`${failed} su ${results.length} suggerimenti non confermati`);
+      toast.error(t('mapping.toasts.bulk_confirm_partial', { failed, total: results.length }));
     }
     clearSelection();
     loadData();
@@ -453,18 +448,18 @@ export default function Mapping() {
             })
           )
         );
-        toast.success('Imballaggio applicato ai gruppi selezionati');
+        toast.success(t('mapping.toasts.mapping_add_to_groups'));
       } else {
         await apiFetch(`/products/${addTarget.shopifyProductId}/packaging`, {
           method: 'POST',
           body: JSON.stringify(payload),
         });
-        toast.success('Imballaggio associato al prodotto');
+        toast.success(t('mapping.toasts.mapping_added'));
       }
       setAddModalOpen(false);
       loadData();
     } catch (e) {
-      toast.error('Errore durante l\'associazione');
+      toast.error(t('mapping.toasts.mapping_add_failed'));
       console.error(e);
     } finally {
       setAddLoading(false);
@@ -479,14 +474,22 @@ export default function Mapping() {
     clearSelection();
   };
 
+  // ── Status badge ──────────────────────────────────────────────────────────
+
+  const StatusCell = ({ status }: { status: MappingStatus }) => {
+    if (status === 'mapped') return <Badge tone="success">{t('mapping.status.mapped')}</Badge>;
+    if (status === 'pending') return <Badge tone="info">{t('mapping.status.pending')}</Badge>;
+    return <Badge tone="critical">{t('mapping.status.unmapped')}</Badge>;
+  };
+
   // ── Tab labels with server-side counts ────────────────────────────────────
 
   const totalAll = meta.totalMapped + meta.totalPending + meta.totalUnmapped;
   const tabs = [
-    { id: 'all', content: `Tutti (${totalAll})` },
-    { id: 'mapped', content: `Mappati (${meta.totalMapped})` },
-    { id: 'pending', content: `Da Revisionare (${meta.totalPending})` },
-    { id: 'unmapped', content: `Senza Imballaggio (${meta.totalUnmapped})` },
+    { id: 'all', content: t('mapping.tabs.all', { count: totalAll }) },
+    { id: 'mapped', content: t('mapping.tabs.mapped', { count: meta.totalMapped }) },
+    { id: 'pending', content: t('mapping.tabs.pending', { count: meta.totalPending }) },
+    { id: 'unmapped', content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }) },
   ];
 
   const totalPages = Math.max(1, Math.ceil(meta.total / PAGE_LIMIT));
@@ -519,7 +522,9 @@ export default function Mapping() {
                 <InlineStack key={comp.mappingId} gap="200" blockAlign="center" wrap={false}>
                   <Thumbnail source={comp.packagingImageUrl || ''} alt={comp.packagingName} size="extraSmall" />
                   <BlockStack gap="050">
-                    <Text as="span" fontWeight="semibold" variant="bodySm">{comp.packagingName} ×{comp.quantityPerUnit}</Text>
+                    <Text as="span" fontWeight="semibold" variant="bodySm">
+                      {comp.packagingName} {t('mapping.table.row.quantity_suffix', { count: comp.quantityPerUnit })}
+                    </Text>
                     <Text as="span" variant="bodySm" tone="subdued">{purposeLabel(comp.purpose)}</Text>
                   </BlockStack>
                   <Button
@@ -527,7 +532,7 @@ export default function Mapping() {
                     size="micro"
                     tone="critical"
                     variant="plain"
-                    accessibilityLabel="Rimuovi associazione"
+                    accessibilityLabel={t('mapping.table.row.remove_accessibility')}
                     onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
                   />
                 </InlineStack>
@@ -544,8 +549,8 @@ export default function Mapping() {
                   title={comp.packagingName}
                   confidence={comp.similarityScore}
                   reason={comp.reason}
-                  acceptLabel="Conferma"
-                  rejectLabel="Rifiuta"
+                  acceptLabel={t('mapping.table.row.ai_accept')}
+                  rejectLabel={t('mapping.table.row.ai_reject')}
                   onAccept={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
                   onReject={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
                 />
@@ -554,7 +559,7 @@ export default function Mapping() {
           )}
 
           {product.confirmedComponents.length === 0 && product.pendingComponents.length === 0 && (
-            <Text as="span" tone="subdued" variant="bodySm">Nessun imballaggio assegnato</Text>
+            <Text as="span" tone="subdued" variant="bodySm">{t('mapping.table.row.no_packaging')}</Text>
           )}
         </BlockStack>
       </IndexTable.Cell>
@@ -566,7 +571,7 @@ export default function Mapping() {
           disabled={packagingOptions.length === 0}
           onClick={() => openAddModal(product)}
         >
-          Aggiungi
+          {t('mapping.table.row.add_cta')}
         </Button>
       </IndexTable.Cell>
     </IndexTable.Row>
@@ -576,13 +581,13 @@ export default function Mapping() {
 
   const promotedBulkActions = [
     {
-      content: 'Assegna imballaggio',
+      content: t('mapping.bulk_actions.assign_packaging'),
       icon: PlusIcon,
       onAction: openBulkSelectionModal,
       disabled: packagingOptions.length === 0,
     },
     {
-      content: 'Conferma suggerimenti AI',
+      content: t('mapping.bulk_actions.confirm_ai_suggestions'),
       icon: CheckIcon,
       onAction: handleBulkConfirmSuggestions,
       disabled: bulkConfirming,
@@ -593,15 +598,16 @@ export default function Mapping() {
 
   return (
     <Page
-      title="Mappatura Prodotti"
+      title={t('mapping.page.title')}
+      subtitle={t('mapping.page.subtitle')}
       primaryAction={{
-        content: 'Sincronizza Shopify',
+        content: t('mapping.page.primary_action'),
         onAction: handleSync,
         loading: syncing,
       }}
       secondaryActions={[
         {
-          content: 'Associa a gruppo',
+          content: t('mapping.page.secondary_action_assign_group'),
           onAction: openBulkGroupModal,
           disabled: groups.length === 0 || packagingOptions.length === 0,
         },
@@ -612,13 +618,10 @@ export default function Mapping() {
           <Layout.Section>
             <Banner
               tone="warning"
-              title="Configura prima l'inventario imballaggi"
-              action={{ content: 'Vai a Inventario', onAction: () => navigate('/inventory') }}
+              title={t('mapping.no_inventory_banner.title')}
+              action={{ content: t('mapping.no_inventory_banner.cta'), onAction: () => navigate('/inventory') }}
             >
-              <p>
-                Per associare gli imballaggi ai prodotti devi prima aver censito almeno
-                un imballaggio nell'inventario.
-              </p>
+              <p>{t('mapping.no_inventory_banner.body')}</p>
             </Banner>
           </Layout.Section>
         )}
@@ -629,7 +632,7 @@ export default function Mapping() {
               selected={selectedTab}
               onSelect={handleTabChange}
               queryValue={queryValue}
-              queryPlaceholder="Cerca prodotto…"
+              queryPlaceholder={t('mapping.search_placeholder')}
               onQueryChange={setQueryValue}
               onQueryClear={() => setQueryValue('')}
               mode={mode}
@@ -654,39 +657,39 @@ export default function Mapping() {
               <EmptyState
                 heading={
                   selectedTab === 3
-                    ? 'Tutti i prodotti sono mappati!'
+                    ? t('mapping.empty_state.all_mapped_heading')
                     : queryDebounced
-                      ? 'Nessun risultato trovato'
-                      : 'Nessun prodotto trovato'
+                      ? t('mapping.empty_state.no_search_results_heading')
+                      : t('mapping.empty_state.no_products_heading')
                 }
                 action={
                   !queryDebounced
-                    ? { content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }
+                    ? { content: t('mapping.page.primary_action'), onAction: handleSync, loading: syncing }
                     : undefined
                 }
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
                 <Text as="p">
                   {selectedTab === 3
-                    ? 'Ottimo! Ogni prodotto ha almeno un imballaggio associato.'
+                    ? t('mapping.empty_state.all_mapped_body')
                     : queryDebounced
-                      ? `Nessun prodotto corrisponde a "${queryDebounced}".`
-                      : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
+                      ? t('mapping.empty_state.no_search_results_body', { query: queryDebounced })
+                      : t('mapping.empty_state.no_products_body')}
                 </Text>
               </EmptyState>
             ) : (
               <BlockStack>
                 <IndexTable
-                  resourceName={{ singular: 'prodotto', plural: 'prodotti' }}
+                  resourceName={{ singular: t('mapping.table.resource_singular'), plural: t('mapping.table.resource_plural') }}
                   itemCount={productsWithId.length}
                   selectedItemsCount={allResourcesSelected ? 'All' : selectedResources.length}
                   onSelectionChange={handleSelectionChange}
                   promotedBulkActions={promotedBulkActions}
                   headings={[
-                    { title: 'Prodotto' },
-                    { title: 'Stato' },
-                    { title: 'Imballaggio' },
-                    { title: 'Azione' },
+                    { title: t('mapping.table.columns.product') },
+                    { title: t('mapping.table.columns.status') },
+                    { title: t('mapping.table.columns.packaging') },
+                    { title: t('mapping.table.columns.action') },
                   ]}
                 >
                   {rowMarkup}
@@ -701,7 +704,7 @@ export default function Mapping() {
                         onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       />
                       <Text as="span" variant="bodySm" tone="subdued">
-                        Pagina {currentPage} di {totalPages} · {meta.total} prodotti
+                        {t('mapping.table.pagination', { current: currentPage, total: totalPages, count: meta.total })}
                       </Text>
                     </InlineStack>
                   </Box>
@@ -716,37 +719,37 @@ export default function Mapping() {
       <Modal
         open={bulkGroupModalOpen}
         onClose={() => setBulkGroupModalOpen(false)}
-        title="Associa imballaggio a un gruppo"
+        title={t('mapping.modal.bulk_group.title')}
         primaryAction={{
-          content: 'Applica al gruppo',
+          content: t('mapping.modal.bulk_group.primary'),
           onAction: handleBulkGroupConfirm,
           loading: bulkGroupLoading,
           disabled: !bulkGroupForm.groupId || !bulkGroupForm.packagingId,
         }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkGroupModalOpen(false) }]}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setBulkGroupModalOpen(false) }]}
       >
         <Modal.Section>
           <FormLayout>
             <PolarisSelect
-              label="Gruppo prodotto"
+              label={t('mapping.modal.bulk_group.form.group_label')}
               options={groups.map((g) => ({ label: g.name, value: g.id }))}
               value={bulkGroupForm.groupId}
               onChange={(v) => setBulkGroupForm((f) => ({ ...f, groupId: v }))}
             />
             <PolarisSelect
-              label="Imballaggio"
+              label={t('mapping.modal.bulk_group.form.packaging_label')}
               options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
               value={bulkGroupForm.packagingId}
               onChange={(v) => setBulkGroupForm((f) => ({ ...f, packagingId: v }))}
             />
             <PolarisSelect
-              label="Scopo"
-              options={PURPOSE_OPTIONS}
+              label={t('mapping.modal.bulk_group.form.purpose_label')}
+              options={purposeOptions}
               value={bulkGroupForm.purpose}
               onChange={(v) => setBulkGroupForm((f) => ({ ...f, purpose: v }))}
             />
             <TextField
-              label="Quantità per unità"
+              label={t('mapping.modal.bulk_group.form.quantity_label')}
               type="number"
               value={bulkGroupForm.quantityPerUnit}
               onChange={(v) => setBulkGroupForm((f) => ({ ...f, quantityPerUnit: v }))}
@@ -754,10 +757,10 @@ export default function Mapping() {
               min={1}
             />
             <Checkbox
-              label="Sovrascrivi associazioni esistenti con lo stesso scopo"
+              label={t('mapping.modal.bulk_group.form.overwrite_label')}
               checked={bulkGroupForm.overwrite}
               onChange={(v) => setBulkGroupForm((f) => ({ ...f, overwrite: v }))}
-              helpText="Se attivo, rimuove le associazioni esistenti dello stesso scopo prima di applicare quella nuova."
+              helpText={t('mapping.modal.bulk_group.form.overwrite_help')}
             />
           </FormLayout>
         </Modal.Section>
@@ -767,38 +770,42 @@ export default function Mapping() {
       <Modal
         open={bulkSelectionModalOpen}
         onClose={() => setBulkSelectionModalOpen(false)}
-        title={`Associa imballaggio a ${selectedResources.length} prodotti selezionati`}
+        title={t('mapping.modal.bulk_selection.title', { count: selectedResources.length })}
         primaryAction={{
-          content: 'Applica',
+          content: t('mapping.modal.bulk_selection.primary'),
           onAction: handleBulkSelectionConfirm,
           loading: bulkSelectionLoading,
           disabled: !bulkSelectionForm.packagingId,
         }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkSelectionModalOpen(false) }]}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setBulkSelectionModalOpen(false) }]}
       >
         <Modal.Section>
           <BlockStack gap="300">
             <Banner tone="info">
               <p>
-                Questo imballaggio verrà aggiunto a <b>{selectedResources.length}</b> prodotti.
-                Le associazioni esistenti non verranno modificate.
+                <Trans
+                  ns="product_mapping"
+                  i18nKey="mapping.modal.bulk_selection.info_banner"
+                  values={{ count: selectedResources.length }}
+                  components={{ strong: <strong /> }}
+                />
               </p>
             </Banner>
             <FormLayout>
               <PolarisSelect
-                label="Imballaggio"
+                label={t('mapping.modal.bulk_selection.form.packaging_label')}
                 options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
                 value={bulkSelectionForm.packagingId}
                 onChange={(v) => setBulkSelectionForm((f) => ({ ...f, packagingId: v }))}
               />
               <PolarisSelect
-                label="Scopo"
-                options={PURPOSE_OPTIONS}
+                label={t('mapping.modal.bulk_selection.form.purpose_label')}
+                options={purposeOptions}
                 value={bulkSelectionForm.purpose}
                 onChange={(v) => setBulkSelectionForm((f) => ({ ...f, purpose: v }))}
               />
               <TextField
-                label="Quantità per unità"
+                label={t('mapping.modal.bulk_selection.form.quantity_label')}
                 type="number"
                 value={bulkSelectionForm.quantityPerUnit}
                 onChange={(v) => setBulkSelectionForm((f) => ({ ...f, quantityPerUnit: v }))}
@@ -814,47 +821,49 @@ export default function Mapping() {
       <Modal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
-        title={`Associa imballaggio — ${addTarget?.title ?? ''}`}
+        title={t('mapping.modal.single.title', { product: addTarget?.title ?? '' })}
         primaryAction={{
-          content: 'Salva',
+          content: t('mapping.modal.single.primary'),
           onAction: handleAddConfirm,
           loading: addLoading,
           disabled: !addForm.packagingId,
         }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setAddModalOpen(false) }]}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setAddModalOpen(false) }]}
       >
         <Modal.Section>
           <FormLayout>
             <PolarisSelect
-              label="Imballaggio"
+              label={t('mapping.modal.single.form.packaging_label')}
               options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
               value={addForm.packagingId}
               onChange={(v) => setAddForm((f) => ({ ...f, packagingId: v }))}
             />
             <PolarisSelect
-              label="Scopo"
-              options={PURPOSE_OPTIONS}
+              label={t('mapping.modal.single.form.purpose_label')}
+              options={purposeOptions}
               value={addForm.purpose}
               onChange={(v) => setAddForm((f) => ({ ...f, purpose: v }))}
             />
             <TextField
-              label="Quantità per unità"
+              label={t('mapping.modal.single.form.quantity_label')}
               type="number"
               value={addForm.quantityPerUnit}
               onChange={(v) => setAddForm((f) => ({ ...f, quantityPerUnit: v }))}
               autoComplete="off"
               min={1}
+              helpText={t('mapping.modal.single.form.quantity_help')}
             />
             {addTarget?.groups && addTarget.groups.length > 0 && (
               <BlockStack gap="200">
                 <Text as="span" variant="bodySm" tone="subdued">
-                  Questo prodotto appartiene {addTarget.groups.length === 1 ? 'a un gruppo' : 'a più gruppi'}.
-                  Puoi applicare l'imballaggio anche agli altri prodotti del gruppo:
+                  {addTarget.groups.length === 1
+                    ? t('mapping.modal.single.form.apply_to_groups_hint_single')
+                    : t('mapping.modal.single.form.apply_to_groups_hint_multi')}
                 </Text>
                 {addTarget.groups.map((g) => (
                   <Checkbox
                     key={g.id}
-                    label={`Applica a tutti i prodotti del gruppo "${g.name}"`}
+                    label={t('mapping.modal.single.form.apply_to_group_checkbox', { group: g.name })}
                     checked={addForm.applyToGroups.includes(g.id)}
                     onChange={(checked) =>
                       setAddForm((f) => ({
@@ -876,20 +885,29 @@ export default function Mapping() {
       <Modal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
-        title="Conferma rimozione"
+        title={t('mapping.modal.delete.title')}
         primaryAction={{
-          content: 'Rimuovi',
+          content: t('mapping.modal.delete.primary'),
           onAction: handleDeleteConfirm,
           loading: deleteLoading,
           destructive: true,
         }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setDeleteModalOpen(false) }]}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setDeleteModalOpen(false) }]}
       >
         <Modal.Section>
-          <Text as="p">
-            Vuoi rimuovere l'associazione con <Text as="span" fontWeight="bold">{deleteTarget?.name}</Text>?
-            Questa azione non può essere annullata.
-          </Text>
+          <BlockStack gap="200">
+            <Text as="p">
+              <Trans
+                ns="product_mapping"
+                i18nKey="mapping.modal.delete.body"
+                values={{ name: deleteTarget?.name ?? '' }}
+                components={{ strong: <strong /> }}
+              />
+            </Text>
+            <Text as="p" tone="subdued" variant="bodySm">
+              {t('mapping.modal.delete.irreversible_note')}
+            </Text>
+          </BlockStack>
         </Modal.Section>
       </Modal>
     </Page>

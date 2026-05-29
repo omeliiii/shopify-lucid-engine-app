@@ -4,6 +4,7 @@ import {
   Modal, Form, FormLayout, EmptyState, Tooltip, Icon,
 } from '@shopify/polaris';
 import { ExportIcon, LockIcon } from '@shopify/polaris-icons';
+import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch, apiDownload, isBillingError } from '../utils/api';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { PolarisDatePicker } from '../components/PolarisDatePicker';
@@ -53,22 +54,26 @@ interface ReportListResponse {
   };
 }
 
-function ReportStatusBadge({ report }: { report: Report }) {
-  const status: ReportStatus = report.status ?? 'READY';
-  if (status === 'PROCESSING') {
-    return <Badge tone="info" progress="incomplete">In elaborazione</Badge>;
-  }
-  if (status === 'ERROR') {
-    return <Badge tone="critical">Errore</Badge>;
-  }
-  return <Badge tone="success" progress="complete">Pronto</Badge>;
-}
-
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function Reports() {
   const navigate = useNavigate();
   const { catalog, redirectToAddon } = useBilling();
+  const { t, i18n } = useTranslation('reports');
+  const { t: tCommon } = useTranslation('common');
+
+  const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
+
+  const ReportStatusBadge = ({ report }: { report: Report }) => {
+    const status: ReportStatus = report.status ?? 'READY';
+    if (status === 'PROCESSING') {
+      return <Badge tone="info" progress="incomplete">{t('status.processing')}</Badge>;
+    }
+    if (status === 'ERROR') {
+      return <Badge tone="critical">{t('status.error')}</Badge>;
+    }
+    return <Badge tone="success" progress="complete">{t('status.ready')}</Badge>;
+  };
 
   const [newReports, setNewReports] = useState<Report[]>([]);
   const [pastReports, setPastReports] = useState<Report[]>([]);
@@ -115,10 +120,12 @@ export default function Reports() {
       setPastReports(items.filter((r) => r.downloadedAt));
     } catch (e) {
       console.error('Failed to load reports', e);
+      showToast(t('toasts.load_failed'), { isError: true });
     } finally {
       setLoading(false);
     }
-  }, [page, filterCountry, filterStartDate, filterEndDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, filterCountry, filterStartDate, filterEndDate, t]);
 
   useEffect(() => {
     loadData();
@@ -139,6 +146,7 @@ export default function Reports() {
       loadData();
     } catch (e) {
       console.error('Failed to generate report', e);
+      showToast(t('toasts.generate_failed'), { isError: true });
     } finally {
       setSubmitting(false);
       setModalOpen(false);
@@ -159,12 +167,12 @@ export default function Reports() {
         if (e.error === 'SUBSCRIPTION_ACCESS_DENIED') {
           const reason = e.details?.reason;
           if (reason === 'TRIAL') {
-            showToast('Upgrade or wait until your trial ends to download reports', { isError: true });
+            showToast(t('toasts.trial_blocked'), { isError: true });
           } else if (reason === 'COUNTRY_NOT_INCLUDED') {
             setAddonModalCountry(report.countryCode);
             setAddonModalOpen(true);
           } else if (reason === 'EXPIRED') {
-            showToast('Your subscription has expired. Please renew.', { isError: true });
+            showToast(t('toasts.expired_blocked'), { isError: true });
             navigate('/billing/start');
           } else {
             navigate('/billing/start');
@@ -172,13 +180,13 @@ export default function Reports() {
         } else if (e.error === 'NO_ACTIVE_SUBSCRIPTION') {
           navigate('/billing/start');
         } else if (e.error === 'SHOPIFY_BILLING_ERROR') {
-          showToast('Shopify is having issues, try again in a moment', { isError: true });
+          showToast(t('toasts.shopify_billing_issue'), { isError: true });
         } else {
-          showToast(e.message || 'Download failed', { isError: true });
+          showToast(e.message || t('toasts.download_failed'), { isError: true });
         }
       } else {
         console.error('Failed to download report bundle', e);
-        showToast('Errore durante il download del report.', { isError: true });
+        showToast(t('toasts.download_failed'), { isError: true });
       }
     } finally {
       setDownloadingId(null);
@@ -190,7 +198,7 @@ export default function Reports() {
     try {
       await redirectToAddon(addonModalCountry);
     } catch {
-      showToast('Something went wrong', { isError: true });
+      showToast(t('toasts.addon_failed'), { isError: true });
     } finally {
       setAddingAddon(false);
       setAddonModalOpen(false);
@@ -207,20 +215,21 @@ export default function Reports() {
     const canDownload = report.canDownload !== false && status === 'READY';
     const lockedReason = report.lockedReason;
     const addonAmount = catalog?.addon.amount ?? 99;
+    const currency = catalog?.currency === 'USD' ? '$' : (catalog?.currency ?? '$');
 
     // Build the action cell based on download access
     let actionCell: React.ReactNode;
 
     if (status === 'PROCESSING') {
       actionCell = (
-        <Tooltip content="Il report sarà disponibile al termine dell'elaborazione" dismissOnMouseOut>
-          <Button size="micro" icon={ExportIcon} disabled>Scarica</Button>
+        <Tooltip content={t('tooltips.processing')} dismissOnMouseOut>
+          <Button size="micro" icon={ExportIcon} disabled>{t('actions.download')}</Button>
         </Tooltip>
       );
     } else if (status === 'ERROR') {
       actionCell = (
-        <Tooltip content={report.errorMessage || 'Errore durante la generazione del report'} dismissOnMouseOut>
-          <Button size="micro" disabled>Non disponibile</Button>
+        <Tooltip content={report.errorMessage || t('tooltips.error_default')} dismissOnMouseOut>
+          <Button size="micro" disabled>{t('actions.download_unavailable')}</Button>
         </Tooltip>
       );
     } else if (canDownload) {
@@ -232,14 +241,14 @@ export default function Reports() {
           loading={downloadingId === report.id}
           onClick={() => handleDownloadBundle(report)}
         >
-          Scarica
+          {t('actions.download')}
         </Button>
       );
     } else if (lockedReason === 'TRIAL') {
       actionCell = (
-        <Tooltip content="Upgrade or wait until trial ends to download" dismissOnMouseOut>
+        <Tooltip content={t('tooltips.trial_locked')} dismissOnMouseOut>
           <Button size="micro" icon={LockIcon} disabled>
-            Scarica
+            {t('actions.download')}
           </Button>
         </Tooltip>
       );
@@ -253,42 +262,45 @@ export default function Reports() {
             setAddonModalOpen(true);
           }}
         >
-          {`Add country ($${addonAmount})`}
+          {t('actions.add_country', { country: report.countryCode, currency, amount: addonAmount })}
         </Button>
       );
     } else if (lockedReason === 'EXPIRED') {
       actionCell = (
         <Button size="micro" variant="primary" onClick={() => navigate('/billing/start')}>
-          Renew
+          {t('actions.renew')}
         </Button>
       );
     } else if (lockedReason === 'NO_ACCESS') {
       actionCell = (
         <Button size="micro" variant="primary" onClick={() => navigate('/billing/start')}>
-          Subscribe
+          {t('actions.subscribe')}
         </Button>
       );
     } else {
-      // Fallback — should not happen but display locked state
       actionCell = (
         <Button size="micro" icon={LockIcon} disabled>
-          Locked
+          {t('actions.download_locked')}
         </Button>
       );
     }
 
+    const periodLabel = t(`period_types.${report.periodType}` as 'period_types.ANNUAL', {
+      defaultValue: report.periodType,
+    });
+
     return [
       <InlineStack gap="200" align="start" blockAlign="center">
         <FlagBadge countryCode={report.countryCode} />
-        {isNew && <Badge tone="info">Nuovo</Badge>}
+        {isNew && <Badge tone="info">{t('status.new_badge')}</Badge>}
         {!canDownload && lockedReason === 'TRIAL' && status === 'READY' && (
           <Icon source={LockIcon} tone="subdued" />
         )}
       </InlineStack>,
       <ReportStatusBadge report={report} />,
-      report.periodType,
+      periodLabel,
       `${report.periodStart} → ${report.periodEnd}`,
-      new Date(report.generatedAt).toLocaleDateString(),
+      new Date(report.generatedAt).toLocaleDateString(dateLocale),
       <Text as="span" tone="subdued" variant="bodySm">
         {formatsLabel}
       </Text>,
@@ -299,16 +311,27 @@ export default function Reports() {
   const newRows = newReports.map((r) => buildRow(r, true));
   const pastRows = pastReports.map((r) => buildRow(r, false));
 
-  const tableHeadings = ['Paese', 'Stato', 'Periodo', 'Date', 'Generato il', 'Formati', 'Download'];
+  const tableHeadings = [
+    t('table.columns.country'),
+    t('table.columns.status'),
+    t('table.columns.period_type'),
+    t('table.columns.dates'),
+    t('table.columns.generated_at'),
+    t('table.columns.formats'),
+    t('table.columns.download'),
+  ];
   const tableColTypes = ['text', 'text', 'text', 'text', 'text', 'text', 'text'] as const;
+
+  const addonAmount = catalog?.addon.amount ?? 99;
+  const addonCurrency = catalog?.currency === 'USD' ? '$' : (catalog?.currency ?? '$');
 
   return (
     <Page
-      title="Report e Dichiarazioni"
-      subtitle="I report vengono generati automaticamente in base alla cadenza configurata per ciascun paese."
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       secondaryActions={[
         {
-          content: 'Genera manualmente',
+          content: t('page.secondary_action_manual'),
           onAction: () => setModalOpen(true),
         },
       ]}
@@ -341,13 +364,13 @@ export default function Reports() {
             <BlockStack gap="300">
               <InlineStack gap="200" blockAlign="center">
                 <Text as="h2" variant="headingMd">
-                  Nuovi report
+                  {t('sections.new_reports_title')}
                 </Text>
                 {newReports.length > 0 && <Badge tone="info">{`${newReports.length}`}</Badge>}
               </InlineStack>
               {newReports.length === 0 && !loading ? (
                 <Text as="p" tone="subdued">
-                  Nessun nuovo report da scaricare. Quando lo scheduler genera un report, comparirà qui.
+                  {t('sections.new_reports_empty')}
                 </Text>
               ) : (
                 <DataTable
@@ -365,14 +388,14 @@ export default function Reports() {
           <Card>
             <BlockStack gap="300">
               <Text as="h2" variant="headingMd">
-                Report scaricati
+                {t('sections.past_reports_title')}
               </Text>
               {pastReports.length === 0 && !loading ? (
                 <EmptyState
-                  heading="Nessun report scaricato"
+                  heading={t('empty_state.past_heading')}
                   image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                 >
-                  <p>I report già scaricati appariranno qui per consultazione futura.</p>
+                  <p>{t('empty_state.past_body')}</p>
                 </EmptyState>
               ) : (
                 <DataTable
@@ -396,40 +419,39 @@ export default function Reports() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Generazione manuale del report"
-        primaryAction={{ content: 'Genera', onAction: handleGenerate, loading: submitting }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setModalOpen(false) }]}
+        title={t('manual_modal.title')}
+        primaryAction={{ content: t('manual_modal.primary'), onAction: handleGenerate, loading: submitting }}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setModalOpen(false) }]}
       >
         <Modal.Section>
           <Form onSubmit={handleGenerate}>
             <FormLayout>
               <PolarisSelect
-                label="Paese di destinazione"
+                label={t('manual_modal.form.country_label')}
                 options={[
-                  { label: 'Germania (LUCID)', value: 'DE' },
-                  { label: 'Italia (CONAI)', value: 'IT' },
-                  { label: 'Francia (CITEO)', value: 'FR' },
+                  { label: t('schemes.DE'), value: 'DE' },
+                  { label: t('schemes.IT'), value: 'IT' },
+                  { label: t('schemes.FR'), value: 'FR' },
                 ]}
                 value={country}
                 onChange={setCountry}
               />
               <PolarisSelect
-                label="Tipo di periodo"
+                label={t('manual_modal.form.period_type_label')}
                 options={[
-                  { label: 'Annuale', value: 'ANNUAL' },
-                  { label: 'Trimestrale', value: 'QUARTERLY' },
-                  { label: 'Mensile', value: 'MONTHLY' },
+                  { label: t('period_types.ANNUAL'), value: 'ANNUAL' },
+                  { label: t('period_types.QUARTERLY'), value: 'QUARTERLY' },
+                  { label: t('period_types.MONTHLY'), value: 'MONTHLY' },
                 ]}
                 value={periodType}
                 onChange={setPeriodType}
               />
               <FormLayout.Group>
-                <PolarisDatePicker label="Data inizio" value={startDate} onChange={setStartDate} />
-                <PolarisDatePicker label="Data fine" value={endDate} onChange={setEndDate} />
+                <PolarisDatePicker label={t('manual_modal.form.start_date_label')} value={startDate} onChange={setStartDate} />
+                <PolarisDatePicker label={t('manual_modal.form.end_date_label')} value={endDate} onChange={setEndDate} />
               </FormLayout.Group>
               <Text as="p" tone="subdued" variant="bodySm">
-                I report vengono generati automaticamente secondo la cadenza configurata per ciascun
-                paese. Usa questo form solo per backfill o test.
+                {t('manual_modal.form.footer_note')}
               </Text>
             </FormLayout>
           </Form>
@@ -440,19 +462,22 @@ export default function Reports() {
       <Modal
         open={addonModalOpen}
         onClose={() => setAddonModalOpen(false)}
-        title="Country not included"
+        title={t('addon_modal.title')}
         primaryAction={{
-          content: `Add ${addonModalCountry} ($${catalog?.addon.amount ?? 99}/year)`,
+          content: t('addon_modal.primary', { country: addonModalCountry, currency: addonCurrency, amount: addonAmount }),
           onAction: handleAddonFromReport,
           loading: addingAddon,
         }}
-        secondaryActions={[{ content: 'Cancel', onAction: () => setAddonModalOpen(false) }]}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setAddonModalOpen(false) }]}
       >
         <Modal.Section>
           <Text as="p">
-            This report requires access to <strong>{addonModalCountry}</strong>, which is not
-            included in your current plan. Add it as an extra country for
-            ${catalog?.addon.amount ?? 99}/year.
+            <Trans
+              ns="reports"
+              i18nKey="addon_modal.body"
+              values={{ country: addonModalCountry, currency: addonCurrency, amount: addonAmount }}
+              components={{ strong: <strong /> }}
+            />
           </Text>
         </Modal.Section>
       </Modal>

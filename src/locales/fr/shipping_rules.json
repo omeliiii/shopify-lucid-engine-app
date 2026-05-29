@@ -1,0 +1,92 @@
+{
+  "page": {
+    "title": "Règles d'expédition",
+    "subtitle": "Indique comment tu composes les colis sortants (carton extérieur, calage, ruban) selon le nombre d'articles d'une commande. Nous utilisons ces règles pour calculer le poids REP de chaque envoi.",
+    "primary_action": "Nouvelle règle",
+    "secondary_action_groups": "Gérer les groupes de produits"
+  },
+  "no_inventory_banner": {
+    "title": "Configure d'abord ton inventaire d'emballages",
+    "body": "Avant de créer des règles, tu dois avoir dans ton inventaire au moins un carton extérieur, un ruban et un calage.",
+    "cta": "Aller à l'inventaire"
+  },
+  "empty_state": {
+    "heading": "Aucune règle d'expédition",
+    "body": "Crée ta première règle pour définir comment composer les colis selon le nombre d'articles."
+  },
+  "priority": {
+    "label": "Priorité",
+    "labels": {
+      "1": "Minimale",
+      "2": "Moyenne",
+      "3": "Haute",
+      "4": "Maximale"
+    },
+    "with_label": "Priorité : {{level}}"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "En pause",
+    "catch_all": "Catch-all"
+  },
+  "rule_card": {
+    "range_with_max": "S'applique aux commandes de {{min}} à {{max}} articles.",
+    "range_without_max": "S'applique aux commandes d'au moins {{min}} articles.",
+    "catch_all_suffix": " (s'applique à tous les produits)",
+    "scope_group_suffix": " Limitée au groupe « {{group}} ».",
+    "secondary_label": "Carton extérieur",
+    "filler_label": "Calage",
+    "tape_label": "Ruban adhésif",
+    "no_components": "Aucun emballage configuré dans cette règle.",
+    "actions": {
+      "suspend": "Mettre en pause",
+      "activate": "Réactiver"
+    }
+  },
+  "modal": {
+    "title_new": "Nouvelle règle d'expédition",
+    "title_edit": "Modifier la règle",
+    "primary": "Enregistrer la règle",
+    "form": {
+      "name_label": "Nom de la règle",
+      "name_placeholder": "ex. Petits colis (1-3 articles)",
+      "name_help": "Donne à la règle un nom reconnaissable.",
+      "min_items_label": "Nombre minimum d'articles",
+      "max_items_label": "Nombre maximum d'articles",
+      "max_items_help": "Mets la même valeur que le minimum pour cibler un nombre exact d'articles.",
+      "range_help": "Les règles se déclenchent selon le nombre d'articles dans la commande.",
+      "group_label": "Groupe de produits (optionnel)",
+      "group_help_with_groups": "Laisse « Aucun » pour appliquer la règle à tous les produits (catch-all).",
+      "group_help_empty": "Tu n'as pas encore de groupes de produits. Crée-en un dans la page Groupes pour cibler des règles.",
+      "group_none_option": "Aucun (s'applique à tous les produits)",
+      "secondary_label": "Carton extérieur ou pochette",
+      "secondary_help": "L'emballage qui contient le colis avant expédition.",
+      "filler_label": "Calage",
+      "filler_help": "Matériau qui comble l'espace vide dans le carton (papier bulle, papier, frisure…).",
+      "tape_label": "Ruban adhésif",
+      "tape_help": "Le ruban utilisé pour fermer le carton.",
+      "none_option": "Aucun",
+      "priority_label": "Priorité de la règle",
+      "priority_help": "Si deux règles se chevauchent pour une même commande, la priorité la plus haute l'emporte.",
+      "active_label": "Règle active"
+    }
+  },
+  "delete_modal": {
+    "title": "Supprimer la règle ?",
+    "body": "Veux-tu vraiment supprimer la règle <strong>{{name}}</strong> ?",
+    "irreversible_note": "Cette action est irréversible.",
+    "primary": "Supprimer la règle"
+  },
+  "toasts": {
+    "load_failed": "Impossible de charger les règles.",
+    "name_required": "Donne un nom à la règle avant d'enregistrer.",
+    "created": "Règle créée.",
+    "updated": "Règle mise à jour.",
+    "save_failed": "L'enregistrement a échoué.",
+    "deleted": "Règle supprimée.",
+    "delete_failed": "Impossible de supprimer la règle.",
+    "activated": "Règle réactivée.",
+    "suspended": "Règle en pause : elle ne s'appliquera plus aux nouvelles commandes.",
+    "toggle_failed": "La mise à jour a échoué."
+  }
+}

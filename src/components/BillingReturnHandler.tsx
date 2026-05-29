@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useBilling } from '../contexts/BillingProvider';
 
 /**
@@ -13,6 +14,7 @@ import { useBilling } from '../contexts/BillingProvider';
 export function BillingReturnHandler() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { refreshSubscription } = useBilling();
+  const { t } = useTranslation('common');
   const handled = useRef(false);
 
   useEffect(() => {
@@ -37,13 +39,13 @@ export function BillingReturnHandler() {
     };
 
     if (billingStatus === 'ACTIVE') {
-      showToast('Subscription activated! 🎉');
+      showToast(t('paywall.subscription_activated'));
       refreshSubscription();
       return;
     }
 
     // PENDING or unknown → poll
-    showToast('Verifying subscription…');
+    showToast(t('paywall.subscription_verifying'));
 
     let attempts = 0;
     const MAX_ATTEMPTS = 5; // 5 × 2 s = 10 s
@@ -56,7 +58,7 @@ export function BillingReturnHandler() {
 
         if (sub.status === 'ACTIVE') {
           clearInterval(timer);
-          showToast('Subscription activated! 🎉');
+          showToast(t('paywall.subscription_activated'));
           refreshSubscription();
           return;
         }
@@ -66,7 +68,7 @@ export function BillingReturnHandler() {
 
       if (attempts >= MAX_ATTEMPTS) {
         clearInterval(timer);
-        showToast('Subscription is being processed — please refresh in a moment.');
+        showToast(t('paywall.subscription_processing'));
         refreshSubscription();
       }
     }, 2000);

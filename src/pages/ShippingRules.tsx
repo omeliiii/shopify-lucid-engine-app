@@ -6,6 +6,7 @@ import {
 } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -34,22 +35,18 @@ interface ShippingRule {
   productGroup?: ProductGroupRef | null;
 }
 
-// ── Constants ──
-
-const PRIORITY_LABELS: Record<number, string> = {
-  1: 'Minima',
-  2: 'Media',
-  3: 'Alta',
-  4: 'Massima',
-};
-
-const getPriorityLabel = (p: number) => PRIORITY_LABELS[p] || p;
-
 // ── Component ──
 
 export default function ShippingRules() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { t } = useTranslation('shipping_rules');
+  const { t: tCommon } = useTranslation('common');
+
+  const getPriorityLabel = useCallback(
+    (p: number) => t(`priority.labels.${p}` as 'priority.labels.1'),
+    [t],
+  );
 
   // ── State ──
   const [rules, setRules] = useState<ShippingRule[]>([]);
@@ -93,24 +90,21 @@ export default function ShippingRules() {
       setInventoryRaw(invData);
       setGroups(Array.isArray(groupsData) ? groupsData : []);
     } catch (e) {
-      toast.error('Impossibile caricare le regole');
+      toast.error(t('toasts.load_failed'));
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   // ── Inventory options, filtered by packaging type category ──
-  // PRIMARY → scatole/buste (used as outer box / "secondario")
-  // FILLER  → riempimento
-  // TAPE    → nastro adesivo
   const optionsByCategory = useMemo(() => {
     const categorise = (cat: 'PRIMARY' | 'FILLER' | 'TAPE') => [
-      { label: 'Nessuno', value: 'none' },
+      { label: t('modal.form.none_option'), value: 'none' },
       ...inventoryRaw
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .filter((i: any) => i?.packagingType?.category === cat)
@@ -122,7 +116,7 @@ export default function ShippingRules() {
       filler: categorise('FILLER'),
       tape: categorise('TAPE'),
     };
-  }, [inventoryRaw]);
+  }, [inventoryRaw, t]);
 
   const lookupInventoryName = (id: string | null | undefined): string | undefined => {
     if (!id) return undefined;
@@ -132,7 +126,7 @@ export default function ShippingRules() {
 
   // ── Group options for rule form ──
   const groupOptions = [
-    { label: 'Nessuno (Catch-all)', value: 'none' },
+    { label: t('modal.form.group_none_option'), value: 'none' },
     ...groups.map((g) => ({ label: g.name, value: g.id })),
   ];
 
@@ -140,7 +134,7 @@ export default function ShippingRules() {
 
   const handleRuleSubmit = async () => {
     if (!name.trim()) {
-      toast.error('Inserisci un nome per la regola');
+      toast.error(t('toasts.name_required'));
       return;
     }
     setSaving(true);
@@ -162,18 +156,18 @@ export default function ShippingRules() {
           method: 'PATCH',
           body: JSON.stringify(body),
         });
-        toast.success('Regola aggiornata');
+        toast.success(t('toasts.updated'));
       } else {
         await apiFetch('/orders/shipping-rules', {
           method: 'POST',
           body: JSON.stringify(body),
         });
-        toast.success('Regola creata');
+        toast.success(t('toasts.created'));
       }
       setRuleModalOpen(false);
       await loadData();
     } catch (e) {
-      toast.error('Errore durante il salvataggio');
+      toast.error(t('toasts.save_failed'));
       console.error(e);
     } finally {
       setSaving(false);
@@ -204,10 +198,10 @@ export default function ShippingRules() {
     setDeleting(true);
     try {
       await apiFetch(`/orders/shipping-rules/${pendingDelete.id}`, { method: 'DELETE' });
-      toast.success('Regola eliminata');
+      toast.success(t('toasts.deleted'));
       await loadData();
     } catch (e) {
-      toast.error('Errore durante l\'eliminazione');
+      toast.error(t('toasts.delete_failed'));
       console.error(e);
     } finally {
       setDeleting(false);
@@ -237,10 +231,10 @@ export default function ShippingRules() {
         method: 'PATCH',
         body: JSON.stringify({ isActive: !rule.isActive }),
       });
-      toast.success(rule.isActive ? 'Regola sospesa' : 'Regola attivata');
+      toast.success(rule.isActive ? t('toasts.suspended') : t('toasts.activated'));
       await loadData();
     } catch (e) {
-      toast.error('Errore durante l\'aggiornamento');
+      toast.error(t('toasts.toggle_failed'));
       console.error(e);
     }
   };
@@ -251,16 +245,16 @@ export default function ShippingRules() {
 
   return (
     <Page
-      title="Regole di Spedizione"
-      subtitle="Definisci come comporre i pacchi (scatole esterne + filler) in base al numero di articoli per ordine."
+      title={t('page.title')}
+      subtitle={t('page.subtitle')}
       primaryAction={{
-        content: 'Nuova Regola',
+        content: t('page.primary_action'),
         onAction: () => { resetRuleForm(); setRuleModalOpen(true); },
         disabled: noInventory,
       }}
       secondaryActions={[
         {
-          content: 'Gestisci gruppi',
+          content: t('page.secondary_action_groups'),
           onAction: () => navigate('/groups'),
         },
       ]}
@@ -270,13 +264,10 @@ export default function ShippingRules() {
           <Layout.Section>
             <Banner
               tone="warning"
-              title="Configura prima l'inventario imballaggi"
-              action={{ content: 'Vai a Inventario', onAction: () => navigate('/inventory') }}
+              title={t('no_inventory_banner.title')}
+              action={{ content: t('no_inventory_banner.cta'), onAction: () => navigate('/inventory') }}
             >
-              <p>
-                Per creare regole di spedizione devi prima aver censito gli imballaggi
-                secondari (scatole esterne) e di riempimento nell'inventario.
-              </p>
+              <p>{t('no_inventory_banner.body')}</p>
             </Banner>
           </Layout.Section>
         )}
@@ -285,6 +276,7 @@ export default function ShippingRules() {
           <BlockStack gap="400">
             {rules.map((item) => {
               const groupLabel = item.productGroup?.name ?? null;
+              const hasMax = typeof item.maxItems === 'number' && item.maxItems > 0;
 
               return (
                 <Card key={item.id} padding="400">
@@ -293,14 +285,20 @@ export default function ShippingRules() {
                       <InlineStack gap="200" blockAlign="center">
                         <Text as="h3" variant="headingMd">{item.name}</Text>
                         <Badge tone={item.isActive ? 'success' : 'critical'}>
-                          {item.isActive ? 'Attiva' : 'Disattiva'}
+                          {item.isActive ? t('status.active') : t('status.inactive')}
                         </Badge>
-                        <Badge tone="info">{'Priorità: ' + getPriorityLabel(item.priority)}</Badge>
-                        {groupLabel && <Badge tone="warning">{groupLabel}</Badge>}
+                        <Badge tone="info">{t('priority.with_label', { level: getPriorityLabel(item.priority) })}</Badge>
+                        {groupLabel
+                          ? <Badge tone="warning">{groupLabel}</Badge>
+                          : <Badge tone="attention">{t('status.catch_all')}</Badge>}
                       </InlineStack>
                       <Text as="p" tone="subdued">
-                        Da {item.minItems} a {item.maxItems ?? '∞'} articoli per pacco.
-                        {!groupLabel && ' (Catch-all)'}
+                        {hasMax
+                          ? t('rule_card.range_with_max', { min: item.minItems, max: item.maxItems })
+                          : t('rule_card.range_without_max', { min: item.minItems })}
+                        {groupLabel
+                          ? t('rule_card.scope_group_suffix', { group: groupLabel })
+                          : t('rule_card.catch_all_suffix')}
                       </Text>
                       <InlineStack gap="400">
                         {item.secondaryPackagingId && (() => {
@@ -311,7 +309,7 @@ export default function ShippingRules() {
                             <InlineStack gap="200" blockAlign="center">
                               {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                               <Text as="span" variant="bodySm">
-                                <b>Secondario:</b> {item.secondaryPackaging?.name || lookupInventoryName(item.secondaryPackagingId) || item.secondaryPackagingId}
+                                <b>{t('rule_card.secondary_label')}:</b> {item.secondaryPackaging?.name || lookupInventoryName(item.secondaryPackagingId) || item.secondaryPackagingId}
                               </Text>
                             </InlineStack>
                           );
@@ -324,7 +322,7 @@ export default function ShippingRules() {
                             <InlineStack gap="200" blockAlign="center">
                               {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                               <Text as="span" variant="bodySm">
-                                <b>Riempimento:</b> {item.fillerPackaging?.name || lookupInventoryName(item.fillerPackagingId) || item.fillerPackagingId}
+                                <b>{t('rule_card.filler_label')}:</b> {item.fillerPackaging?.name || lookupInventoryName(item.fillerPackagingId) || item.fillerPackagingId}
                               </Text>
                             </InlineStack>
                           );
@@ -337,19 +335,22 @@ export default function ShippingRules() {
                             <InlineStack gap="200" blockAlign="center">
                               {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                               <Text as="span" variant="bodySm">
-                                <b>Tape:</b> {item.tapePackaging?.name || lookupInventoryName(item.tapePackagingId) || item.tapePackagingId}
+                                <b>{t('rule_card.tape_label')}:</b> {item.tapePackaging?.name || lookupInventoryName(item.tapePackagingId) || item.tapePackagingId}
                               </Text>
                             </InlineStack>
                           );
                         })()}
+                        {!item.secondaryPackagingId && !item.fillerPackagingId && !item.tapePackagingId && (
+                          <Text as="span" variant="bodySm" tone="subdued">{t('rule_card.no_components')}</Text>
+                        )}
                       </InlineStack>
                     </BlockStack>
                     <InlineStack gap="200">
                       <Button onClick={() => toggleActive(item.id)} tone={item.isActive ? 'critical' : 'success'}>
-                        {item.isActive ? 'Sospendi' : 'Attiva'}
+                        {item.isActive ? t('rule_card.actions.suspend') : t('rule_card.actions.activate')}
                       </Button>
-                      <Button icon={EditIcon} onClick={() => handleEditRule(item)}>Modifica</Button>
-                      <Button tone="critical" icon={DeleteIcon} onClick={() => askDeleteRule(item)}>Elimina</Button>
+                      <Button icon={EditIcon} onClick={() => handleEditRule(item)}>{tCommon('actions.edit')}</Button>
+                      <Button tone="critical" icon={DeleteIcon} onClick={() => askDeleteRule(item)}>{tCommon('actions.delete')}</Button>
                     </InlineStack>
                   </InlineStack>
                 </Card>
@@ -358,9 +359,9 @@ export default function ShippingRules() {
             {rules.length === 0 && !loading && !noInventory && (
               <Card padding="400">
                 <BlockStack gap="200">
-                  <Text as="p" tone="subdued">Nessuna regola di spedizione configurata.</Text>
+                  <Text as="p" tone="subdued">{t('empty_state.heading')}</Text>
                   <Text as="p" tone="subdued" variant="bodySm">
-                    Crea la prima regola per definire come comporre i pacchi in uscita.
+                    {t('empty_state.body')}
                   </Text>
                 </BlockStack>
               </Card>
@@ -373,60 +374,74 @@ export default function ShippingRules() {
       <Modal
         open={ruleModalOpen}
         onClose={() => setRuleModalOpen(false)}
-        title={editingRuleId ? 'Modifica Regola di Imballaggio' : 'Nuova Regola di Imballaggio'}
-        primaryAction={{ content: 'Salva', onAction: handleRuleSubmit, loading: saving }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setRuleModalOpen(false) }]}
+        title={editingRuleId ? t('modal.title_edit') : t('modal.title_new')}
+        primaryAction={{ content: t('modal.primary'), onAction: handleRuleSubmit, loading: saving }}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setRuleModalOpen(false) }]}
       >
         <Modal.Section>
           <Form onSubmit={handleRuleSubmit}>
             <FormLayout>
-              <TextField label="Nome Regola" value={name} onChange={setName} autoComplete="off" />
+              <TextField
+                label={t('modal.form.name_label')}
+                value={name}
+                onChange={setName}
+                autoComplete="off"
+                placeholder={t('modal.form.name_placeholder')}
+                helpText={t('modal.form.name_help')}
+              />
               <FormLayout.Group>
-                <TextField label="Articoli Minimi" type="number" value={minItems} onChange={setMinItems} autoComplete="off" />
-                <TextField label="Articoli Massimi" type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" />
+                <TextField label={t('modal.form.min_items_label')} type="number" value={minItems} onChange={setMinItems} autoComplete="off" min={1} />
+                <TextField label={t('modal.form.max_items_label')} type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" min={1} helpText={t('modal.form.max_items_help')} />
               </FormLayout.Group>
               <BlockStack gap="100">
                 <PolarisSelect
-                  label="Gruppo Prodotto (Opzionale)"
+                  label={t('modal.form.group_label')}
                   options={groupOptions}
                   value={productGroupId}
                   onChange={setProductGroupId}
                 />
                 <Text as="p" variant="bodySm" tone="subdued">
-                  {groups.length === 0
-                    ? 'Non hai ancora gruppi. Creane uno in "Gestisci gruppi" per applicare regole solo a una categoria di prodotti.'
-                    : 'Lascia "Nessuno" per applicare la regola a tutti i prodotti (catch-all).'}
+                  {groups.length === 0 ? t('modal.form.group_help_empty') : t('modal.form.group_help_with_groups')}
                 </Text>
               </BlockStack>
-              <PolarisSelect
-                label="Imballaggio Secondario (Opzionale)"
-                options={optionsByCategory.secondary}
-                value={secondaryPackagingId}
-                onChange={setSecondaryPackagingId}
-              />
-              <PolarisSelect
-                label="Imballaggio di Riempimento (Opzionale)"
-                options={optionsByCategory.filler}
-                value={fillerPackagingId}
-                onChange={setFillerPackagingId}
-              />
-              <PolarisSelect
-                label="Nastro Adesivo (Opzionale)"
-                options={optionsByCategory.tape}
-                value={tapePackagingId}
-                onChange={setTapePackagingId}
-              />
+              <BlockStack gap="100">
+                <PolarisSelect
+                  label={t('modal.form.secondary_label')}
+                  options={optionsByCategory.secondary}
+                  value={secondaryPackagingId}
+                  onChange={setSecondaryPackagingId}
+                />
+                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.secondary_help')}</Text>
+              </BlockStack>
+              <BlockStack gap="100">
+                <PolarisSelect
+                  label={t('modal.form.filler_label')}
+                  options={optionsByCategory.filler}
+                  value={fillerPackagingId}
+                  onChange={setFillerPackagingId}
+                />
+                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.filler_help')}</Text>
+              </BlockStack>
+              <BlockStack gap="100">
+                <PolarisSelect
+                  label={t('modal.form.tape_label')}
+                  options={optionsByCategory.tape}
+                  value={tapePackagingId}
+                  onChange={setTapePackagingId}
+                />
+                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.tape_help')}</Text>
+              </BlockStack>
               <RangeSlider
-                label={`Priorità: ${getPriorityLabel(priority)}`}
+                label={t('priority.with_label', { level: getPriorityLabel(priority) })}
                 value={priority}
                 min={1}
                 max={4}
                 step={1}
                 output
                 onChange={(val) => setPriority(val as number)}
-                helpText="Le regole con priorità più alta vengono valutate prima."
+                helpText={t('modal.form.priority_help')}
               />
-              <Checkbox label="Regola Attiva" checked={isActive} onChange={setIsActive} />
+              <Checkbox label={t('modal.form.active_label')} checked={isActive} onChange={setIsActive} />
             </FormLayout>
           </Form>
         </Modal.Section>
@@ -436,25 +451,29 @@ export default function ShippingRules() {
       <Modal
         open={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); setPendingDelete(null); }}
-        title="Conferma eliminazione"
+        title={t('delete_modal.title')}
         primaryAction={{
-          content: 'Elimina',
+          content: t('delete_modal.primary'),
           destructive: true,
           loading: deleting,
           onAction: handleConfirmDelete,
         }}
         secondaryActions={[
-          { content: 'Annulla', onAction: () => { setDeleteModalOpen(false); setPendingDelete(null); } },
+          { content: tCommon('actions.cancel'), onAction: () => { setDeleteModalOpen(false); setPendingDelete(null); } },
         ]}
       >
         <Modal.Section>
           <BlockStack gap="200">
             <Text as="p">
-              Vuoi davvero eliminare la regola{' '}
-              <Text as="span" fontWeight="bold">{pendingDelete?.name}</Text>?
+              <Trans
+                ns="shipping_rules"
+                i18nKey="delete_modal.body"
+                values={{ name: pendingDelete?.name ?? '' }}
+                components={{ strong: <strong /> }}
+              />
             </Text>
             <Text as="p" tone="subdued" variant="bodySm">
-              Questa azione non può essere annullata.
+              {t('delete_modal.irreversible_note')}
             </Text>
           </BlockStack>
         </Modal.Section>

@@ -1,7 +1,8 @@
-import { 
-  InlineStack, 
+import {
+  InlineStack,
   Button
 } from '@shopify/polaris';
+import { useTranslation } from 'react-i18next';
 import { PolarisDatePicker } from './PolarisDatePicker';
 import { PolarisSelect } from './PolarisSelect';
 
@@ -15,13 +16,6 @@ interface CountryDateFiltersProps {
   onReset: () => void;
 }
 
-const COUNTRY_OPTIONS = [
-  { label: 'Tutti i paesi', value: 'ALL' },
-  { label: 'Germania (DE)', value: 'DE' },
-  { label: 'Italia (IT)', value: 'IT' },
-  { label: 'Francia (FR)', value: 'FR' },
-];
-
 export function CountryDateFilters({
   countryFilter,
   onCountryChange,
@@ -31,19 +25,28 @@ export function CountryDateFilters({
   onEndDateChange,
   onReset
 }: CountryDateFiltersProps) {
+  const { t } = useTranslation('common');
+
+  const COUNTRY_OPTIONS = [
+    { label: t('countries.all'), value: 'ALL' },
+    { label: t('countries.with_code.DE'), value: 'DE' },
+    { label: t('countries.with_code.IT'), value: 'IT' },
+    { label: t('countries.with_code.FR'), value: 'FR' },
+  ];
+
   return (
     <InlineStack gap="400" blockAlign="end">
       <PolarisSelect
-        label="Filtra per Paese"
+        label={t('filters.country_label')}
         options={COUNTRY_OPTIONS}
         value={countryFilter}
         onChange={onCountryChange}
       />
-      <PolarisDatePicker label="Data Inizio" value={startDate} onChange={onStartDateChange} />
-      <PolarisDatePicker label="Data Fine" value={endDate} onChange={onEndDateChange} />
-      
+      <PolarisDatePicker label={t('filters.start_date')} value={startDate} onChange={onStartDateChange} />
+      <PolarisDatePicker label={t('filters.end_date')} value={endDate} onChange={onEndDateChange} />
+
       {(countryFilter !== 'ALL' || startDate !== '' || endDate !== '') && (
-        <Button onClick={onReset}>Resetta Filtri</Button>
+        <Button onClick={onReset}>{t('actions.reset_filters')}</Button>
       )}
     </InlineStack>
   );

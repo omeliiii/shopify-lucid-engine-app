@@ -18,6 +18,7 @@ import {
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
+import { useTranslation, Trans } from 'react-i18next';
 import { useBilling } from '../contexts/BillingProvider';
 import { countryDisplay, countryFlag, countryLabel, countryOptions } from '../utils/countries';
 import type { SubscriptionStatus } from '../types/billingTypes';
@@ -25,48 +26,9 @@ import { isBillingError } from '../utils/api';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
-
 function daysUntil(iso: string): number {
   const diff = new Date(iso).getTime() - Date.now();
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-}
-
-function statusBadge(
-  status: SubscriptionStatus | null,
-  isInTrial: boolean,
-  trialEndsAt: string | null,
-  currentPeriodEnd: string | null,
-) {
-  if (!status) return <Badge>Unknown</Badge>;
-
-  if (status === 'ACTIVE' && isInTrial && trialEndsAt) {
-    const days = daysUntil(trialEndsAt);
-    return <Badge tone="info">{`Trial (${days} day${days !== 1 ? 's' : ''} left)`}</Badge>;
-  }
-  if (status === 'ACTIVE') {
-    return <Badge tone="success">Active</Badge>;
-  }
-  if (status === 'CANCELLED' && currentPeriodEnd && new Date(currentPeriodEnd) > new Date()) {
-    return <Badge tone="warning">{`Cancelled — access until ${formatDate(currentPeriodEnd)}`}</Badge>;
-  }
-  if (status === 'EXPIRED') {
-    return <Badge tone="critical">Expired</Badge>;
-  }
-  if (status === 'PENDING') {
-    return <Badge>Awaiting confirmation</Badge>;
-  }
-  if (status === 'DECLINED') {
-    return <Badge tone="critical">Declined</Badge>;
-  }
-  return <Badge>{status}</Badge>;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -84,6 +46,53 @@ export default function Subscription() {
     getPlan,
     refreshSubscription,
   } = useBilling();
+  const { t, i18n } = useTranslation('common');
+  const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
+
+  const formatDate = (iso: string | null | undefined): string => {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString(dateLocale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const renderStatusBadge = (
+    status: SubscriptionStatus | null,
+    isInTrial: boolean,
+    trialEndsAt: string | null,
+    currentPeriodEnd: string | null,
+  ) => {
+    if (!status) return <Badge>{t('billing.subscription_status.unknown')}</Badge>;
+
+    if (status === 'ACTIVE' && isInTrial && trialEndsAt) {
+      const days = daysUntil(trialEndsAt);
+      return (
+        <Badge tone="info">
+          {days === 1
+            ? t('billing.subscription_status.trial_one')
+            : t('billing.subscription_status.trial', { days })}
+        </Badge>
+      );
+    }
+    if (status === 'ACTIVE') {
+      return <Badge tone="success">{t('billing.subscription_status.active')}</Badge>;
+    }
+    if (status === 'CANCELLED' && currentPeriodEnd && new Date(currentPeriodEnd) > new Date()) {
+      return <Badge tone="warning">{t('billing.subscription_status.cancelled_until', { date: formatDate(currentPeriodEnd) })}</Badge>;
+    }
+    if (status === 'EXPIRED') {
+      return <Badge tone="critical">{t('billing.subscription_status.expired')}</Badge>;
+    }
+    if (status === 'PENDING') {
+      return <Badge>{t('billing.subscription_status.pending')}</Badge>;
+    }
+    if (status === 'DECLINED') {
+      return <Badge tone="critical">{t('billing.subscription_status.declined')}</Badge>;
+    }
+    return <Badge>{status}</Badge>;
+  };
 
   // ── Local UI state ──
   const [changeCountryOpen, setChangeCountryOpen] = useState(false);
@@ -128,7 +137,7 @@ export default function Subscription() {
   // ── Loading state ──
   if (loading || !sub || !catalog) {
     return (
-      <SkeletonPage title="Subscription">
+      <SkeletonPage title={t('billing.subscription_page.title')}>
         <Layout>
           <Layout.Section><Card><SkeletonBodyText lines={6} /></Card></Layout.Section>
           <Layout.Section><Card><SkeletonBodyText lines={4} /></Card></Layout.Section>
@@ -137,24 +146,28 @@ export default function Subscription() {
     );
   }
 
+  const currency = catalog.currency === 'USD' ? '$' : catalog.currency;
+  const addonAmount = catalog.addon.amount;
+  const multiAmount = getPlan('MULTI_COUNTRY')?.amount ?? 329;
+
   // ── Handlers ──
   const handleChangeCountry = async () => {
     setChangingCountry(true);
     try {
       await changeCountry(newCountry);
-      showToast(`Country changed to ${countryLabel(newCountry)}`);
+      showToast(t('billing.modals.change_country.toast_changed', { country: countryLabel(newCountry) }));
       setChangeCountryOpen(false);
       setNewCountry('');
     } catch (e) {
       if (isBillingError(e) && e.error === 'COUNTRY_LOCKED') {
         showToast(
-          `Cannot change country until next renewal (${formatDate(sub.currentPeriodEnd)})`,
+          t('billing.modals.change_country.toast_locked', { date: formatDate(sub.currentPeriodEnd) }),
           { isError: true },
         );
       } else if (isBillingError(e) && e.error === 'COUNTRY_NOT_SUPPORTED') {
-        showToast('Country not available', { isError: true });
+        showToast(t('billing.modals.change_country.toast_unsupported'), { isError: true });
       } else {
-        showToast('Something went wrong', { isError: true });
+        showToast(t('billing.modals.change_country.toast_failed'), { isError: true });
       }
     } finally {
       setChangingCountry(false);
@@ -167,7 +180,7 @@ export default function Subscription() {
       await redirectToAddon(addonCountry);
     } catch (e) {
       console.error('[Subscription] addon failed', e);
-      showToast('Something went wrong', { isError: true });
+      showToast(t('billing.modals.addon.toast_failed'), { isError: true });
     } finally {
       setAddingAddon(false);
       setAddonOpen(false);
@@ -179,7 +192,7 @@ export default function Subscription() {
       await redirectToUpgrade();
     } catch (e) {
       console.error('[Subscription] upgrade failed', e);
-      showToast('Something went wrong', { isError: true });
+      showToast(t('billing.modals.upgrade.toast_failed'), { isError: true });
     }
   };
 
@@ -189,7 +202,7 @@ export default function Subscription() {
       await redirectToEndTrial();
     } catch (e) {
       console.error('[Subscription] endTrial failed', e);
-      showToast('Something went wrong', { isError: true });
+      showToast(t('billing.modals.end_trial.toast_failed'), { isError: true });
       setEndingTrial(false);
     }
   };
@@ -198,14 +211,14 @@ export default function Subscription() {
     setCancelling(true);
     try {
       await cancel();
-      showToast(`Your subscription will end on ${formatDate(sub.currentPeriodEnd)}`);
+      showToast(t('billing.modals.cancel.toast_confirmed', { date: formatDate(sub.currentPeriodEnd) }));
       setCancelOpen(false);
       await refreshSubscription();
     } catch (e) {
       if (isBillingError(e)) {
         showToast(e.message, { isError: true });
       } else {
-        showToast('Something went wrong', { isError: true });
+        showToast(t('billing.modals.cancel.toast_failed'), { isError: true });
       }
     } finally {
       setCancelling(false);
@@ -213,7 +226,7 @@ export default function Subscription() {
   };
 
   return (
-    <Page title="Subscription" narrowWidth>
+    <Page title={t('billing.subscription_page.title')} narrowWidth>
       <Layout>
         {/* ── Header: Plan + Status ── */}
         <Layout.Section>
@@ -221,24 +234,28 @@ export default function Subscription() {
             <BlockStack gap="400">
               <InlineStack align="space-between" blockAlign="center">
                 <Text as="h2" variant="headingLg">
-                  {planInfo?.name ?? sub.plan ?? 'No plan'}
+                  {planInfo?.name ?? sub.plan ?? t('billing.subscription_page.no_plan')}
                 </Text>
-                {statusBadge(sub.status, sub.isInTrial, sub.trialEndsAt, sub.currentPeriodEnd)}
+                {renderStatusBadge(sub.status, sub.isInTrial, sub.trialEndsAt, sub.currentPeriodEnd)}
               </InlineStack>
 
               <InlineStack gap="100" blockAlign="baseline">
                 <Text as="span" variant="headingXl">
-                  {`$${planInfo?.amount ?? '—'}`}
+                  {`${currency}${planInfo?.amount ?? '—'}`}
                 </Text>
-                <Text as="span" tone="subdued">/year</Text>
+                <Text as="span" tone="subdued">{t('billing.plans.one_country.amount_unit')}</Text>
               </InlineStack>
 
               {sub.isInTrial && sub.trialEndsAt && (
                 <Banner tone="info">
                   <BlockStack gap="300">
                     <p>
-                      You're on a free trial until <strong>{formatDate(sub.trialEndsAt)}</strong>.
-                      Report downloads are available after the trial ends.
+                      <Trans
+                        ns="common"
+                        i18nKey="billing.subscription_page.trial_banner_body"
+                        values={{ date: formatDate(sub.trialEndsAt) }}
+                        components={{ strong: <strong /> }}
+                      />
                     </p>
                     <Box>
                       <Button
@@ -246,7 +263,7 @@ export default function Subscription() {
                         loading={endingTrial}
                         onClick={handleEndTrial}
                       >
-                        End trial and activate payment
+                        {t('billing.subscription_page.end_trial_cta')}
                       </Button>
                     </Box>
                   </BlockStack>
@@ -255,7 +272,7 @@ export default function Subscription() {
 
               {sub.currentPeriodEnd && sub.status !== 'CANCELLED' && (
                 <Text as="p" tone="subdued">
-                  Renews on {formatDate(sub.currentPeriodEnd)}
+                  {t('billing.subscription_page.renews_on', { date: formatDate(sub.currentPeriodEnd) })}
                 </Text>
               )}
             </BlockStack>
@@ -267,13 +284,13 @@ export default function Subscription() {
           <Layout.Section>
             <Card>
               <BlockStack gap="400">
-                <Text as="h2" variant="headingMd">Selected Country</Text>
+                <Text as="h2" variant="headingMd">{t('billing.subscription_page.selected_country_title')}</Text>
 
                 <InlineStack gap="200" blockAlign="center">
                   <Text as="span" variant="headingLg">
                     {sub.selectedCountry
                       ? countryDisplay(sub.selectedCountry)
-                      : 'No country selected'}
+                      : t('billing.subscription_page.no_country_selected')}
                   </Text>
 
                   {sub.canChangeSelectedCountry ? (
@@ -281,11 +298,11 @@ export default function Subscription() {
                       size="slim"
                       onClick={() => setChangeCountryOpen(true)}
                     >
-                      Change
+                      {t('billing.subscription_page.change_country_cta')}
                     </Button>
                   ) : (
-                    <Tooltip content={`Country locked until renewal (${formatDate(sub.currentPeriodEnd)})`}>
-                      <Badge>Locked</Badge>
+                    <Tooltip content={t('billing.subscription_page.country_locked_tooltip', { date: formatDate(sub.currentPeriodEnd) })}>
+                      <Badge>{t('billing.subscription_page.country_locked_badge')}</Badge>
                     </Tooltip>
                   )}
                 </InlineStack>
@@ -293,7 +310,7 @@ export default function Subscription() {
                 <Divider />
 
                 {/* Add-on countries */}
-                <Text as="h3" variant="headingSm">Extra Countries</Text>
+                <Text as="h3" variant="headingSm">{t('billing.subscription_page.extra_countries_title')}</Text>
 
                 {sub.addonCountries.length > 0 ? (
                   <InlineStack gap="200">
@@ -302,12 +319,12 @@ export default function Subscription() {
                     ))}
                   </InlineStack>
                 ) : (
-                  <Text as="p" tone="subdued">No extra countries yet.</Text>
+                  <Text as="p" tone="subdued">{t('billing.subscription_page.no_extra_countries')}</Text>
                 )}
 
                 {addonAvailable.length > 0 && (
                   <Button onClick={() => setAddonOpen(true)}>
-                  {`Add another country ($${catalog.addon.amount}/year)`}
+                    {t('billing.subscription_page.add_country_cta', { currency, amount: addonAmount })}
                   </Button>
                 )}
               </BlockStack>
@@ -321,15 +338,14 @@ export default function Subscription() {
             <Card>
               <BlockStack gap="300">
                 <Text as="h2" variant="headingMd">
-                  Upgrade to Multi Country
+                  {t('billing.subscription_page.upgrade_title')}
                 </Text>
                 <Text as="p" tone="subdued">
-                  Get unlimited access to all countries for ${getPlan('MULTI_COUNTRY')?.amount ?? 329}/year.
-                  Prorated billing handled by Shopify — upgrade mid-cycle anytime.
+                  {t('billing.subscription_page.upgrade_body', { currency, amount: multiAmount })}
                 </Text>
                 <Box>
                   <Button variant="primary" onClick={handleUpgrade}>
-                    Upgrade now
+                    {t('billing.subscription_page.upgrade_cta')}
                   </Button>
                 </Box>
               </BlockStack>
@@ -343,15 +359,14 @@ export default function Subscription() {
             <Card>
               <BlockStack gap="300">
                 <Text as="h2" variant="headingMd" tone="critical">
-                  Danger Zone
+                  {t('billing.subscription_page.danger_zone_title')}
                 </Text>
                 <Text as="p" tone="subdued">
-                  Cancel your subscription. You'll retain access until the end of your current
-                  billing period ({formatDate(sub.currentPeriodEnd)}).
+                  {t('billing.subscription_page.danger_zone_body', { date: formatDate(sub.currentPeriodEnd) })}
                 </Text>
                 <Box>
                   <Button tone="critical" onClick={() => setCancelOpen(true)}>
-                    Cancel subscription
+                    {t('billing.subscription_page.cancel_cta')}
                   </Button>
                 </Box>
               </BlockStack>
@@ -364,24 +379,28 @@ export default function Subscription() {
       <Modal
         open={changeCountryOpen}
         onClose={() => setChangeCountryOpen(false)}
-        title="Change selected country"
+        title={t('billing.modals.change_country.title')}
         primaryAction={{
-          content: 'Confirm change',
+          content: t('billing.modals.change_country.primary'),
           onAction: handleChangeCountry,
           loading: changingCountry,
           disabled: !newCountry,
         }}
-        secondaryActions={[{ content: 'Cancel', onAction: () => setChangeCountryOpen(false) }]}
+        secondaryActions={[{ content: t('actions.cancel'), onAction: () => setChangeCountryOpen(false) }]}
       >
         <Modal.Section>
           <BlockStack gap="300">
             <Text as="p">
-              Your current country is <strong>{sub.selectedCountry ? countryDisplay(sub.selectedCountry) : '—'}</strong>.
-              Choose a new primary country below.
+              <Trans
+                ns="common"
+                i18nKey="billing.modals.change_country.body"
+                values={{ country: sub.selectedCountry ? countryDisplay(sub.selectedCountry) : '—' }}
+                components={{ strong: <strong /> }}
+              />
             </Text>
             <Select
-              label="New country"
-              options={[{ label: 'Choose…', value: '' }, ...changeCountryOpts]}
+              label={t('billing.modals.change_country.select_label')}
+              options={[{ label: t('billing.modals.change_country.placeholder'), value: '' }, ...changeCountryOpts]}
               value={newCountry}
               onChange={setNewCountry}
             />
@@ -393,25 +412,24 @@ export default function Subscription() {
       <Modal
         open={addonOpen}
         onClose={() => setAddonOpen(false)}
-        title="Add extra country"
+        title={t('billing.modals.addon.title')}
         primaryAction={{
-          content: `Add country ($${catalog.addon.amount}/year)`,
+          content: t('billing.modals.addon.primary', { currency, amount: addonAmount }),
           onAction: handleAddAddon,
           loading: addingAddon,
           disabled: !addonCountry,
         }}
-        secondaryActions={[{ content: 'Cancel', onAction: () => setAddonOpen(false) }]}
+        secondaryActions={[{ content: t('actions.cancel'), onAction: () => setAddonOpen(false) }]}
       >
         <Modal.Section>
           <BlockStack gap="300">
             <Text as="p">
-              Add an extra country to your One Country plan for ${catalog.addon.amount}/year.
-              This add-on renews automatically with your main subscription.
+              {t('billing.modals.addon.body', { currency, amount: addonAmount })}
             </Text>
             <Select
-              label="Country to add"
+              label={t('billing.modals.addon.select_label')}
               options={[
-                { label: 'Choose…', value: '' },
+                { label: t('billing.modals.addon.placeholder'), value: '' },
                 ...countryOptions(addonAvailable),
               ]}
               value={addonCountry}
@@ -425,19 +443,23 @@ export default function Subscription() {
       <Modal
         open={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        title="Cancel subscription?"
+        title={t('billing.modals.cancel.title')}
         primaryAction={{
-          content: 'Yes, cancel',
+          content: t('billing.modals.cancel.primary'),
           onAction: handleCancel,
           loading: cancelling,
           destructive: true,
         }}
-        secondaryActions={[{ content: 'Keep subscription', onAction: () => setCancelOpen(false) }]}
+        secondaryActions={[{ content: t('billing.modals.cancel.keep'), onAction: () => setCancelOpen(false) }]}
       >
         <Modal.Section>
           <Text as="p">
-            Your access will continue until <strong>{formatDate(sub.currentPeriodEnd)}</strong>.
-            After that, all features will be locked. You can resubscribe at any time.
+            <Trans
+              ns="common"
+              i18nKey="billing.modals.cancel.body"
+              values={{ date: formatDate(sub.currentPeriodEnd) }}
+              components={{ strong: <strong /> }}
+            />
           </Text>
         </Modal.Section>
       </Modal>

@@ -5,6 +5,7 @@ import {
   Tag, OptionList, Scrollable, EmptyState,
 } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
+import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
@@ -23,14 +24,16 @@ interface ShippingRuleRef {
   productGroupId: string | null;
 }
 
-const MATCH_TYPE_LABELS: Record<string, string> = {
-  MANUAL: 'Manuale',
-  PRODUCT_TYPE: 'Tipo Prodotto Shopify',
-  TAG: 'Tag Prodotto',
-};
-
 export default function Groups() {
   const toast = useToast();
+  const { t } = useTranslation('product_mapping');
+  const { t: tCommon } = useTranslation('common');
+
+  const matchTypeLabel = useCallback(
+    (mt: 'MANUAL' | 'PRODUCT_TYPE' | 'TAG') =>
+      t(`groups.match_types.${mt}` as 'groups.match_types.MANUAL'),
+    [t],
+  );
 
   const [groups, setGroups] = useState<ProductGroup[]>([]);
   const [rules, setRules] = useState<ShippingRuleRef[]>([]);
@@ -67,12 +70,12 @@ export default function Groups() {
       setGroups(Array.isArray(groupsData) ? groupsData : []);
       setRules(Array.isArray(rulesData) ? rulesData : []);
     } catch (e) {
-      toast.error('Impossibile caricare i gruppi');
+      toast.error(t('groups.toasts.load_failed'));
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -110,7 +113,7 @@ export default function Groups() {
 
   const handleSubmit = async () => {
     if (!groupName.trim()) {
-      toast.error('Inserisci un nome per il gruppo');
+      toast.error(t('groups.toasts.name_required'));
       return;
     }
     setSaving(true);
@@ -123,16 +126,16 @@ export default function Groups() {
     try {
       if (editingGroupId) {
         await apiFetch(`/products/groups/${editingGroupId}`, { method: 'PATCH', body: JSON.stringify(body) });
-        toast.success('Gruppo aggiornato');
+        toast.success(t('groups.toasts.updated'));
       } else {
         await apiFetch('/products/groups', { method: 'POST', body: JSON.stringify(body) });
-        toast.success('Gruppo creato');
+        toast.success(t('groups.toasts.created'));
       }
       setGroupModalOpen(false);
       resetForm();
       await loadGroups();
     } catch (e) {
-      toast.error(editingGroupId ? 'Errore durante l\'aggiornamento' : 'Errore durante la creazione');
+      toast.error(editingGroupId ? t('groups.toasts.update_failed') : t('groups.toasts.create_failed'));
       console.error(e);
     } finally {
       setSaving(false);
@@ -150,10 +153,10 @@ export default function Groups() {
     setDeleting(true);
     try {
       await apiFetch(`/products/groups/${pendingDelete.id}`, { method: 'DELETE' });
-      toast.success('Gruppo eliminato');
+      toast.success(t('groups.toasts.deleted'));
       await loadGroups();
     } catch (e) {
-      toast.error('Errore durante l\'eliminazione');
+      toast.error(t('groups.toasts.delete_failed'));
       console.error(e);
     } finally {
       setDeleting(false);
@@ -166,10 +169,10 @@ export default function Groups() {
     setSyncingCatalog(true);
     try {
       await apiFetch('/products/groups/sync-from-catalog', { method: 'POST' });
-      toast.success('Tipi importati dal catalogo Shopify');
+      toast.success(t('groups.toasts.sync_done'));
       await loadGroups();
     } catch (e) {
-      toast.error('Errore durante l\'importazione');
+      toast.error(t('groups.toasts.sync_failed'));
       console.error(e);
     } finally {
       setSyncingCatalog(false);
@@ -187,23 +190,23 @@ export default function Groups() {
   const visibleGroups = filter ? groups.filter((g) => g.matchType === filter) : groups;
 
   const tabs = [
-    { id: 'all', content: `Tutti (${groups.length})` },
-    { id: 'product-type', content: `Tipo (${groups.filter((g) => g.matchType === 'PRODUCT_TYPE').length})` },
-    { id: 'tag', content: `Tag (${groups.filter((g) => g.matchType === 'TAG').length})` },
-    { id: 'manual', content: `Manuali (${groups.filter((g) => g.matchType === 'MANUAL').length})` },
+    { id: 'all', content: t('groups.tabs.all', { count: groups.length }) },
+    { id: 'product-type', content: t('groups.tabs.product_type', { count: groups.filter((g) => g.matchType === 'PRODUCT_TYPE').length }) },
+    { id: 'tag', content: t('groups.tabs.tag', { count: groups.filter((g) => g.matchType === 'TAG').length }) },
+    { id: 'manual', content: t('groups.tabs.manual', { count: groups.filter((g) => g.matchType === 'MANUAL').length }) },
   ];
 
   return (
     <Page
-      title="Gruppi Prodotto"
-      subtitle="I gruppi servono per applicare regole di spedizione e mappature di imballaggio a più prodotti contemporaneamente."
+      title={t('groups.page.title')}
+      subtitle={t('groups.page.subtitle')}
       primaryAction={{
-        content: 'Nuovo Gruppo',
+        content: t('groups.page.primary_action'),
         onAction: () => { resetForm(); setGroupModalOpen(true); },
       }}
       secondaryActions={[
         {
-          content: 'Importa Tipi dal Catalogo',
+          content: t('groups.page.secondary_action_sync'),
           onAction: handleSyncFromCatalog,
           loading: syncingCatalog,
         },
@@ -213,9 +216,11 @@ export default function Groups() {
         <Layout.Section>
           <Banner tone="info">
             <p>
-              Usa <b>Tipo Prodotto Shopify</b> per un matching automatico basato sul campo
-              <code>product_type</code> di Shopify. <b>Tag</b> per matching automatico tramite tag.
-              <b> Selezione Manuale</b> per costruire un gruppo a mano scegliendo i singoli prodotti.
+              <Trans
+                ns="product_mapping"
+                i18nKey="groups.info_banner"
+                components={{ strong: <strong />, code: <code /> }}
+              />
             </p>
           </Banner>
         </Layout.Section>
@@ -226,57 +231,57 @@ export default function Groups() {
               <Box padding="400">
                 {visibleGroups.length === 0 && !loading ? (
                   <EmptyState
-                    heading={selectedTab === 0 ? 'Nessun gruppo presente' : 'Nessun gruppo in questa categoria'}
+                    heading={selectedTab === 0 ? t('groups.empty_state.heading_all') : t('groups.empty_state.heading_category')}
                     action={
                       selectedTab === 0
-                        ? { content: 'Crea il primo gruppo', onAction: () => { resetForm(); setGroupModalOpen(true); } }
+                        ? { content: t('groups.empty_state.cta'), onAction: () => { resetForm(); setGroupModalOpen(true); } }
                         : undefined
                     }
                     image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                   >
-                    <p>
-                      I gruppi permettono di raggruppare prodotti per assegnare regole o
-                      mappature in modalità bulk.
-                    </p>
+                    <p>{t('groups.empty_state.body')}</p>
                   </EmptyState>
                 ) : (
                   <BlockStack gap="400">
                     {visibleGroups.map((group) => {
                       const rulesUsingGroup = rules.filter((r) => r.productGroupId === group.id);
+                      const manualCount = group.members?.length ?? 0;
                       return (
                         <Card key={group.id} padding="400">
                           <InlineStack align="space-between" blockAlign="center">
                             <BlockStack gap="200">
                               <InlineStack gap="200" blockAlign="center">
                                 <Text as="h3" variant="headingMd">{group.name}</Text>
-                                <Badge tone="info">{MATCH_TYPE_LABELS[group.matchType]}</Badge>
+                                <Badge tone="info">{matchTypeLabel(group.matchType)}</Badge>
                               </InlineStack>
                               {group.matchValue && (
                                 <Text as="p" tone="subdued">
-                                  Valore di match: <b>{group.matchValue}</b>
+                                  {t('groups.card.match_value_label')}: <b>{group.matchValue}</b>
                                 </Text>
                               )}
                               {group.matchType === 'MANUAL' && group.members && (
                                 <Text as="p" tone="subdued">
-                                  {group.members.length} prodotti assegnati manualmente
+                                  {manualCount === 1
+                                    ? t('groups.card.manual_count_one')
+                                    : t('groups.card.manual_count', { count: manualCount })}
                                 </Text>
                               )}
                               {rulesUsingGroup.length > 0 ? (
                                 <InlineStack gap="200">
-                                  <Text as="span" variant="bodySm" tone="subdued">Usato in:</Text>
+                                  <Text as="span" variant="bodySm" tone="subdued">{t('groups.card.used_in')}</Text>
                                   {rulesUsingGroup.map((r) => (
                                     <Tag key={r.id}>{r.name}</Tag>
                                   ))}
                                 </InlineStack>
                               ) : (
                                 <Text as="p" variant="bodySm" tone="caution">
-                                  Nessuna regola associata a questo gruppo
+                                  {t('groups.card.no_rules')}
                                 </Text>
                               )}
                             </BlockStack>
                             <InlineStack gap="200">
-                              <Button icon={EditIcon} onClick={() => handleEdit(group)}>Modifica</Button>
-                              <Button tone="critical" icon={DeleteIcon} onClick={() => askDelete(group)}>Elimina</Button>
+                              <Button icon={EditIcon} onClick={() => handleEdit(group)}>{tCommon('actions.edit')}</Button>
+                              <Button tone="critical" icon={DeleteIcon} onClick={() => askDelete(group)}>{tCommon('actions.delete')}</Button>
                             </InlineStack>
                           </InlineStack>
                         </Card>
@@ -294,26 +299,26 @@ export default function Groups() {
       <Modal
         open={groupModalOpen}
         onClose={() => { setGroupModalOpen(false); resetForm(); }}
-        title={editingGroupId ? 'Modifica Gruppo' : 'Nuovo Gruppo'}
-        primaryAction={{ content: 'Salva', onAction: handleSubmit, loading: saving }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => { setGroupModalOpen(false); resetForm(); } }]}
+        title={editingGroupId ? t('groups.modal.title_edit') : t('groups.modal.title_new')}
+        primaryAction={{ content: t('groups.modal.primary'), onAction: handleSubmit, loading: saving }}
+        secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => { setGroupModalOpen(false); resetForm(); } }]}
       >
         <Modal.Section>
           <Form onSubmit={handleSubmit}>
             <FormLayout>
               <TextField
-                label="Nome Gruppo"
+                label={t('groups.modal.form.name_label')}
                 value={groupName}
                 onChange={setGroupName}
                 autoComplete="off"
-                placeholder="es. Abbigliamento, Elettronica fragile…"
+                placeholder={t('groups.modal.form.name_placeholder')}
               />
               <PolarisSelect
-                label="Tipo di Match"
+                label={t('groups.modal.form.match_type_label')}
                 options={[
-                  { label: 'Tipo Prodotto Shopify (automatico)', value: 'PRODUCT_TYPE' },
-                  { label: 'Tag Prodotto (automatico)', value: 'TAG' },
-                  { label: 'Selezione Manuale', value: 'MANUAL' },
+                  { label: t('groups.match_types.PRODUCT_TYPE_option'), value: 'PRODUCT_TYPE' },
+                  { label: t('groups.match_types.TAG_option'), value: 'TAG' },
+                  { label: t('groups.match_types.MANUAL_option'), value: 'MANUAL' },
                 ]}
                 value={matchType}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -321,19 +326,23 @@ export default function Groups() {
               />
               {matchType !== 'MANUAL' ? (
                 <TextField
-                  label={matchType === 'PRODUCT_TYPE' ? 'Tipo Prodotto (es. Electronics, Clothing)' : 'Tag (es. fragile, heavy)'}
+                  label={
+                    matchType === 'PRODUCT_TYPE'
+                      ? t('groups.modal.form.match_value_label_product_type')
+                      : t('groups.modal.form.match_value_label_tag')
+                  }
                   value={matchValue}
                   onChange={setMatchValue}
                   autoComplete="off"
                   helpText={
                     matchType === 'PRODUCT_TYPE'
-                      ? 'Deve corrispondere esattamente al "Product Type" configurato in Shopify.'
-                      : 'Deve corrispondere esattamente a un tag del prodotto Shopify.'
+                      ? t('groups.modal.form.match_value_help_product_type')
+                      : t('groups.modal.form.match_value_help_tag')
                   }
                 />
               ) : (
                 <Box paddingBlockStart="200">
-                  <Text as="h3" variant="headingSm">Seleziona Prodotti</Text>
+                  <Text as="h3" variant="headingSm">{t('groups.modal.form.manual_section_title')}</Text>
                   <Box minHeight="200px" paddingBlockStart="200">
                     <Scrollable style={{ height: '200px' }} shadow>
                       <OptionList
@@ -356,34 +365,41 @@ export default function Groups() {
       <Modal
         open={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); setPendingDelete(null); }}
-        title="Conferma eliminazione"
+        title={t('groups.delete_modal.title')}
         primaryAction={{
-          content: 'Elimina',
+          content: t('groups.delete_modal.primary'),
           destructive: true,
           loading: deleting,
           onAction: handleConfirmDelete,
         }}
         secondaryActions={[
-          { content: 'Annulla', onAction: () => { setDeleteModalOpen(false); setPendingDelete(null); } },
+          { content: tCommon('actions.cancel'), onAction: () => { setDeleteModalOpen(false); setPendingDelete(null); } },
         ]}
       >
         <Modal.Section>
           <BlockStack gap="200">
             <Text as="p">
-              Vuoi davvero eliminare il gruppo{' '}
-              <Text as="span" fontWeight="bold">{pendingDelete?.name}</Text>?
+              <Trans
+                ns="product_mapping"
+                i18nKey="groups.delete_modal.body"
+                values={{ name: pendingDelete?.name ?? '' }}
+                components={{ strong: <strong /> }}
+              />
             </Text>
             {pendingDelete && pendingDelete.rulesInGroup > 0 && (
               <Banner tone="warning">
                 <p>
-                  Questo gruppo è utilizzato da <b>{pendingDelete.rulesInGroup}</b>{' '}
-                  {pendingDelete.rulesInGroup === 1 ? 'regola' : 'regole'}. Eliminandolo, queste
-                  regole diventeranno catch-all.
+                  <Trans
+                    ns="product_mapping"
+                    i18nKey={pendingDelete.rulesInGroup === 1 ? 'groups.delete_modal.rules_warning_one' : 'groups.delete_modal.rules_warning'}
+                    values={{ count: pendingDelete.rulesInGroup }}
+                    components={{ strong: <strong /> }}
+                  />
                 </p>
               </Banner>
             )}
             <Text as="p" tone="subdued" variant="bodySm">
-              Questa azione non può essere annullata.
+              {t('groups.delete_modal.irreversible_note')}
             </Text>
           </BlockStack>
         </Modal.Section>

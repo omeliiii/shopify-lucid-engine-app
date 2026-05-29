@@ -1,0 +1,66 @@
+{
+  "page": {
+    "title": "Inventario imballaggi",
+    "subtitle": "Crea il catalogo dei materiali che usi davvero per spedire: scatole, nastro, riempitivi. Ti servirà per calcolare il peso EPR di ogni ordine.",
+    "primary_action": "Aggiungi un imballaggio"
+  },
+  "warnings": {
+    "missing_categories_title": "Mancano alcuni materiali di spedizione",
+    "missing_categories_body": "Non hai ancora aggiunto: <strong>{{categories}}</strong>. Senza questi materiali il peso del pacco potrebbe risultare incompleto nei report EPR.",
+    "missing_categories_cta": "Aggiungi ora",
+    "categories": {
+      "TAPE": "nastro adesivo (Tape)",
+      "FILLER": "materiale di riempimento (Filler)"
+    },
+    "join_and": " e "
+  },
+  "empty_state": {
+    "heading": "Nessun imballaggio nel tuo inventario",
+    "body": "Aggiungi le scatole, il nastro adesivo e i riempitivi che usi per spedire. Bastano pochi minuti per partire.",
+    "cta": "Aggiungi il primo imballaggio"
+  },
+  "ai_section": {
+    "subtitle": "Abbiamo analizzato il tuo catalogo e proposto alcuni imballaggi. Controllali e accetta quelli che usi davvero."
+  },
+  "modal": {
+    "title_add": "Aggiungi un imballaggio",
+    "title_customize": "Personalizza l'imballaggio",
+    "title_edit": "Modifica imballaggio",
+    "category_label": "Categoria",
+    "category_filters": {
+      "ALL": "Tutti",
+      "PRIMARY": "Primari",
+      "TAPE": "Nastro",
+      "FILLER": "Riempitivo"
+    },
+    "no_types_for_category": "Nessun modello disponibile per questa categoria. Crea un imballaggio personalizzato qui sotto.",
+    "create_custom_cta": "Crea un imballaggio personalizzato",
+    "back_to_standard_cta": "Torna ai modelli standard",
+    "standard_card": {
+      "customize_cta": "Personalizza",
+      "add_cta": "Aggiungi"
+    },
+    "form": {
+      "name_label": "Nome personalizzato",
+      "name_placeholder": "es. Bustina calzini brand",
+      "name_help": "Dagli un nome riconoscibile: ti servirà per associarlo ai prodotti.",
+      "type_label": "Tipo di imballaggio",
+      "length_label": "Lunghezza (mm)",
+      "width_label": "Larghezza (mm)",
+      "height_label": "Altezza (mm)",
+      "custom_gsm_label": "Grammatura personalizzata (g/m²)",
+      "custom_gsm_help": "Lascia vuoto per usare la grammatura standard del materiale."
+    }
+  },
+  "toasts": {
+    "load_failed": "Non siamo riusciti a caricare l'inventario. Aggiorna la pagina.",
+    "added": "Imballaggio aggiunto all'inventario.",
+    "updated": "Imballaggio aggiornato.",
+    "deleted": "Imballaggio eliminato.",
+    "save_failed": "Salvataggio non riuscito. Verifica i campi e riprova.",
+    "delete_failed": "Eliminazione non riuscita. Riprova.",
+    "add_failed": "Non siamo riusciti ad aggiungere l'imballaggio.",
+    "suggestion_accepted": "Suggerimento accettato e aggiunto all'inventario.",
+    "suggestion_accept_failed": "Non siamo riusciti ad accettare il suggerimento."
+  }
+}

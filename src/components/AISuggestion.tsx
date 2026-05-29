@@ -9,13 +9,14 @@ import {
   Thumbnail,
 } from '@shopify/polaris';
 import { MagicIcon } from '@shopify/polaris-icons';
+import { useTranslation } from 'react-i18next';
 
 // ── <AISuggestion.Section> ───────────────────────────────────────────────────
 // Highlighted container that groups one or more AI-generated suggestions.
 // Use for "showcase" patterns like the suggested-packaging grid in Inventory.
 
 interface SectionProps {
-  /** Section title. Defaults to "Suggeriti dall'IA". */
+  /** Section title. Falls back to the localized "AI suggestions" string. */
   title?: string;
   /** Optional supporting line under the title. */
   subtitle?: string;
@@ -25,11 +26,13 @@ interface SectionProps {
 }
 
 function AISuggestionSection({
-  title = "Suggeriti dall'IA",
+  title,
   subtitle,
   count,
   children,
 }: SectionProps) {
+  const { t } = useTranslation('common');
+  const resolvedTitle = title ?? t('ai.section_title');
   return (
     <Box
       background="bg-surface-magic"
@@ -42,7 +45,7 @@ function AISuggestionSection({
         <BlockStack gap="100">
           <InlineStack gap="200" blockAlign="center">
             <Icon source={MagicIcon} tone="magic" />
-            <Text as="h3" variant="headingMd" tone="magic">{title}</Text>
+            <Text as="h3" variant="headingMd" tone="magic">{resolvedTitle}</Text>
             {typeof count === 'number' && count > 0 && (
               <Badge tone="magic">{String(count)}</Badge>
             )}
@@ -83,10 +86,13 @@ function AISuggestionItem({
   reason,
   onAccept,
   onReject,
-  acceptLabel = 'Accetta',
-  rejectLabel = 'Rifiuta',
+  acceptLabel,
+  rejectLabel,
   disabled = false,
 }: ItemProps) {
+  const { t } = useTranslation('common');
+  const resolvedAcceptLabel = acceptLabel ?? t('ai.accept');
+  const resolvedRejectLabel = rejectLabel ?? t('ai.reject');
   return (
     <Box
       background="bg-surface-magic"
@@ -103,7 +109,7 @@ function AISuggestionItem({
           )}
           <Text as="span" fontWeight="semibold">{title}</Text>
           {typeof confidence === 'number' && (
-            <Badge tone="magic">{`${Math.round(confidence * 100)}%`}</Badge>
+            <Badge tone="magic">{t('ai.confidence_value', { value: Math.round(confidence * 100) })}</Badge>
           )}
         </InlineStack>
         {reason && (
@@ -111,10 +117,10 @@ function AISuggestionItem({
         )}
         <InlineStack gap="200">
           <Button size="micro" variant="primary" disabled={disabled} onClick={onAccept}>
-            {acceptLabel}
+            {resolvedAcceptLabel}
           </Button>
           <Button size="micro" tone="critical" disabled={disabled} onClick={onReject}>
-            {rejectLabel}
+            {resolvedRejectLabel}
           </Button>
         </InlineStack>
       </BlockStack>

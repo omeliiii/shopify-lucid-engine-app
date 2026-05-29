@@ -1,0 +1,92 @@
+{
+  "page": {
+    "title": "Shipping rules",
+    "subtitle": "Tell us how you build outgoing parcels (outer box, void filler, tape) based on how many items an order has. We'll use these rules to calculate the EPR weight of every shipment.",
+    "primary_action": "New rule",
+    "secondary_action_groups": "Manage product groups"
+  },
+  "no_inventory_banner": {
+    "title": "Set up your packaging inventory first",
+    "body": "Before creating shipping rules you need at least one outer box, one tape and one filler in your inventory.",
+    "cta": "Go to inventory"
+  },
+  "empty_state": {
+    "heading": "No shipping rules yet",
+    "body": "Create your first rule to define how outgoing parcels are built based on item count."
+  },
+  "priority": {
+    "label": "Priority",
+    "labels": {
+      "1": "Lowest",
+      "2": "Medium",
+      "3": "High",
+      "4": "Highest"
+    },
+    "with_label": "Priority: {{level}}"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Paused",
+    "catch_all": "Catch-all"
+  },
+  "rule_card": {
+    "range_with_max": "Applies to orders with {{min}} to {{max}} items.",
+    "range_without_max": "Applies to orders with at least {{min}} items.",
+    "catch_all_suffix": " (applies to every product)",
+    "scope_group_suffix": " Limited to the \"{{group}}\" group.",
+    "secondary_label": "Outer box",
+    "filler_label": "Void filler",
+    "tape_label": "Tape",
+    "no_components": "No packaging configured in this rule.",
+    "actions": {
+      "suspend": "Pause",
+      "activate": "Reactivate"
+    }
+  },
+  "modal": {
+    "title_new": "New shipping rule",
+    "title_edit": "Edit shipping rule",
+    "primary": "Save rule",
+    "form": {
+      "name_label": "Rule name",
+      "name_placeholder": "e.g. Small parcels (1-3 items)",
+      "name_help": "Give the rule a name you'll recognize later.",
+      "min_items_label": "Minimum items",
+      "max_items_label": "Maximum items",
+      "max_items_help": "Set the same value as min to apply the rule to an exact item count.",
+      "range_help": "Rules trigger based on the order's item count.",
+      "group_label": "Product group (optional)",
+      "group_help_with_groups": "Leave \"None\" to apply the rule to every product (catch-all).",
+      "group_help_empty": "You haven't created any product groups. Create one from the Groups page to scope rules.",
+      "group_none_option": "None (applies to every product)",
+      "secondary_label": "Outer box or mailer",
+      "secondary_help": "The packaging that wraps the parcel before shipping.",
+      "filler_label": "Void filler",
+      "filler_help": "Material that fills empty space in the box (bubble wrap, paper, chips…).",
+      "tape_label": "Tape",
+      "tape_help": "The tape you use to seal the box.",
+      "none_option": "None",
+      "priority_label": "Rule priority",
+      "priority_help": "When two rules overlap for the same order, the higher priority wins.",
+      "active_label": "Rule active"
+    }
+  },
+  "delete_modal": {
+    "title": "Delete rule?",
+    "body": "Do you really want to delete the rule <strong>{{name}}</strong>?",
+    "irreversible_note": "This can't be undone.",
+    "primary": "Delete rule"
+  },
+  "toasts": {
+    "load_failed": "We couldn't load your rules.",
+    "name_required": "Give the rule a name before saving.",
+    "created": "Rule created.",
+    "updated": "Rule updated.",
+    "save_failed": "We couldn't save your changes.",
+    "deleted": "Rule deleted.",
+    "delete_failed": "We couldn't delete the rule.",
+    "activated": "Rule reactivated.",
+    "suspended": "Rule paused: it won't apply to new orders.",
+    "toggle_failed": "Update didn't go through."
+  }
+}

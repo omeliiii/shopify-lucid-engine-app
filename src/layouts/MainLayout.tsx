@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { Frame, Navigation } from '@shopify/polaris';
 import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, CreditCardIcon, CollectionIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useBilling } from '../contexts/BillingProvider';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('common');
   const [unreadReports, setUnreadReports] = useState<number>(0);
   const { subscription } = useBilling();
 
@@ -35,42 +37,42 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         items={[
           {
             url: '/',
-            label: 'Dashboard & Logs',
+            label: t('navigation.dashboard'),
             icon: HomeIcon,
             onClick: () => navigate('/'),
             selected: location.pathname === '/',
           },
           {
             url: '/inventory',
-            label: 'Inventario Imballaggi',
+            label: t('navigation.inventory'),
             icon: InventoryIcon,
             onClick: () => navigate('/inventory'),
             selected: location.pathname === '/inventory',
           },
           {
             url: '/mapping',
-            label: 'Mappatura Prodotti',
+            label: t('navigation.mapping'),
             icon: ProductIcon,
             onClick: () => navigate('/mapping'),
             selected: location.pathname === '/mapping',
           },
           {
             url: '/groups',
-            label: 'Gruppi Prodotto',
+            label: t('navigation.groups'),
             icon: CollectionIcon,
             onClick: () => navigate('/groups'),
             selected: location.pathname === '/groups',
           },
           {
             url: '/shipping-rules',
-            label: 'Regole di Spedizione',
+            label: t('navigation.shipping_rules'),
             icon: SettingsIcon,
             onClick: () => navigate('/shipping-rules'),
             selected: location.pathname === '/shipping-rules',
           },
           {
             url: '/reports',
-            label: 'Report e Dichiarazioni',
+            label: t('navigation.reports'),
             icon: FileIcon,
             badge: unreadReports > 0 ? String(unreadReports) : undefined,
             onClick: () => {
@@ -83,7 +85,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             ? [
                 {
                   url: '/subscription',
-                  label: 'Subscription',
+                  label: t('navigation.subscription'),
                   icon: CreditCardIcon,
                   onClick: () => navigate('/subscription'),
                   selected: location.pathname === '/subscription',
