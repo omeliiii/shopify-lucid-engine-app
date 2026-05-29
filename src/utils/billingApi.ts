@@ -60,3 +60,8 @@ export async function changeSelectedCountry(
 export async function cancelSubscription(): Promise<void> {
   await apiFetch('/billing/cancel', { method: 'POST' });
 }
+
+/** POST /billing/end-trial — end trial early and activate paid subscription. */
+export async function endTrial(): Promise<CheckoutResponse> {
+  return apiFetch('/billing/end-trial', { method: 'POST' });
+}

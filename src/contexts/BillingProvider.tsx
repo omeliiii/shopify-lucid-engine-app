@@ -14,6 +14,7 @@ import {
   addAddon,
   changeSelectedCountry,
   cancelSubscription,
+  endTrial,
 } from '../utils/billingApi';
 
 // ── Helpers: App Bridge redirect ───────────────────────────────────────────────
@@ -62,6 +63,9 @@ interface BillingContextValue {
 
   /** Cancel subscription at period end. */
   cancel: () => Promise<void>;
+
+  /** End trial early → redirect to Shopify to activate paid subscription. */
+  redirectToEndTrial: () => Promise<void>;
 
   /** Get the CatalogPlan for a given PlanType. */
   getPlan: (plan: PlanType) => CatalogPlan | undefined;
@@ -145,6 +149,11 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     await refreshSubscription();
   }, [refreshSubscription]);
 
+  const redirectToEndTrial = useCallback(async () => {
+    const { confirmationUrl } = await endTrial();
+    redirectTopLevel(confirmationUrl);
+  }, []);
+
   const getPlan = useCallback(
     (plan: PlanType) => catalog?.plans.find((p) => p.plan === plan),
     [catalog],
@@ -172,12 +181,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       redirectToAddon,
       changeCountry,
       cancel,
+      redirectToEndTrial,
       getPlan,
     }),
     [
       catalog, subscription, loading, error, isPaywallRequired,
       refreshSubscription, redirectToCheckout, redirectToUpgrade,
-      redirectToAddon, changeCountry, cancel, getPlan,
+      redirectToAddon, changeCountry, cancel, redirectToEndTrial, getPlan,
     ],
   );
 

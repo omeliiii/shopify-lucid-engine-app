@@ -80,6 +80,7 @@ export default function Subscription() {
     redirectToAddon,
     redirectToUpgrade,
     cancel,
+    redirectToEndTrial,
     getPlan,
     refreshSubscription,
   } = useBilling();
@@ -95,6 +96,8 @@ export default function Subscription() {
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+
+  const [endingTrial, setEndingTrial] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const shopify = typeof window !== 'undefined' ? (window as any).shopify : null;
@@ -180,6 +183,17 @@ export default function Subscription() {
     }
   };
 
+  const handleEndTrial = async () => {
+    setEndingTrial(true);
+    try {
+      await redirectToEndTrial();
+    } catch (e) {
+      console.error('[Subscription] endTrial failed', e);
+      showToast('Something went wrong', { isError: true });
+      setEndingTrial(false);
+    }
+  };
+
   const handleCancel = async () => {
     setCancelling(true);
     try {
@@ -221,10 +235,21 @@ export default function Subscription() {
 
               {sub.isInTrial && sub.trialEndsAt && (
                 <Banner tone="info">
-                  <p>
-                    You're on a free trial until <strong>{formatDate(sub.trialEndsAt)}</strong>.
-                    Report downloads are available after the trial ends.
-                  </p>
+                  <BlockStack gap="300">
+                    <p>
+                      You're on a free trial until <strong>{formatDate(sub.trialEndsAt)}</strong>.
+                      Report downloads are available after the trial ends.
+                    </p>
+                    <Box>
+                      <Button
+                        variant="primary"
+                        loading={endingTrial}
+                        onClick={handleEndTrial}
+                      >
+                        End trial and activate payment
+                      </Button>
+                    </Box>
+                  </BlockStack>
                 </Banner>
               )}
 
