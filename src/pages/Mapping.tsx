@@ -19,6 +19,7 @@ import {
   Thumbnail,
   SkeletonBodyText,
   Pagination,
+  Checkbox,
 } from '@shopify/polaris';
 import { DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
@@ -56,6 +57,7 @@ interface MergedProduct {
   status: MappingStatus;
   confirmedComponents: PackagingComponent[];
   pendingComponents: PendingComponent[];
+  groups?: { id: string; name: string }[];
 }
 
 interface MergedViewMeta {
@@ -65,6 +67,11 @@ interface MergedViewMeta {
   totalMapped: number;
   totalPending: number;
   totalUnmapped: number;
+}
+
+interface ProductGroup {
+  id: string;
+  name: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -121,13 +128,30 @@ export default function Mapping() {
   // Add packaging modal
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addTarget, setAddTarget] = useState<MergedProduct | null>(null);
-  const [addForm, setAddForm] = useState({ packagingId: '', purpose: 'CONTAINER', quantityPerUnit: '1' });
+  const [addForm, setAddForm] = useState({
+    packagingId: '',
+    purpose: 'CONTAINER',
+    quantityPerUnit: '1',
+    applyToGroups: [] as string[],
+  });
   const [addLoading, setAddLoading] = useState(false);
 
   // Delete/reject confirm modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ productId: number; mappingId: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Bulk packaging-by-group modal
+  const [groups, setGroups] = useState<ProductGroup[]>([]);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkForm, setBulkForm] = useState({
+    groupId: '',
+    packagingId: '',
+    purpose: 'CONTAINER',
+    quantityPerUnit: '1',
+    overwrite: false,
+  });
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   // ── Debounce search ───────────────────────────────────────────────────────
 
@@ -177,6 +201,12 @@ export default function Mapping() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    apiFetch('/products/groups')
+      .then((data) => setGroups(Array.isArray(data) ? data : []))
+      .catch(() => setGroups([]));
+  }, []);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -243,22 +273,72 @@ export default function Mapping() {
 
   const openAddModal = (product: MergedProduct) => {
     setAddTarget(product);
-    setAddForm({ packagingId: packagingOptions[0]?.id ?? '', purpose: 'CONTAINER', quantityPerUnit: '1' });
+    setAddForm({
+      packagingId: packagingOptions[0]?.id ?? '',
+      purpose: 'CONTAINER',
+      quantityPerUnit: '1',
+      applyToGroups: [],
+    });
     setAddModalOpen(true);
+  };
+
+  const openBulkModal = () => {
+    setBulkForm({
+      groupId: groups[0]?.id ?? '',
+      packagingId: packagingOptions[0]?.id ?? '',
+      purpose: 'CONTAINER',
+      quantityPerUnit: '1',
+      overwrite: false,
+    });
+    setBulkModalOpen(true);
+  };
+
+  const handleBulkConfirm = async () => {
+    if (!bulkForm.groupId || !bulkForm.packagingId) return;
+    setBulkLoading(true);
+    try {
+      await apiFetch(`/products/groups/${bulkForm.groupId}/packaging`, {
+        method: 'POST',
+        body: JSON.stringify({
+          packagingId: bulkForm.packagingId,
+          purpose: bulkForm.purpose,
+          quantityPerUnit: parseInt(bulkForm.quantityPerUnit, 10),
+          overwrite: bulkForm.overwrite,
+        }),
+      });
+      setBulkModalOpen(false);
+      loadData();
+    } catch {
+      // ignore for demo
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   const handleAddConfirm = async () => {
     if (!addTarget || !addForm.packagingId) return;
     setAddLoading(true);
+    const payload = {
+      packagingId: addForm.packagingId,
+      purpose: addForm.purpose,
+      quantityPerUnit: parseInt(addForm.quantityPerUnit, 10),
+    };
     try {
-      await apiFetch(`/products/${addTarget.shopifyProductId}/packaging`, {
-        method: 'POST',
-        body: JSON.stringify({
-          packagingId: addForm.packagingId,
-          purpose: addForm.purpose,
-          quantityPerUnit: parseInt(addForm.quantityPerUnit, 10),
-        }),
-      });
+      if (addForm.applyToGroups.length > 0) {
+        await Promise.all(
+          addForm.applyToGroups.map((groupId) =>
+            apiFetch(`/products/groups/${groupId}/packaging`, {
+              method: 'POST',
+              body: JSON.stringify({ ...payload, overwrite: false }),
+            })
+          )
+        );
+      } else {
+        await apiFetch(`/products/${addTarget.shopifyProductId}/packaging`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+      }
       setAddModalOpen(false);
       loadData();
     } catch {
@@ -398,6 +478,13 @@ export default function Mapping() {
         onAction: handleSync,
         loading: syncing,
       }}
+      secondaryActions={[
+        {
+          content: 'Associa a gruppo',
+          onAction: openBulkModal,
+          disabled: groups.length === 0 || packagingOptions.length === 0,
+        },
+      ]}
     >
       <Layout>
         <Layout.Section>
@@ -476,6 +563,57 @@ export default function Mapping() {
         </Layout.Section>
       </Layout>
 
+      {/* ── Bulk Packaging by Group Modal ───────────────────────────────────── */}
+      <Modal
+        open={bulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+        title="Associa imballaggio a un gruppo"
+        primaryAction={{
+          content: 'Applica al gruppo',
+          onAction: handleBulkConfirm,
+          loading: bulkLoading,
+          disabled: !bulkForm.groupId || !bulkForm.packagingId,
+        }}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <FormLayout>
+            <PolarisSelect
+              label="Gruppo prodotto"
+              options={groups.map((g) => ({ label: g.name, value: g.id }))}
+              value={bulkForm.groupId}
+              onChange={(v) => setBulkForm((f) => ({ ...f, groupId: v }))}
+            />
+            <PolarisSelect
+              label="Imballaggio"
+              options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
+              value={bulkForm.packagingId}
+              onChange={(v) => setBulkForm((f) => ({ ...f, packagingId: v }))}
+            />
+            <PolarisSelect
+              label="Scopo"
+              options={PURPOSE_OPTIONS}
+              value={bulkForm.purpose}
+              onChange={(v) => setBulkForm((f) => ({ ...f, purpose: v }))}
+            />
+            <TextField
+              label="Quantità per unità"
+              type="number"
+              value={bulkForm.quantityPerUnit}
+              onChange={(v) => setBulkForm((f) => ({ ...f, quantityPerUnit: v }))}
+              autoComplete="off"
+              min={1}
+            />
+            <Checkbox
+              label="Sovrascrivi associazioni esistenti con lo stesso scopo"
+              checked={bulkForm.overwrite}
+              onChange={(v) => setBulkForm((f) => ({ ...f, overwrite: v }))}
+              helpText="Se attivo, rimuove le associazioni esistenti dello stesso scopo prima di applicare quella nuova."
+            />
+          </FormLayout>
+        </Modal.Section>
+      </Modal>
+
       {/* ── Add Packaging Modal ─────────────────────────────────────────────── */}
       <Modal
         open={addModalOpen}
@@ -511,6 +649,29 @@ export default function Mapping() {
               autoComplete="off"
               min={1}
             />
+            {addTarget?.groups && addTarget.groups.length > 0 && (
+              <BlockStack gap="200">
+                <Text as="span" variant="bodySm" tone="subdued">
+                  Questo prodotto appartiene {addTarget.groups.length === 1 ? 'a un gruppo' : 'a più gruppi'}.
+                  Puoi applicare l'imballaggio anche agli altri prodotti del gruppo:
+                </Text>
+                {addTarget.groups.map((g) => (
+                  <Checkbox
+                    key={g.id}
+                    label={`Applica a tutti i prodotti del gruppo "${g.name}"`}
+                    checked={addForm.applyToGroups.includes(g.id)}
+                    onChange={(checked) =>
+                      setAddForm((f) => ({
+                        ...f,
+                        applyToGroups: checked
+                          ? [...f.applyToGroups, g.id]
+                          : f.applyToGroups.filter((id) => id !== g.id),
+                      }))
+                    }
+                  />
+                ))}
+              </BlockStack>
+            )}
           </FormLayout>
         </Modal.Section>
       </Modal>
