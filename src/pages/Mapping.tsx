@@ -20,8 +20,10 @@ import {
   SkeletonBodyText,
   Pagination,
   Checkbox,
+  Banner,
 } from '@shopify/polaris';
 import { DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
 
@@ -113,6 +115,7 @@ function StatusCell({ status }: { status: MappingStatus }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Mapping() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<MergedProduct[]>([]);
   const [meta, setMeta] = useState<MergedViewMeta>({
     total: 0, page: 1, limit: PAGE_LIMIT,
@@ -461,7 +464,12 @@ export default function Mapping() {
     );
 
     const actionsCell = (
-      <Button icon={PlusIcon} size="micro" onClick={() => openAddModal(product)}>
+      <Button
+        icon={PlusIcon}
+        size="micro"
+        disabled={packagingOptions.length === 0}
+        onClick={() => openAddModal(product)}
+      >
         Aggiungi
       </Button>
     );
@@ -488,6 +496,20 @@ export default function Mapping() {
       ]}
     >
       <Layout>
+        {!loading && packagingOptions.length === 0 && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title="Configura prima l'inventario imballaggi"
+              action={{ content: 'Vai a Inventario', onAction: () => navigate('/inventory') }}
+            >
+              <p>
+                Per associare gli imballaggi ai prodotti devi prima aver censito almeno
+                un imballaggio nell'inventario.
+              </p>
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Card padding="0">
             <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange} fitted>

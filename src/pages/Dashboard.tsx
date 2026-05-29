@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Page,
   Layout,
@@ -11,16 +12,15 @@ import {
   BlockStack,
   EmptyState,
   Box,
-  Button,
   Banner,
   ProgressBar,
-  Spinner,
-  InlineStack
 } from '@shopify/polaris';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
+import { shopKey } from '../utils/storage';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { FlagBadge } from '../components/FlagBadge';
+import { OnboardingChecklist, type OnboardingStep } from '../components/OnboardingChecklist';
 
 interface ShippingLog {
   id: string;
@@ -75,8 +75,8 @@ interface BackfillStatusResponse {
 
 type BackfillUIState = 'idle' | 'running' | 'completed' | 'failed';
 
-const BACKFILL_JOB_STORAGE_KEY = 'backfill_job_id';
-const BACKFILL_LAST_RUN_STORAGE_KEY = 'backfill_last_run';
+const BACKFILL_JOB_STORAGE_KEY = shopKey('backfill_job_id');
+const BACKFILL_LAST_RUN_STORAGE_KEY = shopKey('backfill_last_run');
 const BACKFILL_POLL_INTERVAL_MS = 3000;
 const BACKFILL_FAILURE_THRESHOLD = 3;
 
@@ -116,6 +116,7 @@ function DashboardCard({ title, value, children, chartHeight = 200 }: DashboardC
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<ShippingLog[]>([]);
   const [kpis, setKpis] = useState<KPI | null>(null);
@@ -126,6 +127,12 @@ export default function Dashboard() {
   const [countryFilter, setCountryFilter] = useState('ALL');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // Setup state — drives the onboarding checklist
+  const [hasInventory, setHasInventory] = useState(false);
+  const [hasMappings, setHasMappings] = useState(false);
+  const [hasRules, setHasRules] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(true);
 
   // Backfill state
   const [backfillState, setBackfillState] = useState<BackfillUIState>('idle');
@@ -165,6 +172,44 @@ export default function Dashboard() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Load setup completion state (inventory / mappings / rules) in parallel
+  const loadSetupState = useCallback(async () => {
+    setSetupLoading(true);
+    try {
+      const [invRes, mappedRes, rulesRes] = await Promise.allSettled([
+        apiFetch('/packaging/inventory'),
+        apiFetch('/products/merged-view?page=1&limit=1&status=mapped'),
+        apiFetch('/orders/shipping-rules'),
+      ]);
+
+      if (invRes.status === 'fulfilled') {
+        const items = Array.isArray(invRes.value) ? invRes.value : [];
+        // Count only active, non-AI-suggested items (or AI-suggested that were confirmed)
+        const active = items.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (i: any) => i.isActive && (!i.isAiSuggested || i.isConfirmed),
+        );
+        setHasInventory(active.length > 0);
+      }
+
+      if (mappedRes.status === 'fulfilled') {
+        const totalMapped = mappedRes.value?.meta?.totalMapped ?? 0;
+        setHasMappings(totalMapped > 0);
+      }
+
+      if (rulesRes.status === 'fulfilled') {
+        const rules = Array.isArray(rulesRes.value) ? rulesRes.value : [];
+        setHasRules(rules.length > 0);
+      }
+    } finally {
+      setSetupLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSetupState();
+  }, [loadSetupState]);
 
   // Resume from any in-flight backfill on mount
   useEffect(() => {
@@ -261,6 +306,88 @@ export default function Dashboard() {
     setBackfillState('idle');
   };
 
+  // ── Onboarding checklist ─────────────────────────────────────────────────────
+  const setupComplete = hasInventory && hasMappings && hasRules && hasRunBackfillBefore;
+
+  const backfillProgressPercent = backfillProgress && backfillProgress.fetched > 0
+    ? Math.min(100, Math.round((backfillProgress.processed / backfillProgress.fetched) * 100))
+    : 0;
+
+  const backfillExtra = backfillState === 'running' ? (
+    <BlockStack gap="200">
+      {backfillProgress ? (
+        <>
+          <Text as="p" tone="subdued" variant="bodySm">
+            Scaricati {backfillProgress.fetched.toLocaleString('it-IT')} ·
+            Salvati {backfillProgress.processed.toLocaleString('it-IT')} ·
+            Duplicati {backfillProgress.skippedDuplicate.toLocaleString('it-IT')} ·
+            Esclusi {backfillProgress.skippedNonDe.toLocaleString('it-IT')}
+          </Text>
+          {backfillProgress.fetched > 0 && (
+            <ProgressBar progress={backfillProgressPercent} size="small" />
+          )}
+        </>
+      ) : (
+        <Text as="p" tone="subdued" variant="bodySm">Inizializzazione…</Text>
+      )}
+      {pollNetworkBanner && (
+        <Banner tone="warning">
+          <p>Connessione persa, riprovo…</p>
+        </Banner>
+      )}
+    </BlockStack>
+  ) : backfillState === 'completed' && backfillFinalMessage ? (
+    <Banner tone="success" title="Recupero completato" onDismiss={handleDismissBackfillResult}>
+      <p>{backfillFinalMessage}</p>
+    </Banner>
+  ) : backfillState === 'failed' ? (
+    <Banner tone="critical" title="Recupero non riuscito" onDismiss={handleDismissBackfillResult}>
+      <p>Il recupero non è andato a buon fine: {backfillErrorMessage}. Riprova.</p>
+    </Banner>
+  ) : null;
+
+  const steps: OnboardingStep[] = [
+    {
+      id: 'inventory',
+      title: 'Aggiungi i tuoi imballaggi',
+      description: 'Censisci scatole, nastro adesivo e materiale di riempimento usati per le tue spedizioni.',
+      done: hasInventory,
+      ctaLabel: 'Vai a Inventario',
+      onAction: () => navigate('/inventory'),
+    },
+    {
+      id: 'mapping',
+      title: 'Mappa gli imballaggi ai prodotti',
+      description: 'Associa a ogni prodotto uno o più imballaggi primari.',
+      done: hasMappings,
+      disabled: !hasInventory,
+      ctaLabel: 'Vai a Mappatura',
+      onAction: () => navigate('/mapping'),
+    },
+    {
+      id: 'rules',
+      title: 'Definisci le regole di spedizione',
+      description: 'Crea le regole per scatole esterne, nastro e filler in base alla quantità di articoli.',
+      done: hasRules,
+      disabled: !hasMappings,
+      ctaLabel: 'Vai a Regole',
+      onAction: () => navigate('/shipping-rules'),
+    },
+    {
+      id: 'backfill',
+      title: 'Recupera lo storico ordini',
+      description: hasRunBackfillBefore
+        ? 'Backfill già eseguito. Puoi rilanciarlo per recuperare nuovi ordini.'
+        : "Importa gli ordini pagati dal 1° gennaio fino a oggi. Operazione una tantum, può richiedere alcuni minuti.",
+      done: hasRunBackfillBefore && backfillState !== 'running',
+      disabled: !hasRules || backfillStarting,
+      inProgress: backfillState === 'running',
+      ctaLabel: hasRunBackfillBefore ? 'Rilancia recupero' : "Recupera ordini di quest'anno",
+      onAction: handleStartBackfill,
+      extra: backfillExtra,
+    },
+  ];
+
   if (loading && !kpis) {
     return (
       <SkeletonPage primaryAction>
@@ -297,96 +424,52 @@ export default function Dashboard() {
     ];
   });
 
-  const backfillProgressPercent = backfillProgress && backfillProgress.fetched > 0
-    ? Math.min(100, Math.round((backfillProgress.processed / backfillProgress.fetched) * 100))
-    : 0;
-
   return (
     <Page title="Dashboard & Logs">
       <Layout>
-        {/* Backfill Section */}
-        <Layout.Section>
-          <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', height: '320px' }}>
-            <BlockStack gap="400">
-              <BlockStack gap="100">
-                <Text as="h2" variant="headingMd">Ordini storici</Text>
-                <Text as="p" tone="subdued">
-                  {hasRunBackfillBefore
-                    ? 'Backfill già eseguito. Puoi rilanciarlo per recuperare eventuali nuovi ordini.'
-                    : "Importa gli ordini pagati dal 1° gennaio fino a oggi. Operazione una tantum, può richiedere alcuni minuti."}
-                </Text>
-              </BlockStack>
+        {/* Onboarding checklist — shown until every step is done */}
+        {!setupLoading && !setupComplete && (
+          <Layout.Section>
+            <OnboardingChecklist steps={steps} />
+          </Layout.Section>
+        )}
 
-              {backfillState === 'idle' && (
-                <Box>
-                  <Button
-                    variant="primary"
-                    onClick={handleStartBackfill}
-                    loading={backfillStarting}
-                  >
-                    {hasRunBackfillBefore
-                      ? 'Rilancia recupero ordini'
-                      : "Recupera ordini di quest'anno"}
-                  </Button>
-                </Box>
-              )}
-
-              {backfillState === 'running' && (
-                <BlockStack gap="300">
-                  <InlineStack gap="200" blockAlign="center">
-                    <Spinner size="small" accessibilityLabel="Recupero in corso" />
-                    <Text as="span" fontWeight="medium">Recupero in corso…</Text>
-                  </InlineStack>
-                  {backfillProgress ? (
-                    <BlockStack gap="200">
-                      <Text as="p" tone="subdued">
-                        Scaricati {backfillProgress.fetched.toLocaleString('it-IT')} ·
-                        Salvati {backfillProgress.processed.toLocaleString('it-IT')} ·
-                        Duplicati {backfillProgress.skippedDuplicate.toLocaleString('it-IT')} ·
-                        Esclusi {backfillProgress.skippedNonDe.toLocaleString('it-IT')}
-                      </Text>
-                      {backfillProgress.fetched > 0 && (
-                        <ProgressBar progress={backfillProgressPercent} size="small" />
-                      )}
-                    </BlockStack>
-                  ) : (
-                    <Text as="p" tone="subdued">Inizializzazione…</Text>
-                  )}
-                  <Box>
-                    <Button disabled>Recupero in corso…</Button>
-                  </Box>
-                  {pollNetworkBanner && (
-                    <Banner tone="warning">
-                      <p>Connessione persa, riprovo…</p>
-                    </Banner>
+        {/* Compact "in progress" banner when backfill is running and checklist is hidden */}
+        {setupComplete && backfillState === 'running' && (
+          <Layout.Section>
+            <Banner tone="info" title="Recupero ordini in corso">
+              {backfillProgress ? (
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodySm">
+                    Scaricati {backfillProgress.fetched.toLocaleString('it-IT')} ·
+                    Salvati {backfillProgress.processed.toLocaleString('it-IT')}
+                  </Text>
+                  {backfillProgress.fetched > 0 && (
+                    <ProgressBar progress={backfillProgressPercent} size="small" />
                   )}
                 </BlockStack>
+              ) : (
+                <Text as="p" variant="bodySm">Inizializzazione…</Text>
               )}
+            </Banner>
+          </Layout.Section>
+        )}
 
-              {backfillState === 'completed' && backfillFinalMessage && (
-                <Banner
-                  tone="success"
-                  title="Recupero completato"
-                  onDismiss={handleDismissBackfillResult}
-                >
-                  <p>{backfillFinalMessage}</p>
-                </Banner>
-              )}
-
-              {backfillState === 'failed' && (
-                <Banner
-                  tone="critical"
-                  title="Recupero non riuscito"
-                  onDismiss={handleDismissBackfillResult}
-                >
-                  <p>Il recupero non è andato a buon fine: {backfillErrorMessage}. Riprova.</p>
-                </Banner>
-              )}
-            </BlockStack>
-            </div>
-          </Card>
-        </Layout.Section>
+        {/* Backfill completed/failed banners once setup is complete and checklist is hidden */}
+        {setupComplete && backfillState === 'completed' && backfillFinalMessage && (
+          <Layout.Section>
+            <Banner tone="success" title="Recupero completato" onDismiss={handleDismissBackfillResult}>
+              <p>{backfillFinalMessage}</p>
+            </Banner>
+          </Layout.Section>
+        )}
+        {setupComplete && backfillState === 'failed' && (
+          <Layout.Section>
+            <Banner tone="critical" title="Recupero non riuscito" onDismiss={handleDismissBackfillResult}>
+              <p>Il recupero non è andato a buon fine: {backfillErrorMessage}. Riprova.</p>
+            </Banner>
+          </Layout.Section>
+        )}
 
         {/* KPI Section */}
         <DashboardCard

@@ -5,6 +5,7 @@ import {
   Thumbnail, RangeSlider, Tabs, Banner, Tag, OptionList, Scrollable
 } from '@shopify/polaris';
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import { PolarisSelect } from '../components/PolarisSelect';
 
@@ -54,10 +55,18 @@ const MATCH_TYPE_LABELS: Record<string, string> = {
 // ── Component ──
 
 export default function ShippingRules() {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
 
   // ── Rules State ──
   const [rules, setRules] = useState<ShippingRule[]>([]);
+
+  // ── Delete confirmation state (shared between rules and groups) ──
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<
+    { type: 'rule' | 'group'; id: string; name: string; rulesInGroup?: number } | null
+  >(null);
+  const [deleting, setDeleting] = useState(false);
   const [inventory, setInventory] = useState<{ label: string, value: string }[]>([]);
   const [inventoryRaw, setInventoryRaw] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,13 +199,9 @@ export default function ShippingRules() {
     setRuleModalOpen(true);
   };
 
-  const handleDeleteRule = async (id: string) => {
-    try {
-      await apiFetch(`/orders/shipping-rules/${id}`, { method: 'DELETE' });
-      await loadRulesData();
-    } catch (e) {
-      console.error('Failed to delete rule', e);
-    }
+  const askDeleteRule = (rule: ShippingRule) => {
+    setPendingDelete({ type: 'rule', id: rule.id, name: rule.name });
+    setDeleteModalOpen(true);
   };
 
   const resetRuleForm = () => {
@@ -265,13 +270,30 @@ export default function ShippingRules() {
     setGroupModalOpen(true);
   };
 
-  const handleDeleteGroup = async (id: string) => {
+  const askDeleteGroup = (group: ProductGroup) => {
+    const rulesInGroup = rules.filter((r) => r.productGroupId === group.id).length;
+    setPendingDelete({ type: 'group', id: group.id, name: group.name, rulesInGroup });
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
     try {
-      await apiFetch(`/products/groups/${id}`, { method: 'DELETE' });
-      await loadGroupsData();
-      await loadRulesData(); // Refresh rules since group FK may be nulled
+      if (pendingDelete.type === 'rule') {
+        await apiFetch(`/orders/shipping-rules/${pendingDelete.id}`, { method: 'DELETE' });
+        await loadRulesData();
+      } else {
+        await apiFetch(`/products/groups/${pendingDelete.id}`, { method: 'DELETE' });
+        await loadGroupsData();
+        await loadRulesData(); // Group FK may be nulled
+      }
     } catch (e) {
-      console.error('Failed to delete group', e);
+      console.error('Failed to delete', e);
+    } finally {
+      setDeleting(false);
+      setDeleteModalOpen(false);
+      setPendingDelete(null);
     }
   };
 
@@ -304,16 +326,36 @@ export default function ShippingRules() {
 
   // ── Render ──
 
+  const noInventory = !loading && inventory.length === 0;
+
   return (
     <Page
       title="Regole di Spedizione"
       primaryAction={
         selectedTab === 0
-          ? { content: 'Nuova Regola', onAction: () => { resetRuleForm(); setRuleModalOpen(true); } }
+          ? {
+              content: 'Nuova Regola',
+              onAction: () => { resetRuleForm(); setRuleModalOpen(true); },
+              disabled: noInventory,
+            }
           : { content: 'Nuovo Gruppo', onAction: () => { resetGroupForm(); setGroupModalOpen(true); } }
       }
     >
       <Layout>
+        {noInventory && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title="Configura prima l'inventario imballaggi"
+              action={{ content: 'Vai a Inventario', onAction: () => navigate('/inventory') }}
+            >
+              <p>
+                Per creare regole di spedizione devi prima aver censito gli imballaggi
+                secondari (scatole esterne) e di riempimento nell'inventario.
+              </p>
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab}>
             {selectedTab === 0 ? (
@@ -366,7 +408,7 @@ export default function ShippingRules() {
                             {item.isActive ? "Sospendi" : "Attiva"}
                           </Button>
                           <Button icon={EditIcon} onClick={() => handleEditRule(item)}>Modifica</Button>
-                          <Button tone="critical" icon={DeleteIcon} onClick={() => handleDeleteRule(item.id)}>Elimina</Button>
+                          <Button tone="critical" icon={DeleteIcon} onClick={() => askDeleteRule(item)}>Elimina</Button>
                         </InlineStack>
                       </InlineStack>
                     </Card>
@@ -432,7 +474,7 @@ export default function ShippingRules() {
                         </BlockStack>
                         <InlineStack gap="200">
                           <Button icon={EditIcon} onClick={() => handleEditGroup(group)}>Modifica</Button>
-                          <Button tone="critical" icon={DeleteIcon} onClick={() => handleDeleteGroup(group.id)}>Elimina</Button>
+                          <Button tone="critical" icon={DeleteIcon} onClick={() => askDeleteGroup(group)}>Elimina</Button>
                         </InlineStack>
                       </InlineStack>
                     </Card>
@@ -536,6 +578,43 @@ export default function ShippingRules() {
               )}
             </FormLayout>
           </Form>
+        </Modal.Section>
+      </Modal>
+
+      {/* ── Delete Confirmation Modal (rules + groups) ── */}
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => { setDeleteModalOpen(false); setPendingDelete(null); }}
+        title="Conferma eliminazione"
+        primaryAction={{
+          content: 'Elimina',
+          destructive: true,
+          loading: deleting,
+          onAction: handleConfirmDelete,
+        }}
+        secondaryActions={[
+          { content: 'Annulla', onAction: () => { setDeleteModalOpen(false); setPendingDelete(null); } },
+        ]}
+      >
+        <Modal.Section>
+          <BlockStack gap="200">
+            <Text as="p">
+              Vuoi davvero eliminare {pendingDelete?.type === 'group' ? 'il gruppo' : 'la regola'}{' '}
+              <Text as="span" fontWeight="bold">{pendingDelete?.name}</Text>?
+            </Text>
+            {pendingDelete?.type === 'group' && (pendingDelete.rulesInGroup ?? 0) > 0 && (
+              <Banner tone="warning">
+                <p>
+                  Questo gruppo è utilizzato da <b>{pendingDelete.rulesInGroup}</b>{' '}
+                  {pendingDelete.rulesInGroup === 1 ? 'regola' : 'regole'}. Eliminandolo, queste
+                  regole diventeranno catch-all (verranno applicate a tutti i prodotti senza filtro).
+                </p>
+              </Banner>
+            )}
+            <Text as="p" tone="subdued" variant="bodySm">
+              Questa azione non può essere annullata.
+            </Text>
+          </BlockStack>
         </Modal.Section>
       </Modal>
     </Page>
