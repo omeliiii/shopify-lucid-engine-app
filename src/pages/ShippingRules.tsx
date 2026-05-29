@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Page, Layout, Card, Text, Button, Modal, Form, FormLayout,
   TextField, Checkbox, InlineStack, BlockStack, Badge, Banner,
@@ -24,11 +24,13 @@ interface ShippingRule {
   maxItems: number;
   secondaryPackagingId: string | null;
   fillerPackagingId: string | null;
+  tapePackagingId: string | null;
   productGroupId: string | null;
   priority: number;
   isActive: boolean;
   secondaryPackaging?: { id: string; name: string };
   fillerPackaging?: { id: string; name: string };
+  tapePackaging?: { id: string; name: string };
   productGroup?: ProductGroupRef | null;
 }
 
@@ -51,7 +53,6 @@ export default function ShippingRules() {
 
   // ── State ──
   const [rules, setRules] = useState<ShippingRule[]>([]);
-  const [inventory, setInventory] = useState<{ label: string; value: string }[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [inventoryRaw, setInventoryRaw] = useState<any[]>([]);
   const [groups, setGroups] = useState<ProductGroupRef[]>([]);
@@ -68,6 +69,7 @@ export default function ShippingRules() {
   const [maxItems, setMaxItems] = useState('5');
   const [secondaryPackagingId, setSecondaryPackagingId] = useState('none');
   const [fillerPackagingId, setFillerPackagingId] = useState('none');
+  const [tapePackagingId, setTapePackagingId] = useState('none');
   const [productGroupId, setProductGroupId] = useState('none');
   const [priority, setPriority] = useState(2);
   const [isActive, setIsActive] = useState(true);
@@ -89,8 +91,6 @@ export default function ShippingRules() {
       ]);
       setRules(rulesData);
       setInventoryRaw(invData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setInventory(invData.map((i: any) => ({ label: i.name, value: i.id })));
       setGroups(Array.isArray(groupsData) ? groupsData : []);
     } catch (e) {
       toast.error('Impossibile caricare le regole');
@@ -103,6 +103,32 @@ export default function ShippingRules() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // ── Inventory options, filtered by packaging type category ──
+  // PRIMARY → scatole/buste (used as outer box / "secondario")
+  // FILLER  → riempimento
+  // TAPE    → nastro adesivo
+  const optionsByCategory = useMemo(() => {
+    const categorise = (cat: 'PRIMARY' | 'FILLER' | 'TAPE') => [
+      { label: 'Nessuno', value: 'none' },
+      ...inventoryRaw
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((i: any) => i?.packagingType?.category === cat)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((i: any) => ({ label: i.name, value: i.id })),
+    ];
+    return {
+      secondary: categorise('PRIMARY'),
+      filler: categorise('FILLER'),
+      tape: categorise('TAPE'),
+    };
+  }, [inventoryRaw]);
+
+  const lookupInventoryName = (id: string | null | undefined): string | undefined => {
+    if (!id) return undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return inventoryRaw.find((i: any) => i.id === id)?.name;
+  };
 
   // ── Group options for rule form ──
   const groupOptions = [
@@ -124,6 +150,7 @@ export default function ShippingRules() {
       maxItems: Number(maxItems),
       secondaryPackagingId: secondaryPackagingId === 'none' ? null : secondaryPackagingId,
       fillerPackagingId: fillerPackagingId === 'none' ? null : fillerPackagingId,
+      tapePackagingId: tapePackagingId === 'none' ? null : tapePackagingId,
       productGroupId: productGroupId === 'none' ? null : productGroupId,
       priority,
       isActive,
@@ -159,6 +186,7 @@ export default function ShippingRules() {
     setMaxItems(rule.maxItems?.toString() || '5');
     setSecondaryPackagingId(rule.secondaryPackagingId || 'none');
     setFillerPackagingId(rule.fillerPackagingId || 'none');
+    setTapePackagingId(rule.tapePackagingId || 'none');
     setProductGroupId(rule.productGroupId || 'none');
     setPriority(rule.priority || 2);
     setIsActive(rule.isActive);
@@ -194,6 +222,7 @@ export default function ShippingRules() {
     setMaxItems('5');
     setSecondaryPackagingId('none');
     setFillerPackagingId('none');
+    setTapePackagingId('none');
     setProductGroupId('none');
     setPriority(2);
     setIsActive(true);
@@ -218,7 +247,7 @@ export default function ShippingRules() {
 
   // ── Render ──
 
-  const noInventory = !loading && inventory.length === 0;
+  const noInventory = !loading && inventoryRaw.length === 0;
 
   return (
     <Page
@@ -282,7 +311,7 @@ export default function ShippingRules() {
                             <InlineStack gap="200" blockAlign="center">
                               {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                               <Text as="span" variant="bodySm">
-                                <b>Secondario:</b> {item.secondaryPackaging?.name || inventory.find((i) => i.value === item.secondaryPackagingId)?.label || item.secondaryPackagingId}
+                                <b>Secondario:</b> {item.secondaryPackaging?.name || lookupInventoryName(item.secondaryPackagingId) || item.secondaryPackagingId}
                               </Text>
                             </InlineStack>
                           );
@@ -295,7 +324,20 @@ export default function ShippingRules() {
                             <InlineStack gap="200" blockAlign="center">
                               {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
                               <Text as="span" variant="bodySm">
-                                <b>Riempimento:</b> {item.fillerPackaging?.name || inventory.find((i) => i.value === item.fillerPackagingId)?.label || item.fillerPackagingId}
+                                <b>Riempimento:</b> {item.fillerPackaging?.name || lookupInventoryName(item.fillerPackagingId) || item.fillerPackagingId}
+                              </Text>
+                            </InlineStack>
+                          );
+                        })()}
+                        {item.tapePackagingId && (() => {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          const inv = inventoryRaw.find((i: any) => i.id === item.tapePackagingId);
+                          const imgUrl = inv?.packagingType?.imageUrl;
+                          return (
+                            <InlineStack gap="200" blockAlign="center">
+                              {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
+                              <Text as="span" variant="bodySm">
+                                <b>Tape:</b> {item.tapePackaging?.name || lookupInventoryName(item.tapePackagingId) || item.tapePackagingId}
                               </Text>
                             </InlineStack>
                           );
@@ -358,15 +400,21 @@ export default function ShippingRules() {
               </BlockStack>
               <PolarisSelect
                 label="Imballaggio Secondario (Opzionale)"
-                options={[{ label: 'Nessuno', value: 'none' }, ...inventory]}
+                options={optionsByCategory.secondary}
                 value={secondaryPackagingId}
                 onChange={setSecondaryPackagingId}
               />
               <PolarisSelect
                 label="Imballaggio di Riempimento (Opzionale)"
-                options={[{ label: 'Nessuno', value: 'none' }, ...inventory]}
+                options={optionsByCategory.filler}
                 value={fillerPackagingId}
                 onChange={setFillerPackagingId}
+              />
+              <PolarisSelect
+                label="Nastro Adesivo (Opzionale)"
+                options={optionsByCategory.tape}
+                value={tapePackagingId}
+                onChange={setTapePackagingId}
               />
               <RangeSlider
                 label={`Priorità: ${getPriorityLabel(priority)}`}

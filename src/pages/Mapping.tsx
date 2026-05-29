@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
+import { AISuggestion } from '../components/AISuggestion';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -537,39 +538,17 @@ export default function Mapping() {
           {product.pendingComponents.length > 0 && (
             <BlockStack gap="200">
               {product.pendingComponents.map((comp) => (
-                <Box
+                <AISuggestion.Item
                   key={comp.mappingId}
-                  background="bg-surface-secondary"
-                  padding="300"
-                  borderRadius="200"
-                  borderWidth="025"
-                  borderColor="border"
-                >
-                  <BlockStack gap="200">
-                    <InlineStack gap="200" blockAlign="center" wrap={false}>
-                      <Thumbnail source={comp.packagingImageUrl || ''} alt={comp.packagingName} size="extraSmall" />
-                      <Text as="span" fontWeight="semibold">{comp.packagingName}</Text>
-                      <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}%`}</Badge>
-                    </InlineStack>
-                    <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
-                    <InlineStack gap="200">
-                      <Button
-                        size="micro"
-                        variant="primary"
-                        onClick={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
-                      >
-                        Conferma
-                      </Button>
-                      <Button
-                        size="micro"
-                        tone="critical"
-                        onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
-                      >
-                        Rifiuta
-                      </Button>
-                    </InlineStack>
-                  </BlockStack>
-                </Box>
+                  thumbnailUrl={comp.packagingImageUrl}
+                  title={comp.packagingName}
+                  confidence={comp.similarityScore}
+                  reason={comp.reason}
+                  acceptLabel="Conferma"
+                  rejectLabel="Rifiuta"
+                  onAccept={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
+                  onReject={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
+                />
               ))}
             </BlockStack>
           )}

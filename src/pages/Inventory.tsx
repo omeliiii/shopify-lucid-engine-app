@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Icon, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
-import { MagicIcon, ArrowLeftIcon } from '@shopify/polaris-icons';
+import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
+import { ArrowLeftIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { PackagingCard, type InventoryItem } from '../components/PackagingCard';
+import { AISuggestion } from '../components/AISuggestion';
 
 
 interface PackagingType {
@@ -274,28 +275,23 @@ export default function Inventory() {
             ) : (
               <BlockStack gap="025">
                 {suggestedItems.length > 0 && (
-                  <Box background="bg-surface-warning" padding="400" borderRadius="200" borderColor="border-warning" borderWidth="025">
-                    <BlockStack gap="400">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Icon source={MagicIcon} tone="warning" />
-                        </div>
-                        <Text as="span" variant="headingMd" tone="magic">Suggeriti dall'IA</Text>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                        {suggestedItems.map((item) => (
-                          <PackagingCard
-                            key={item.id}
-                            item={item}
-                            onEdit={handleEditItem}
-                            onDelete={handleDeleteItem}
-                            onAccept={handleAcceptSuggested}
-                            isAiSuggested
-                          />
-                        ))}
-                      </div>
-                    </BlockStack>
-                  </Box>
+                  <AISuggestion.Section
+                    subtitle="Imballaggi proposti dall'IA in base ai tuoi prodotti. Accetta quelli rilevanti per aggiungerli all'inventario."
+                    count={suggestedItems.length}
+                  >
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                      {suggestedItems.map((item) => (
+                        <PackagingCard
+                          key={item.id}
+                          item={item}
+                          onEdit={handleEditItem}
+                          onDelete={handleDeleteItem}
+                          onAccept={handleAcceptSuggested}
+                          isAiSuggested
+                        />
+                      ))}
+                    </div>
+                  </AISuggestion.Section>
                 )}
 
                 {activeItems.length > 0 && (
