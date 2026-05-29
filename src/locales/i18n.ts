@@ -86,7 +86,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'it',
+    fallbackLng: 'en',
     supportedLngs: SUPPORTED_LOCALES as unknown as string[],
     defaultNS: 'common',
     ns: NAMESPACES as unknown as string[],
