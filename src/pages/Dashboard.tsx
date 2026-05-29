@@ -18,6 +18,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { apiFetch } from '../utils/api';
 import { shopKey } from '../utils/storage';
+import { useToast } from '../utils/toast';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { FlagBadge } from '../components/FlagBadge';
 import { OnboardingChecklist, type OnboardingStep } from '../components/OnboardingChecklist';
@@ -117,6 +118,7 @@ function DashboardCard({ title, value, children, chartHeight = 200 }: DashboardC
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<ShippingLog[]>([]);
   const [kpis, setKpis] = useState<KPI | null>(null);
@@ -159,10 +161,12 @@ export default function Dashboard() {
       setKpis(kpisData);
     } catch (err) {
       setError(true);
+      toast.error('Impossibile caricare i dati della dashboard');
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [page, countryFilter, startDate, endDate]);
+  }, [page, countryFilter, startDate, endDate, toast]);
 
   const loadDataRef = useRef(loadData);
   useEffect(() => {
@@ -290,9 +294,12 @@ export default function Dashboard() {
       setBackfillProgress(null);
       setPollNetworkBanner(false);
       setBackfillState('running');
+      toast.success(res.alreadyRunning ? 'Recupero già in corso' : 'Recupero avviato');
     } catch (err) {
-      setBackfillErrorMessage(err instanceof Error ? err.message : 'Errore di rete');
+      const msg = err instanceof Error ? err.message : 'Errore di rete';
+      setBackfillErrorMessage(msg);
       setBackfillState('failed');
+      toast.error('Impossibile avviare il recupero');
     } finally {
       setBackfillStarting(false);
     }

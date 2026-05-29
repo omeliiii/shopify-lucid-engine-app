@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Frame, Navigation } from '@shopify/polaris';
-import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, CreditCardIcon } from '@shopify/polaris-icons';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, CreditCardIcon, CollectionIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import { useBilling } from '../contexts/BillingProvider';
@@ -53,6 +53,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             icon: ProductIcon,
             onClick: () => navigate('/mapping'),
             selected: location.pathname === '/mapping',
+          },
+          {
+            url: '/groups',
+            label: 'Gruppi Prodotto',
+            icon: CollectionIcon,
+            onClick: () => navigate('/groups'),
+            selected: location.pathname === '/groups',
           },
           {
             url: '/shipping-rules',

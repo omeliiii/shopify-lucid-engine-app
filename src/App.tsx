@@ -3,6 +3,7 @@ import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Mapping from './pages/Mapping';
+import Groups from './pages/Groups';
 import ShippingRules from './pages/ShippingRules';
 import Reports from './pages/Reports';
 import BillingStart from './pages/BillingStart';
@@ -53,6 +54,12 @@ function App() {
             path="/mapping"
             element={
               <PaywallGate><Mapping /></PaywallGate>
+            }
+          />
+          <Route
+            path="/groups"
+            element={
+              <PaywallGate><Groups /></PaywallGate>
             }
           />
           <Route

@@ -1,32 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Page,
   Layout,
   Card,
-  DataTable,
   Badge,
   Button,
   Text,
   InlineStack,
   BlockStack,
   Box,
-  Icon,
   EmptyState,
   Modal,
   FormLayout,
   TextField,
-  Tabs,
   Thumbnail,
   SkeletonBodyText,
   Pagination,
   Checkbox,
   Banner,
+  IndexTable,
+  IndexFilters,
+  useIndexResourceState,
+  useSetIndexFiltersMode,
 } from '@shopify/polaris';
-import { DeleteIcon, PlusIcon, SearchIcon } from '@shopify/polaris-icons';
+import { DeleteIcon, PlusIcon, CheckIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
+import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
-
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,15 +101,11 @@ function purposeLabel(purpose: string): string {
   return PURPOSE_OPTIONS.find((o) => o.value === purpose)?.label ?? purpose;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Status badge ─────────────────────────────────────────────────────────────
 
 function StatusCell({ status }: { status: MappingStatus }) {
-  if (status === 'mapped') {
-    return <Badge tone="success">Mappato</Badge>;
-  }
-  if (status === 'pending') {
-    return <Badge tone="info">Suggerimento AI</Badge>;
-  }
+  if (status === 'mapped') return <Badge tone="success">Mappato</Badge>;
+  if (status === 'pending') return <Badge tone="info">Suggerimento AI</Badge>;
   return <Badge tone="critical">Non Mappato</Badge>;
 }
 
@@ -116,6 +113,8 @@ function StatusCell({ status }: { status: MappingStatus }) {
 
 export default function Mapping() {
   const navigate = useNavigate();
+  const toast = useToast();
+
   const [products, setProducts] = useState<MergedProduct[]>([]);
   const [meta, setMeta] = useState<MergedViewMeta>({
     total: 0, page: 1, limit: PAGE_LIMIT,
@@ -126,10 +125,13 @@ export default function Mapping() {
   const [syncing, setSyncing] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchDebounced, setSearchDebounced] = useState('');
 
-  // Add packaging modal
+  // IndexFilters query + mode
+  const [queryValue, setQueryValue] = useState('');
+  const [queryDebounced, setQueryDebounced] = useState('');
+  const { mode, setMode } = useSetIndexFiltersMode();
+
+  // Add packaging modal (single product)
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addTarget, setAddTarget] = useState<MergedProduct | null>(null);
   const [addForm, setAddForm] = useState({
@@ -147,25 +149,37 @@ export default function Mapping() {
 
   // Bulk packaging-by-group modal
   const [groups, setGroups] = useState<ProductGroup[]>([]);
-  const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [bulkForm, setBulkForm] = useState({
+  const [bulkGroupModalOpen, setBulkGroupModalOpen] = useState(false);
+  const [bulkGroupForm, setBulkGroupForm] = useState({
     groupId: '',
     packagingId: '',
     purpose: 'CONTAINER',
     quantityPerUnit: '1',
     overwrite: false,
   });
-  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkGroupLoading, setBulkGroupLoading] = useState(false);
+
+  // Bulk packaging-by-selection modal (new — IndexTable bulk action)
+  const [bulkSelectionModalOpen, setBulkSelectionModalOpen] = useState(false);
+  const [bulkSelectionForm, setBulkSelectionForm] = useState({
+    packagingId: '',
+    purpose: 'CONTAINER',
+    quantityPerUnit: '1',
+  });
+  const [bulkSelectionLoading, setBulkSelectionLoading] = useState(false);
+
+  // Bulk confirm-suggestions loading
+  const [bulkConfirming, setBulkConfirming] = useState(false);
 
   // ── Debounce search ───────────────────────────────────────────────────────
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearchDebounced(searchQuery);
-      setCurrentPage(1); // Reset to page 1 on search change
+      setQueryDebounced(queryValue);
+      setCurrentPage(1);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [queryValue]);
 
   // ── Data loading ──────────────────────────────────────────────────────────
 
@@ -177,7 +191,7 @@ export default function Mapping() {
       params.set('page', String(currentPage));
       params.set('limit', String(PAGE_LIMIT));
       if (statusParam) params.set('status', statusParam);
-      if (searchDebounced.trim()) params.set('search', searchDebounced.trim());
+      if (queryDebounced.trim()) params.set('search', queryDebounced.trim());
 
       const [mergedResult, inventoryResult] = await Promise.allSettled([
         apiFetch(`/products/merged-view?${params.toString()}`),
@@ -192,6 +206,7 @@ export default function Mapping() {
         });
       } else {
         setProducts([]);
+        toast.error('Impossibile caricare i prodotti');
       }
 
       if (inventoryResult.status === 'fulfilled') {
@@ -200,7 +215,7 @@ export default function Mapping() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, selectedTab, searchDebounced]);
+  }, [currentPage, selectedTab, queryDebounced, toast]);
 
   useEffect(() => {
     loadData();
@@ -212,14 +227,29 @@ export default function Mapping() {
       .catch(() => setGroups([]));
   }, []);
 
+  // ── Selection state for bulk actions ──────────────────────────────────────
+
+  const productsWithId = useMemo(
+    () => products.map((p) => ({ ...p, id: String(p.shopifyProductId) })),
+    [products],
+  );
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(productsWithId);
+
   // ── Actions ────────────────────────────────────────────────────────────────
 
   const handleSync = async () => {
     setSyncing(true);
     try {
       await apiFetch('/products/sync', { method: 'POST' });
-    } catch {
-      // ignore
+      toast.success('Sincronizzazione avviata');
+    } catch (e) {
+      toast.error('Errore durante la sincronizzazione');
+      console.error(e);
     }
     setTimeout(() => {
       setSyncing(false);
@@ -230,8 +260,11 @@ export default function Mapping() {
   const handleConfirm = async (productId: number, mappingId: string) => {
     try {
       await apiFetch(`/products/${productId}/packaging/${mappingId}/confirm`, { method: 'PATCH' });
-    } catch {
-      // optimistic update continues below
+      toast.success('Suggerimento confermato');
+    } catch (e) {
+      toast.error('Errore durante la conferma');
+      console.error(e);
+      return;
     }
     setProducts((prev) =>
       prev.map((p) => {
@@ -257,8 +290,14 @@ export default function Mapping() {
       await apiFetch(`/products/${deleteTarget.productId}/packaging/${deleteTarget.mappingId}`, {
         method: 'DELETE',
       });
-    } catch {
-      // optimistic update continues below
+      toast.success('Associazione rimossa');
+    } catch (e) {
+      toast.error('Errore durante la rimozione');
+      console.error(e);
+      setDeleteLoading(false);
+      setDeleteModalOpen(false);
+      setDeleteTarget(null);
+      return;
     }
     setProducts((prev) =>
       prev.map((p) => {
@@ -286,37 +325,113 @@ export default function Mapping() {
     setAddModalOpen(true);
   };
 
-  const openBulkModal = () => {
-    setBulkForm({
+  const openBulkGroupModal = () => {
+    setBulkGroupForm({
       groupId: groups[0]?.id ?? '',
       packagingId: packagingOptions[0]?.id ?? '',
       purpose: 'CONTAINER',
       quantityPerUnit: '1',
       overwrite: false,
     });
-    setBulkModalOpen(true);
+    setBulkGroupModalOpen(true);
   };
 
-  const handleBulkConfirm = async () => {
-    if (!bulkForm.groupId || !bulkForm.packagingId) return;
-    setBulkLoading(true);
+  const openBulkSelectionModal = () => {
+    setBulkSelectionForm({
+      packagingId: packagingOptions[0]?.id ?? '',
+      purpose: 'CONTAINER',
+      quantityPerUnit: '1',
+    });
+    setBulkSelectionModalOpen(true);
+  };
+
+  const handleBulkGroupConfirm = async () => {
+    if (!bulkGroupForm.groupId || !bulkGroupForm.packagingId) return;
+    setBulkGroupLoading(true);
     try {
-      await apiFetch(`/products/groups/${bulkForm.groupId}/packaging`, {
+      await apiFetch(`/products/groups/${bulkGroupForm.groupId}/packaging`, {
         method: 'POST',
         body: JSON.stringify({
-          packagingId: bulkForm.packagingId,
-          purpose: bulkForm.purpose,
-          quantityPerUnit: parseInt(bulkForm.quantityPerUnit, 10),
-          overwrite: bulkForm.overwrite,
+          packagingId: bulkGroupForm.packagingId,
+          purpose: bulkGroupForm.purpose,
+          quantityPerUnit: parseInt(bulkGroupForm.quantityPerUnit, 10),
+          overwrite: bulkGroupForm.overwrite,
         }),
       });
-      setBulkModalOpen(false);
+      toast.success('Imballaggio applicato al gruppo');
+      setBulkGroupModalOpen(false);
       loadData();
-    } catch {
-      // ignore for demo
+    } catch (e) {
+      toast.error('Errore durante l\'applicazione al gruppo');
+      console.error(e);
     } finally {
-      setBulkLoading(false);
+      setBulkGroupLoading(false);
     }
+  };
+
+  const handleBulkSelectionConfirm = async () => {
+    if (!bulkSelectionForm.packagingId || selectedResources.length === 0) return;
+    setBulkSelectionLoading(true);
+    const payload = {
+      packagingId: bulkSelectionForm.packagingId,
+      purpose: bulkSelectionForm.purpose,
+      quantityPerUnit: parseInt(bulkSelectionForm.quantityPerUnit, 10),
+    };
+    try {
+      const results = await Promise.allSettled(
+        selectedResources.map((id) =>
+          apiFetch(`/products/${id}/packaging`, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          }),
+        ),
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      const ok = results.length - failed;
+      if (failed === 0) {
+        toast.success(`Imballaggio applicato a ${ok} prodotti`);
+      } else {
+        toast.error(`${failed} su ${results.length} prodotti non aggiornati`);
+      }
+      setBulkSelectionModalOpen(false);
+      clearSelection();
+      loadData();
+    } finally {
+      setBulkSelectionLoading(false);
+    }
+  };
+
+  const handleBulkConfirmSuggestions = async () => {
+    const selectedSet = new Set(selectedResources);
+    const pairs: { productId: number; mappingId: string }[] = [];
+    products.forEach((p) => {
+      if (!selectedSet.has(String(p.shopifyProductId))) return;
+      p.pendingComponents.forEach((c) => {
+        pairs.push({ productId: p.shopifyProductId, mappingId: c.mappingId });
+      });
+    });
+
+    if (pairs.length === 0) {
+      toast.error('I prodotti selezionati non hanno suggerimenti da confermare');
+      return;
+    }
+
+    setBulkConfirming(true);
+    const results = await Promise.allSettled(
+      pairs.map(({ productId, mappingId }) =>
+        apiFetch(`/products/${productId}/packaging/${mappingId}/confirm`, { method: 'PATCH' }),
+      ),
+    );
+    setBulkConfirming(false);
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const ok = results.length - failed;
+    if (failed === 0) {
+      toast.success(`${ok} suggerimenti confermati`);
+    } else {
+      toast.error(`${failed} su ${results.length} suggerimenti non confermati`);
+    }
+    clearSelection();
+    loadData();
   };
 
   const handleAddConfirm = async () => {
@@ -337,16 +452,19 @@ export default function Mapping() {
             })
           )
         );
+        toast.success('Imballaggio applicato ai gruppi selezionati');
       } else {
         await apiFetch(`/products/${addTarget.shopifyProductId}/packaging`, {
           method: 'POST',
           body: JSON.stringify(payload),
         });
+        toast.success('Imballaggio associato al prodotto');
       }
       setAddModalOpen(false);
       loadData();
-    } catch {
-      // ignore for demo
+    } catch (e) {
+      toast.error('Errore durante l\'associazione');
+      console.error(e);
     } finally {
       setAddLoading(false);
     }
@@ -356,7 +474,8 @@ export default function Mapping() {
 
   const handleTabChange = (tabIndex: number) => {
     setSelectedTab(tabIndex);
-    setCurrentPage(1); // Reset to page 1 on tab change
+    setCurrentPage(1);
+    clearSelection();
   };
 
   // ── Tab labels with server-side counts ────────────────────────────────────
@@ -371,111 +490,125 @@ export default function Mapping() {
 
   const totalPages = Math.max(1, Math.ceil(meta.total / PAGE_LIMIT));
 
-  // ── Table rows ─────────────────────────────────────────────────────────────
+  // ── IndexTable rows ───────────────────────────────────────────────────────
 
-  const rows = products.map((product) => {
-    const productCell = (
-      <InlineStack gap="300" blockAlign="center">
-        <Thumbnail
-          source={product.imageUrl ?? ''}
-          alt={product.title}
-          size="small"
-        />
-        <Text as="span" fontWeight="bold">{product.title}</Text>
-      </InlineStack>
-    );
+  const rowMarkup = productsWithId.map((product, index) => (
+    <IndexTable.Row
+      id={product.id}
+      key={product.id}
+      position={index}
+      selected={selectedResources.includes(product.id)}
+    >
+      <IndexTable.Cell>
+        <InlineStack gap="300" blockAlign="center">
+          <Thumbnail source={product.imageUrl ?? ''} alt={product.title} size="small" />
+          <Text as="span" fontWeight="bold">{product.title}</Text>
+        </InlineStack>
+      </IndexTable.Cell>
 
-    const packagingCell = (
-      <BlockStack gap="200">
-        {product.confirmedComponents.length > 0 && (
-          <BlockStack gap="150">
-            {product.confirmedComponents.map((comp) => (
-              <InlineStack key={comp.mappingId} gap="200" blockAlign="center" wrap={false}>
-                <Thumbnail
-                  source={comp.packagingImageUrl || ''}
-                  alt={comp.packagingName}
-                  size="extraSmall"
-                />
-                <BlockStack gap="050">
-                  <Text as="span" fontWeight="semibold" variant="bodySm">{comp.packagingName} ×{comp.quantityPerUnit}</Text>
-                  <Text as="span" variant="bodySm" tone="subdued">{purposeLabel(comp.purpose)}</Text>
-                </BlockStack>
-                <Button
-                  icon={DeleteIcon}
-                  size="micro"
-                  tone="critical"
-                  variant="plain"
-                  accessibilityLabel="Rimuovi associazione"
-                  onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
-                />
-              </InlineStack>
-            ))}
-          </BlockStack>
-        )}
+      <IndexTable.Cell>
+        <StatusCell status={product.status} />
+      </IndexTable.Cell>
 
-        {product.pendingComponents.length > 0 && (
-          <BlockStack gap="200">
-            {product.pendingComponents.map((comp) => (
-              <Box
-                key={comp.mappingId}
-                background="bg-surface-secondary"
-                padding="300"
-                borderRadius="200"
-                borderWidth="025"
-                borderColor="border"
-              >
-                <BlockStack gap="200">
-                  <InlineStack gap="200" blockAlign="center" wrap={false}>
-                    <Thumbnail
-                      source={comp.packagingImageUrl || ''}
-                      alt={comp.packagingName}
-                      size="extraSmall"
-                    />
-                    <Text as="span" fontWeight="semibold">{comp.packagingName}</Text>
-                    <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}%`}</Badge>
-                  </InlineStack>
-                  <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
-                  <InlineStack gap="200">
-                    <Button
-                      size="micro"
-                      variant="primary"
-                      onClick={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
-                    >
-                      Conferma
-                    </Button>
-                    <Button
-                      size="micro"
-                      tone="critical"
-                      onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
-                    >
-                      Rifiuta
-                    </Button>
-                  </InlineStack>
-                </BlockStack>
-              </Box>
-            ))}
-          </BlockStack>
-        )}
+      <IndexTable.Cell>
+        <BlockStack gap="200">
+          {product.confirmedComponents.length > 0 && (
+            <BlockStack gap="150">
+              {product.confirmedComponents.map((comp) => (
+                <InlineStack key={comp.mappingId} gap="200" blockAlign="center" wrap={false}>
+                  <Thumbnail source={comp.packagingImageUrl || ''} alt={comp.packagingName} size="extraSmall" />
+                  <BlockStack gap="050">
+                    <Text as="span" fontWeight="semibold" variant="bodySm">{comp.packagingName} ×{comp.quantityPerUnit}</Text>
+                    <Text as="span" variant="bodySm" tone="subdued">{purposeLabel(comp.purpose)}</Text>
+                  </BlockStack>
+                  <Button
+                    icon={DeleteIcon}
+                    size="micro"
+                    tone="critical"
+                    variant="plain"
+                    accessibilityLabel="Rimuovi associazione"
+                    onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
+                  />
+                </InlineStack>
+              ))}
+            </BlockStack>
+          )}
 
-        {product.confirmedComponents.length === 0 && product.pendingComponents.length === 0 && (
-          <Text as="span" tone="subdued" variant="bodySm">Nessun imballaggio assegnato</Text>
-        )}
-      </BlockStack>
-    );
+          {product.pendingComponents.length > 0 && (
+            <BlockStack gap="200">
+              {product.pendingComponents.map((comp) => (
+                <Box
+                  key={comp.mappingId}
+                  background="bg-surface-secondary"
+                  padding="300"
+                  borderRadius="200"
+                  borderWidth="025"
+                  borderColor="border"
+                >
+                  <BlockStack gap="200">
+                    <InlineStack gap="200" blockAlign="center" wrap={false}>
+                      <Thumbnail source={comp.packagingImageUrl || ''} alt={comp.packagingName} size="extraSmall" />
+                      <Text as="span" fontWeight="semibold">{comp.packagingName}</Text>
+                      <Badge tone="info">{`${(comp.similarityScore * 100).toFixed(0)}%`}</Badge>
+                    </InlineStack>
+                    <Text as="p" variant="bodySm" tone="subdued">{comp.reason}</Text>
+                    <InlineStack gap="200">
+                      <Button
+                        size="micro"
+                        variant="primary"
+                        onClick={() => handleConfirm(product.shopifyProductId, comp.mappingId)}
+                      >
+                        Conferma
+                      </Button>
+                      <Button
+                        size="micro"
+                        tone="critical"
+                        onClick={() => openDeleteModal(product.shopifyProductId, comp.mappingId, comp.packagingName)}
+                      >
+                        Rifiuta
+                      </Button>
+                    </InlineStack>
+                  </BlockStack>
+                </Box>
+              ))}
+            </BlockStack>
+          )}
 
-    const actionsCell = (
-      <Button
-        icon={PlusIcon}
-        size="micro"
-        disabled={packagingOptions.length === 0}
-        onClick={() => openAddModal(product)}
-      >
-        Aggiungi
-      </Button>
-    );
+          {product.confirmedComponents.length === 0 && product.pendingComponents.length === 0 && (
+            <Text as="span" tone="subdued" variant="bodySm">Nessun imballaggio assegnato</Text>
+          )}
+        </BlockStack>
+      </IndexTable.Cell>
 
-    return [productCell, <StatusCell status={product.status} />, packagingCell, actionsCell];
-  });
+      <IndexTable.Cell>
+        <Button
+          icon={PlusIcon}
+          size="micro"
+          disabled={packagingOptions.length === 0}
+          onClick={() => openAddModal(product)}
+        >
+          Aggiungi
+        </Button>
+      </IndexTable.Cell>
+    </IndexTable.Row>
+  ));
+
+  // ── Bulk actions (visible only when something is selected) ────────────────
+
+  const promotedBulkActions = [
+    {
+      content: 'Assegna imballaggio',
+      icon: PlusIcon,
+      onAction: openBulkSelectionModal,
+      disabled: packagingOptions.length === 0,
+    },
+    {
+      content: 'Conferma suggerimenti AI',
+      icon: CheckIcon,
+      onAction: handleBulkConfirmSuggestions,
+      disabled: bulkConfirming,
+    },
+  ];
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -490,7 +623,7 @@ export default function Mapping() {
       secondaryActions={[
         {
           content: 'Associa a gruppo',
-          onAction: openBulkModal,
+          onAction: openBulkGroupModal,
           disabled: groups.length === 0 || packagingOptions.length === 0,
         },
       ]}
@@ -512,132 +645,193 @@ export default function Mapping() {
         )}
         <Layout.Section>
           <Card padding="0">
-            <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange} fitted>
-              {/* Search bar */}
-              <Box padding="300" paddingBlockEnd="0">
-                <TextField
-                  label=""
-                  labelHidden
-                  placeholder="Cerca prodotto..."
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  prefix={<Icon source={SearchIcon} />}
-                  clearButton
-                  onClearButtonClick={() => setSearchQuery('')}
-                  autoComplete="off"
-                />
-              </Box>
+            <IndexFilters
+              tabs={tabs}
+              selected={selectedTab}
+              onSelect={handleTabChange}
+              queryValue={queryValue}
+              queryPlaceholder="Cerca prodotto…"
+              onQueryChange={setQueryValue}
+              onQueryClear={() => setQueryValue('')}
+              mode={mode}
+              setMode={setMode}
+              filters={[]}
+              appliedFilters={[]}
+              onClearAll={() => setQueryValue('')}
+              cancelAction={{
+                onAction: () => setQueryValue(''),
+                disabled: false,
+                loading: false,
+              }}
+              hideFilters
+              canCreateNewView={false}
+            />
 
-              {loading ? (
-                <Box padding="400">
-                  <SkeletonBodyText lines={6} />
-                </Box>
-              ) : products.length === 0 ? (
-                <EmptyState
-                  heading={
-                    selectedTab === 3
-                      ? 'Tutti i prodotti sono mappati!'
-                      : searchDebounced
-                        ? 'Nessun risultato trovato'
-                        : 'Nessun prodotto trovato'
-                  }
-                  action={
-                    !searchDebounced
-                      ? { content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }
-                      : undefined
-                  }
-                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+            {loading ? (
+              <Box padding="400">
+                <SkeletonBodyText lines={6} />
+              </Box>
+            ) : products.length === 0 ? (
+              <EmptyState
+                heading={
+                  selectedTab === 3
+                    ? 'Tutti i prodotti sono mappati!'
+                    : queryDebounced
+                      ? 'Nessun risultato trovato'
+                      : 'Nessun prodotto trovato'
+                }
+                action={
+                  !queryDebounced
+                    ? { content: 'Sincronizza Shopify', onAction: handleSync, loading: syncing }
+                    : undefined
+                }
+                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+              >
+                <Text as="p">
+                  {selectedTab === 3
+                    ? 'Ottimo! Ogni prodotto ha almeno un imballaggio associato.'
+                    : queryDebounced
+                      ? `Nessun prodotto corrisponde a "${queryDebounced}".`
+                      : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
+                </Text>
+              </EmptyState>
+            ) : (
+              <BlockStack>
+                <IndexTable
+                  resourceName={{ singular: 'prodotto', plural: 'prodotti' }}
+                  itemCount={productsWithId.length}
+                  selectedItemsCount={allResourcesSelected ? 'All' : selectedResources.length}
+                  onSelectionChange={handleSelectionChange}
+                  promotedBulkActions={promotedBulkActions}
+                  headings={[
+                    { title: 'Prodotto' },
+                    { title: 'Stato' },
+                    { title: 'Imballaggio' },
+                    { title: 'Azione' },
+                  ]}
                 >
-                  <Text as="p">
-                    {selectedTab === 3
-                      ? 'Ottimo! Ogni prodotto ha almeno un imballaggio associato.'
-                      : searchDebounced
-                        ? `Nessun prodotto corrisponde a "${searchDebounced}".`
-                        : 'Sincronizza i tuoi prodotti da Shopify per iniziare la mappatura.'}
-                  </Text>
-                </EmptyState>
-              ) : (
-                <BlockStack>
-                  <DataTable
-                    columnContentTypes={['text', 'text', 'text', 'text']}
-                    headings={['Prodotto', 'Stato', 'Imballaggio', 'Azione']}
-                    rows={rows}
-                    verticalAlign="middle"
-                  />
-                  {totalPages > 1 && (
-                    <Box padding="400" paddingBlockStart="200">
-                      <InlineStack align="center" gap="300" blockAlign="center">
-                        <Pagination
-                          hasPrevious={currentPage > 1}
-                          hasNext={currentPage < totalPages}
-                          onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        />
-                        <Text as="span" variant="bodySm" tone="subdued">
-                          Pagina {currentPage} di {totalPages} · {meta.total} prodotti
-                        </Text>
-                      </InlineStack>
-                    </Box>
-                  )}
-                </BlockStack>
-              )}
-            </Tabs>
+                  {rowMarkup}
+                </IndexTable>
+                {totalPages > 1 && (
+                  <Box padding="400" paddingBlockStart="200">
+                    <InlineStack align="center" gap="300" blockAlign="center">
+                      <Pagination
+                        hasPrevious={currentPage > 1}
+                        hasNext={currentPage < totalPages}
+                        onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      />
+                      <Text as="span" variant="bodySm" tone="subdued">
+                        Pagina {currentPage} di {totalPages} · {meta.total} prodotti
+                      </Text>
+                    </InlineStack>
+                  </Box>
+                )}
+              </BlockStack>
+            )}
           </Card>
         </Layout.Section>
       </Layout>
 
       {/* ── Bulk Packaging by Group Modal ───────────────────────────────────── */}
       <Modal
-        open={bulkModalOpen}
-        onClose={() => setBulkModalOpen(false)}
+        open={bulkGroupModalOpen}
+        onClose={() => setBulkGroupModalOpen(false)}
         title="Associa imballaggio a un gruppo"
         primaryAction={{
           content: 'Applica al gruppo',
-          onAction: handleBulkConfirm,
-          loading: bulkLoading,
-          disabled: !bulkForm.groupId || !bulkForm.packagingId,
+          onAction: handleBulkGroupConfirm,
+          loading: bulkGroupLoading,
+          disabled: !bulkGroupForm.groupId || !bulkGroupForm.packagingId,
         }}
-        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkModalOpen(false) }]}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkGroupModalOpen(false) }]}
       >
         <Modal.Section>
           <FormLayout>
             <PolarisSelect
               label="Gruppo prodotto"
               options={groups.map((g) => ({ label: g.name, value: g.id }))}
-              value={bulkForm.groupId}
-              onChange={(v) => setBulkForm((f) => ({ ...f, groupId: v }))}
+              value={bulkGroupForm.groupId}
+              onChange={(v) => setBulkGroupForm((f) => ({ ...f, groupId: v }))}
             />
             <PolarisSelect
               label="Imballaggio"
               options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
-              value={bulkForm.packagingId}
-              onChange={(v) => setBulkForm((f) => ({ ...f, packagingId: v }))}
+              value={bulkGroupForm.packagingId}
+              onChange={(v) => setBulkGroupForm((f) => ({ ...f, packagingId: v }))}
             />
             <PolarisSelect
               label="Scopo"
               options={PURPOSE_OPTIONS}
-              value={bulkForm.purpose}
-              onChange={(v) => setBulkForm((f) => ({ ...f, purpose: v }))}
+              value={bulkGroupForm.purpose}
+              onChange={(v) => setBulkGroupForm((f) => ({ ...f, purpose: v }))}
             />
             <TextField
               label="Quantità per unità"
               type="number"
-              value={bulkForm.quantityPerUnit}
-              onChange={(v) => setBulkForm((f) => ({ ...f, quantityPerUnit: v }))}
+              value={bulkGroupForm.quantityPerUnit}
+              onChange={(v) => setBulkGroupForm((f) => ({ ...f, quantityPerUnit: v }))}
               autoComplete="off"
               min={1}
             />
             <Checkbox
               label="Sovrascrivi associazioni esistenti con lo stesso scopo"
-              checked={bulkForm.overwrite}
-              onChange={(v) => setBulkForm((f) => ({ ...f, overwrite: v }))}
+              checked={bulkGroupForm.overwrite}
+              onChange={(v) => setBulkGroupForm((f) => ({ ...f, overwrite: v }))}
               helpText="Se attivo, rimuove le associazioni esistenti dello stesso scopo prima di applicare quella nuova."
             />
           </FormLayout>
         </Modal.Section>
       </Modal>
 
-      {/* ── Add Packaging Modal ─────────────────────────────────────────────── */}
+      {/* ── Bulk Packaging by Selection Modal (from IndexTable bulk action) ── */}
+      <Modal
+        open={bulkSelectionModalOpen}
+        onClose={() => setBulkSelectionModalOpen(false)}
+        title={`Associa imballaggio a ${selectedResources.length} prodotti selezionati`}
+        primaryAction={{
+          content: 'Applica',
+          onAction: handleBulkSelectionConfirm,
+          loading: bulkSelectionLoading,
+          disabled: !bulkSelectionForm.packagingId,
+        }}
+        secondaryActions={[{ content: 'Annulla', onAction: () => setBulkSelectionModalOpen(false) }]}
+      >
+        <Modal.Section>
+          <BlockStack gap="300">
+            <Banner tone="info">
+              <p>
+                Questo imballaggio verrà aggiunto a <b>{selectedResources.length}</b> prodotti.
+                Le associazioni esistenti non verranno modificate.
+              </p>
+            </Banner>
+            <FormLayout>
+              <PolarisSelect
+                label="Imballaggio"
+                options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
+                value={bulkSelectionForm.packagingId}
+                onChange={(v) => setBulkSelectionForm((f) => ({ ...f, packagingId: v }))}
+              />
+              <PolarisSelect
+                label="Scopo"
+                options={PURPOSE_OPTIONS}
+                value={bulkSelectionForm.purpose}
+                onChange={(v) => setBulkSelectionForm((f) => ({ ...f, purpose: v }))}
+              />
+              <TextField
+                label="Quantità per unità"
+                type="number"
+                value={bulkSelectionForm.quantityPerUnit}
+                onChange={(v) => setBulkSelectionForm((f) => ({ ...f, quantityPerUnit: v }))}
+                autoComplete="off"
+                min={1}
+              />
+            </FormLayout>
+          </BlockStack>
+        </Modal.Section>
+      </Modal>
+
+      {/* ── Add Packaging Modal (single product) ─────────────────────────────── */}
       <Modal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}

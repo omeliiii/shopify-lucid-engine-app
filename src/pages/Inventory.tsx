@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Icon, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
 import { MagicIcon, ArrowLeftIcon } from '@shopify/polaris-icons';
 import { apiFetch } from '../utils/api';
+import { useToast } from '../utils/toast';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { PackagingCard, type InventoryItem } from '../components/PackagingCard';
 
@@ -20,6 +21,7 @@ interface PackagingType {
 }
 
 export default function Inventory() {
+  const toast = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [standardTypes, setStandardTypes] = useState<PackagingType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,11 +51,12 @@ export default function Inventory() {
         setPackagingTypeId(typesData[0].id);
       }
     } catch (e) {
-      console.error("Failed to load inventory", e);
+      toast.error('Impossibile caricare l\'inventario');
+      console.error('Failed to load inventory', e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     loadData();
@@ -77,15 +80,19 @@ export default function Inventory() {
           method: 'PATCH',
           body: JSON.stringify(bodyParams)
         });
+        toast.success('Imballaggio aggiornato');
       } else {
         await apiFetch('/packaging/inventory', {
           method: 'POST',
           body: JSON.stringify(bodyParams)
         });
+        toast.success('Imballaggio aggiunto');
       }
       closeModal();
       loadData();
     } catch (e) {
+      toast.error('Errore durante il salvataggio');
+      console.error(e);
       closeModal();
     } finally {
       setSubmitting(false);
@@ -145,8 +152,10 @@ export default function Inventory() {
         method: 'PATCH',
         body: JSON.stringify({ isActive: true })
       });
+      toast.success('Suggerimento accettato');
       loadData();
     } catch (e) {
+      toast.error('Errore durante l\'accettazione');
       console.error(e);
     } finally {
       setSubmitting(false);
@@ -166,9 +175,12 @@ export default function Inventory() {
     };
     try {
       await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
+      toast.success('Imballaggio aggiunto');
       closeModal();
       loadData();
     } catch (e) {
+      toast.error('Errore durante l\'aggiunta');
+      console.error(e);
       closeModal();
     } finally {
       setSubmitting(false);
@@ -176,12 +188,17 @@ export default function Inventory() {
   };
 
   const handleDeleteItem = async (id: string) => {
+    const optimistic = items;
+    setItems(items.filter(i => i.id !== id));
     try {
       await apiFetch(`/packaging/inventory/${id}`, { method: 'DELETE' });
+      toast.success('Imballaggio eliminato');
     } catch (e) {
-      // item removed regardless
+      // rollback
+      setItems(optimistic);
+      toast.error('Errore durante l\'eliminazione');
+      console.error(e);
     }
-    setItems(items.filter(i => i.id !== id));
   };
 
   const filteredStandardTypes = standardTypes.filter(

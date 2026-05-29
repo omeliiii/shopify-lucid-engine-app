@@ -22,6 +22,8 @@ interface ReportExport {
   outputFormat: string;
 }
 
+type ReportStatus = 'PROCESSING' | 'READY' | 'ERROR';
+
 interface Report {
   id: string;
   countryCode: string;
@@ -34,6 +36,10 @@ interface Report {
   exports: ReportExport[];
   canDownload?: boolean;
   lockedReason?: LockedReason | null;
+  /** Backend lifecycle of the report. Defaults to READY when missing. */
+  status?: ReportStatus;
+  /** Human-readable error when status === 'ERROR'. */
+  errorMessage?: string | null;
 }
 
 interface ReportListResponse {
@@ -45,6 +51,17 @@ interface ReportListResponse {
     unreadCount?: number;
     entitlements?: unknown;
   };
+}
+
+function ReportStatusBadge({ report }: { report: Report }) {
+  const status: ReportStatus = report.status ?? 'READY';
+  if (status === 'PROCESSING') {
+    return <Badge tone="info" progress="incomplete">In elaborazione</Badge>;
+  }
+  if (status === 'ERROR') {
+    return <Badge tone="critical">Errore</Badge>;
+  }
+  return <Badge tone="success" progress="complete">Pronto</Badge>;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -186,14 +203,27 @@ export default function Reports() {
       ? report.exports.map((e) => e.outputFormat.toUpperCase()).join(' + ')
       : '—';
 
-    const canDownload = report.canDownload !== false;
+    const status: ReportStatus = report.status ?? 'READY';
+    const canDownload = report.canDownload !== false && status === 'READY';
     const lockedReason = report.lockedReason;
     const addonAmount = catalog?.addon.amount ?? 99;
 
     // Build the action cell based on download access
     let actionCell: React.ReactNode;
 
-    if (canDownload) {
+    if (status === 'PROCESSING') {
+      actionCell = (
+        <Tooltip content="Il report sarà disponibile al termine dell'elaborazione" dismissOnMouseOut>
+          <Button size="micro" icon={ExportIcon} disabled>Scarica</Button>
+        </Tooltip>
+      );
+    } else if (status === 'ERROR') {
+      actionCell = (
+        <Tooltip content={report.errorMessage || 'Errore durante la generazione del report'} dismissOnMouseOut>
+          <Button size="micro" disabled>Non disponibile</Button>
+        </Tooltip>
+      );
+    } else if (canDownload) {
       actionCell = (
         <Button
           size="micro"
@@ -251,10 +281,11 @@ export default function Reports() {
       <InlineStack gap="200" align="start" blockAlign="center">
         <FlagBadge countryCode={report.countryCode} />
         {isNew && <Badge tone="info">Nuovo</Badge>}
-        {!canDownload && lockedReason === 'TRIAL' && (
+        {!canDownload && lockedReason === 'TRIAL' && status === 'READY' && (
           <Icon source={LockIcon} tone="subdued" />
         )}
       </InlineStack>,
+      <ReportStatusBadge report={report} />,
       report.periodType,
       `${report.periodStart} → ${report.periodEnd}`,
       new Date(report.generatedAt).toLocaleDateString(),
@@ -268,8 +299,8 @@ export default function Reports() {
   const newRows = newReports.map((r) => buildRow(r, true));
   const pastRows = pastReports.map((r) => buildRow(r, false));
 
-  const tableHeadings = ['Paese', 'Periodo', 'Date', 'Generato il', 'Formati', 'Download'];
-  const tableColTypes = ['text', 'text', 'text', 'text', 'text', 'text'] as const;
+  const tableHeadings = ['Paese', 'Stato', 'Periodo', 'Date', 'Generato il', 'Formati', 'Download'];
+  const tableColTypes = ['text', 'text', 'text', 'text', 'text', 'text', 'text'] as const;
 
   return (
     <Page
