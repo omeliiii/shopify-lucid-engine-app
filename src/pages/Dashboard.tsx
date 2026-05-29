@@ -307,6 +307,7 @@ export default function Dashboard() {
         {/* Backfill Section */}
         <Layout.Section>
           <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '320px' }}>
             <BlockStack gap="400">
               <BlockStack gap="100">
                 <Text as="h2" variant="headingMd">Ordini storici</Text>
@@ -383,6 +384,7 @@ export default function Dashboard() {
                 </Banner>
               )}
             </BlockStack>
+            </div>
           </Card>
         </Layout.Section>
 
