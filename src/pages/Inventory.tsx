@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, ButtonGroup, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
-import { ArrowLeftIcon } from '@shopify/polaris-icons';
+import { Page, Layout, Card, Text, Button, Collapsible, Icon, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
+import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
@@ -42,7 +42,7 @@ export default function Inventory() {
   const [customGsm, setCustomGsm] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
-  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'PRIMARY' | 'TAPE' | 'FILLER'>('ALL');
+  const [expandedMaterials, setExpandedMaterials] = useState<Record<string, boolean>>({});
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -118,7 +118,6 @@ export default function Inventory() {
     setEditingItemId(null);
     setShowCustomForm(false);
     setSelectedTab(0);
-    setCategoryFilter('ALL');
     if (standardTypes.length > 0) {
       setPackagingTypeId(standardTypes[0].id);
       setLength(standardTypes[0].defaultLMm?.toString() || '');
@@ -205,23 +204,22 @@ export default function Inventory() {
     }
   };
 
-  const filteredStandardTypes = standardTypes.filter(
-    t => categoryFilter === 'ALL' || t.category === categoryFilter
-  );
+  const categoryTabs = [
+    { id: 'cat-all', content: t('modal.category_filters.ALL'), accessibilityLabel: 'ALL', panelID: 'panel-cat-all', _category: 'ALL' as const },
+    { id: 'cat-primary', content: t('modal.category_filters.PRIMARY'), accessibilityLabel: 'PRIMARY', panelID: 'panel-cat-primary', _category: 'PRIMARY' as const },
+    { id: 'cat-tape', content: t('modal.category_filters.TAPE'), accessibilityLabel: 'TAPE', panelID: 'panel-cat-tape', _category: 'TAPE' as const },
+    { id: 'cat-filler', content: t('modal.category_filters.FILLER'), accessibilityLabel: 'FILLER', panelID: 'panel-cat-filler', _category: 'FILLER' as const },
+  ];
 
-  const groupedTypes = filteredStandardTypes.reduce((acc, curr) => {
+  const currentCategory = categoryTabs[selectedTab]?._category ?? 'ALL';
+  const typesForCurrentTab = standardTypes.filter(
+    t => currentCategory === 'ALL' || t.category === currentCategory
+  );
+  const groupedTypesForTab = typesForCurrentTab.reduce((acc, curr) => {
     if (!acc[curr.agnosticMaterial]) acc[curr.agnosticMaterial] = [];
     acc[curr.agnosticMaterial].push(curr);
     return acc;
   }, {} as Record<string, PackagingType[]>);
-
-  const materialTabs = Object.keys(groupedTypes).map((material, index) => ({
-    id: `tab-${index}`,
-    content: tCommon(`materials.${material}` as 'materials.PAPER'),
-    accessibilityLabel: material,
-    panelID: `panel-${index}`,
-    _material: material,
-  }));
 
   const activeItems = items.filter(i => i.isActive && (!i.isAiSuggested || i.isConfirmed));
   const suggestedItems = items.filter(i => i.isAiSuggested && !i.isConfirmed);
@@ -239,13 +237,6 @@ export default function Inventory() {
     : showCustomForm
       ? t('modal.title_customize')
       : t('modal.title_add');
-
-  const categoryFilters: Array<{ value: 'ALL' | 'PRIMARY' | 'TAPE' | 'FILLER'; label: string }> = [
-    { value: 'ALL', label: t('modal.category_filters.ALL') },
-    { value: 'PRIMARY', label: t('modal.category_filters.PRIMARY') },
-    { value: 'TAPE', label: t('modal.category_filters.TAPE') },
-    { value: 'FILLER', label: t('modal.category_filters.FILLER') },
-  ];
 
   const missingCategoriesText = missingCategories
     .map((key) => t(`warnings.categories.${key}` as 'warnings.categories.TAPE'))
@@ -356,48 +347,65 @@ export default function Inventory() {
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
               <div data-tour="inventory-modal-categories">
-              <InlineStack gap="200" blockAlign="center">
-                <Text as="span" variant="bodySm" tone="subdued">{t('modal.category_label')}:</Text>
-                <ButtonGroup variant="segmented">
-                  {categoryFilters.map(opt => (
-                    <Button
-                      key={opt.value}
-                      size="slim"
-                      pressed={categoryFilter === opt.value}
-                      onClick={() => { setCategoryFilter(opt.value); setSelectedTab(0); }}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
-                </ButtonGroup>
-              </InlineStack>
-              </div>
-              {materialTabs.length > 0 ? (
-                <Tabs tabs={materialTabs} selected={selectedTab} onSelect={setSelectedTab}>
-                  <Box paddingBlockStart="400">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
-                      {groupedTypes[materialTabs[selectedTab]?._material]?.map(type => (
-                        <Card key={type.id} padding="300" background="bg-surface-secondary">
-                          <BlockStack gap="150">
-                            <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
-                            {type.defaultGsm && (
-                              <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
-                            )}
-                            <InlineStack gap="100" align="end">
-                              <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
-                              <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>{t('modal.standard_card.add_cta')}</Button>
-                            </InlineStack>
+              <Tabs tabs={categoryTabs} selected={selectedTab} onSelect={setSelectedTab}>
+                <Box paddingBlockStart="400">
+                  {typesForCurrentTab.length > 0 ? (
+                    <BlockStack gap="400">
+                      {Object.entries(groupedTypesForTab).map(([material, types], idx) => {
+                        const isExpanded = expandedMaterials[material] ?? true;
+                        return (
+                          <BlockStack key={material} gap="0">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedMaterials(prev => ({ ...prev, [material]: !isExpanded }))}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                width: '100%',
+                                padding: '8px 0',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{ display: 'inline-flex', width: '20px', height: '20px', flexShrink: 0 }}>
+                                <Icon source={isExpanded ? ChevronUpIcon : ChevronDownIcon} tone="subdued" />
+                              </span>
+                              <Text as="h3" variant="headingSm">{tCommon(`materials.${material}` as 'materials.PAPER')}</Text>
+                            </button>
+                            <Collapsible open={isExpanded} id={`collapsible-${material}`}>
+                              <Box paddingBlockStart="300" paddingBlockEnd="100">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
+                                  {types.map(type => (
+                                    <Card key={type.id} padding="300" background="bg-surface-secondary">
+                                      <BlockStack gap="150">
+                                        <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
+                                        {type.defaultGsm && (
+                                          <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
+                                        )}
+                                        <InlineStack gap="100" align="end">
+                                          <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
+                                          <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>{t('modal.standard_card.add_cta')}</Button>
+                                        </InlineStack>
+                                      </BlockStack>
+                                    </Card>
+                                  ))}
+                                </div>
+                              </Box>
+                            </Collapsible>
                           </BlockStack>
-                        </Card>
-                      ))}
-                    </div>
-                  </Box>
-                </Tabs>
-              ) : (
-                <Box paddingBlockStart="200" paddingBlockEnd="200">
-                  <Text as="p" tone="subdued">{t('modal.no_types_for_category')}</Text>
+                        );
+                      })}
+                    </BlockStack>
+                  ) : (
+                    <Box paddingBlockStart="200" paddingBlockEnd="200">
+                      <Text as="p" tone="subdued">{t('modal.no_types_for_category')}</Text>
+                    </Box>
+                  )}
                 </Box>
-              )}
+              </Tabs>
+              </div>
               <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
                 <Button onClick={() => setShowCustomForm(true)}>{t('modal.create_custom_cta')}</Button>
               </Box>
