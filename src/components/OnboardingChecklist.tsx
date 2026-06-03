@@ -39,27 +39,28 @@ export function OnboardingChecklist({ steps, title }: OnboardingChecklistProps) 
   const progress = Math.round((completed / steps.length) * 100);
 
   return (
-    <Card>
-      <BlockStack gap="400">
-        <BlockStack gap="200">
-          <InlineStack align="space-between" blockAlign="center">
-            <Text as="h2" variant="headingMd">{resolvedTitle}</Text>
-            <Text as="span" tone="subdued" variant="bodySm">
-              {t('onboarding.progress', { completed, total: steps.length })}
-            </Text>
-          </InlineStack>
-          <ProgressBar progress={progress} size="small" tone="primary" />
-        </BlockStack>
+    <div data-tour="checklist">
+      <Card>
+        <BlockStack gap="400">
+          <BlockStack gap="200">
+            <InlineStack align="space-between" blockAlign="center">
+              <Text as="h2" variant="headingMd">{resolvedTitle}</Text>
+              <Text as="span" tone="subdued" variant="bodySm">
+                {t('onboarding.progress', { completed, total: steps.length })}
+              </Text>
+            </InlineStack>
+            <ProgressBar progress={progress} size="small" tone="primary" />
+          </BlockStack>
 
-        <BlockStack gap="0">
-          {steps.map((step, idx) => (
-            <Box
-              key={step.id}
-              paddingBlockStart={idx === 0 ? '0' : '300'}
-              paddingBlockEnd="300"
-              borderBlockStartWidth={idx === 0 ? '0' : '025'}
-              borderColor="border"
-            >
+          <BlockStack gap="0">
+            {steps.map((step, idx) => (
+              <div key={step.id} data-tour={`checklist-item-${step.id}`}>
+              <Box
+                paddingBlockStart={idx === 0 ? '0' : '300'}
+                paddingBlockEnd="300"
+                borderBlockStartWidth={idx === 0 ? '0' : '025'}
+                borderColor="border"
+              >
               <InlineStack align="space-between" blockAlign="center" wrap={false} gap="400">
                 <InlineStack gap="300" blockAlign="center" wrap={false}>
                   <Box>
@@ -96,10 +97,12 @@ export function OnboardingChecklist({ steps, title }: OnboardingChecklistProps) 
                 </Box>
               </InlineStack>
               {step.extra && <Box paddingBlockStart="200">{step.extra}</Box>}
-            </Box>
-          ))}
+              </Box>
+              </div>
+            ))}
+          </BlockStack>
         </BlockStack>
-      </BlockStack>
-    </Card>
+      </Card>
+    </div>
   );
 }

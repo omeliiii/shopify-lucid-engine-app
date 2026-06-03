@@ -1,0 +1,120 @@
+{
+  "buttons": {
+    "next": "Suivant",
+    "back": "Retour",
+    "skip": "Passer pour l'instant",
+    "close": "Fermer",
+    "last": "Terminer",
+    "dismiss_forever": "Ne plus afficher",
+    "got_it": "Compris, allons-y !",
+    "open_inventory": "Ouvrir l'inventaire",
+    "open_mapping": "Aller à l'association",
+    "open_rules": "Aller aux règles",
+    "back_to_dashboard": "Retour au tableau de bord"
+  },
+  "progress": "Étape {{current}} sur {{total}}",
+  "welcome": {
+    "intro": {
+      "title": "Bienvenue à bord ! 👋",
+      "body": "On configure l'app ensemble en quelques minutes. On y va étape par étape — tu peux mettre en pause quand tu veux et reprendre exactement là où tu t'es arrêté."
+    },
+    "reports": {
+      "title": "Tes rapports, prêts à partir",
+      "body": "Tu vois cet onglet \"Rapports\" ? Une fois la configuration finie, l'app génère automatiquement les rapports REP prêts à téléverser sur les portails de chaque pays. Tu reçois aussi un e-mail à chaque nouveau rapport disponible."
+    },
+    "checklist": {
+      "title": "Ta mini check-list",
+      "body": "Voici ce qu'il reste à faire. Commençons par le premier point : ton inventaire d'emballages. Clique \"Suivant\" et je t'emmène sur la bonne page."
+    }
+  },
+  "inventory": {
+    "intro": {
+      "title": "Construisons ton inventaire",
+      "body": "C'est ta page des emballages. Ajoute tout ce que tu utilises pour expédier : cartons, rubans, calage. Clique sur le bouton en haut à droite pour ajouter ton premier emballage."
+    },
+    "categories": {
+      "title": "Choisis une catégorie",
+      "body": "Il y a quatre catégories : Primaire (l'emballage du produit), Secondaire (le carton d'expédition), Calage (papier, bulle) et Ruban. Commence par un Primaire — choisis-le depuis les catégories en haut."
+    },
+    "add_items": {
+      "title": "Remplis ton inventaire",
+      "body": "D'ici tu ajoutes tous les emballages que tu utilises : cartons, rubans, calage. Tu peux les ajouter tels quels (les types standards, prêts à l'emploi) ou personnaliser dimensions et grammage pour des calculs encore plus précis. Quand tu en as ajouté assez, clique \"Suivant\"."
+    },
+    "next": {
+      "title": "Inventaire prêt ✅",
+      "body": "Tu as tout ce qu'il faut. Maintenant on dit à l'app quel emballage primaire va avec chaque produit. On y va ?"
+    }
+  },
+  "mapping": {
+    "intro": {
+      "title": "Associer produits et emballages",
+      "body": "Ici tu relies chaque produit à son emballage primaire — celui dans lequel il arrive. L'IA te suggère des correspondances probables, mais c'est toujours toi qui décides."
+    },
+    "row_add": {
+      "title": "Ajouter un emballage",
+      "body": "Clique \"Ajouter\" sur n'importe quel produit pour lui assigner un emballage. Petit rappel : ici on parle d'emballage PRIMAIRE (l'emballage du produit, pas le carton d'expédition)."
+    },
+    "bulk": {
+      "title": "Va plus vite avec les actions en masse",
+      "body": "Beaucoup de produits similaires ? Sélectionne plusieurs lignes et utilise les actions en masse, ou utilise \"Assigner par groupe\" en haut pour appliquer le même emballage à un groupe entier d'un coup."
+    },
+    "next": {
+      "title": "Association faite 💪",
+      "body": "Passons aux règles d'expédition : c'est là qu'on dira à l'app quoi ajouter en plus de l'emballage primaire pour chaque type d'envoi."
+    }
+  },
+  "shipping_rules": {
+    "intro": {
+      "title": "Les règles d'expédition",
+      "body": "Tu définis ici ce qu'on ajoute à chaque envoi en plus de l'emballage primaire :\n• Secondaire : le carton ou l'enveloppe extérieure\n• Calage : ce qui protège le produit\n• Ruban : pour sceller\n\nClique sur le bouton en haut à droite pour créer ta première règle."
+    },
+    "modal_name": {
+      "title": "Donne un nom à la règle",
+      "body": "Choisis quelque chose de clair — ça t'aidera à la reconnaître plus tard. Exemple : \"Envoi un article\" ou \"Commande multi-articles moyenne\"."
+    },
+    "modal_range": {
+      "title": "À combien d'articles s'applique-t-elle ?",
+      "body": "Indique le minimum et le maximum d'articles couverts par cette règle. Exemple : de 1 à 3 articles → petit carton ; de 4 à 10 → grand carton."
+    },
+    "modal_group": {
+      "title": "Pour quels produits ?",
+      "body": "Si la règle ne vaut que pour un groupe de produits (ex. \"fragiles\"), choisis-le ici. Si elle vaut pour tous, laisse \"Tous les produits\"."
+    },
+    "modal_secondary": {
+      "title": "Emballage secondaire",
+      "body": "Le carton ou l'enveloppe extérieure pour l'expédition. Choisis le bon pour cette plage d'articles."
+    },
+    "modal_filler": {
+      "title": "Calage",
+      "body": "Ce qui protège le produit : papier, papier bulle, particules. Ajoute-le si tu en utilises un."
+    },
+    "modal_tape": {
+      "title": "Ruban",
+      "body": "Le ruban utilisé pour sceller le carton. Ajoute-le pour un calcul de poids vraiment complet."
+    },
+    "modal_save": {
+      "title": "Enregistre la règle",
+      "body": "Tout est prêt ! Clique sur \"Créer la règle\" en bas pour l'enregistrer. À partir de maintenant elle sera appliquée automatiquement aux envois qui correspondent aux paramètres choisis."
+    },
+    "next": {
+      "title": "Règles créées 🎯",
+      "body": "Une dernière étape : récupérer les commandes passées pour que tes rapports soient complets. Retournons au tableau de bord."
+    }
+  },
+  "backfill": {
+    "intro": {
+      "title": "Récupère les commandes passées",
+      "body": "Dernière étape ! L'app trace les commandes à partir de maintenant, mais tu peux aussi rattraper celles déjà faites depuis le début de l'année. Exemple : aujourd'hui c'est {{today}} — clique ici et on récupère toutes les commandes depuis le 1er janvier pour que tes prochains rapports soient complets.\n\nÇa tourne en arrière-plan, tu peux continuer à utiliser l'app pendant ce temps."
+    }
+  },
+  "completed": {
+    "title": "Tout est prêt ! 🚀",
+    "body": "Super boulot : l'app est configurée. À partir d'ici tout est automatique — chaque nouvelle commande est tracée et les rapports arrivent à temps. Si jamais tu veux revoir quelque chose, les pages sont toujours dans le menu de gauche."
+  },
+  "confirmations": {
+    "dismiss_title": "Sûr de ne plus vouloir voir le tour ?",
+    "dismiss_body": "On ne l'affichera plus. Tu peux toujours refaire la configuration manuellement depuis chaque page.",
+    "dismiss_confirm": "Oui, ne plus l'afficher",
+    "dismiss_cancel": "Annuler"
+  }
+}

@@ -10,6 +10,8 @@ import BillingStart from './pages/BillingStart';
 import Subscription from './pages/Subscription';
 import { BillingProvider, useBilling } from './contexts/BillingProvider';
 import { BillingReturnHandler } from './components/BillingReturnHandler';
+import { TourProvider } from './contexts/TourProvider';
+import Tour from './components/Tour';
 
 // ── Paywall Gate ───────────────────────────────────────────────────────────────
 // Redirects to the billing/start page when no active subscription exists.
@@ -31,57 +33,60 @@ function PaywallGate({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <BillingProvider>
-      <BillingReturnHandler />
-      <MainLayout>
-        <Routes>
-          {/* Billing pages — always accessible */}
-          <Route path="/billing/start" element={<BillingStart />} />
+      <TourProvider>
+        <BillingReturnHandler />
+        <Tour />
+        <MainLayout>
+          <Routes>
+            {/* Billing pages — always accessible */}
+            <Route path="/billing/start" element={<BillingStart />} />
 
-          {/* Protected pages — require active subscription */}
-          <Route
-            path="/"
-            element={
-              <PaywallGate><Dashboard /></PaywallGate>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <PaywallGate><Inventory /></PaywallGate>
-            }
-          />
-          <Route
-            path="/mapping"
-            element={
-              <PaywallGate><Mapping /></PaywallGate>
-            }
-          />
-          <Route
-            path="/groups"
-            element={
-              <PaywallGate><Groups /></PaywallGate>
-            }
-          />
-          <Route
-            path="/shipping-rules"
-            element={
-              <PaywallGate><ShippingRules /></PaywallGate>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <PaywallGate><Reports /></PaywallGate>
-            }
-          />
-          <Route
-            path="/subscription"
-            element={
-              <PaywallGate><Subscription /></PaywallGate>
-            }
-          />
-        </Routes>
-      </MainLayout>
+            {/* Protected pages — require active subscription */}
+            <Route
+              path="/"
+              element={
+                <PaywallGate><Dashboard /></PaywallGate>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <PaywallGate><Inventory /></PaywallGate>
+              }
+            />
+            <Route
+              path="/mapping"
+              element={
+                <PaywallGate><Mapping /></PaywallGate>
+              }
+            />
+            <Route
+              path="/groups"
+              element={
+                <PaywallGate><Groups /></PaywallGate>
+              }
+            />
+            <Route
+              path="/shipping-rules"
+              element={
+                <PaywallGate><ShippingRules /></PaywallGate>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <PaywallGate><Reports /></PaywallGate>
+              }
+            />
+            <Route
+              path="/subscription"
+              element={
+                <PaywallGate><Subscription /></PaywallGate>
+              }
+            />
+          </Routes>
+        </MainLayout>
+      </TourProvider>
     </BillingProvider>
   );
 }

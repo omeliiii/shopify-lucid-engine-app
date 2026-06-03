@@ -626,6 +626,7 @@ export default function Mapping() {
           </Layout.Section>
         )}
         <Layout.Section>
+          <div data-tour="mapping-table">
           <Card padding="0">
             <IndexFilters
               tabs={tabs}
@@ -712,6 +713,7 @@ export default function Mapping() {
               </BlockStack>
             )}
           </Card>
+          </div>
         </Layout.Section>
       </Layout>
 

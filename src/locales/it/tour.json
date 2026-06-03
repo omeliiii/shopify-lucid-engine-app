@@ -1,0 +1,120 @@
+{
+  "buttons": {
+    "next": "Avanti",
+    "back": "Indietro",
+    "skip": "Salta per ora",
+    "close": "Chiudi",
+    "last": "Fine",
+    "dismiss_forever": "Non mostrare più",
+    "got_it": "Ok, andiamo!",
+    "open_inventory": "Apri inventario",
+    "open_mapping": "Vai all'associazione",
+    "open_rules": "Vai alle regole",
+    "back_to_dashboard": "Torna alla dashboard"
+  },
+  "progress": "Passo {{current}} di {{total}}",
+  "welcome": {
+    "intro": {
+      "title": "Benvenuto a bordo! 👋",
+      "body": "In pochi minuti configuriamo insieme l'app. Ti guideremo passo passo: niente paura, puoi mettere in pausa quando vuoi e riprendere dove eri."
+    },
+    "reports": {
+      "title": "I tuoi report, già pronti",
+      "body": "Vedi questa voce \"Report\"? Una volta finita la configurazione, quando sarà il momento, l'app genererà in automatico i report EPR già pronti da caricare sui portali dei vari paesi. Riceverai anche un'email ogni volta che un nuovo report è disponibile."
+    },
+    "checklist": {
+      "title": "La tua mini-checklist",
+      "body": "Qui sotto trovi i passi da completare. Iniziamo dal primo: l'inventario degli imballaggi. Clicca su \"Avanti\" e ti porto sulla pagina giusta."
+    }
+  },
+  "inventory": {
+    "intro": {
+      "title": "Costruiamo il tuo inventario",
+      "body": "Questa è la pagina degli imballaggi. Qui aggiungi tutto ciò che usi per spedire: scatole, nastri, riempitivi. Clicca sul pulsante in alto a destra per iniziare ad aggiungere il tuo primo imballaggio."
+    },
+    "categories": {
+      "title": "Scegli la categoria",
+      "body": "Le categorie sono quattro: Primario (la confezione del prodotto), Secondario (la scatola di spedizione), Riempitivo (carta, pluriball) e Nastro. Per iniziare scegli un imballaggio Primario dalle categorie qui sopra."
+    },
+    "add_items": {
+      "title": "Riempi l'inventario",
+      "body": "Da qui aggiungi tutti gli imballaggi che usi: scatole, nastri, riempitivi. Puoi aggiungerli così come sono (i tipi standard, già pronti) oppure personalizzare dimensioni e grammatura per avere calcoli ancora più precisi. Quando ne hai aggiunti abbastanza, clicca \"Avanti\"."
+    },
+    "next": {
+      "title": "Inventario pronto ✅",
+      "body": "Hai tutto ciò che ti serve. Ora il prossimo passo è dire all'app quale imballaggio primario usi per ciascun prodotto. Andiamo?"
+    }
+  },
+  "mapping": {
+    "intro": {
+      "title": "Associa imballaggi ai prodotti",
+      "body": "Qui colleghi ogni prodotto al suo imballaggio primario — quello in cui è confezionato. L'AI ti suggerirà accoppiamenti probabili, ma puoi sempre decidere tu."
+    },
+    "row_add": {
+      "title": "Aggiungi un imballaggio",
+      "body": "Clicca \"Aggiungi\" su qualsiasi prodotto per assegnargli un imballaggio. Ricorda: qui parliamo di imballaggio PRIMARIO (la confezione del prodotto, non la scatola di spedizione)."
+    },
+    "bulk": {
+      "title": "Vai più veloce con il bulk",
+      "body": "Hai molti prodotti simili? Seleziona più righe e usa le azioni in blocco, oppure usa \"Assegna per gruppo\" in alto per applicare lo stesso imballaggio a un gruppo di prodotti in un colpo solo."
+    },
+    "next": {
+      "title": "Mapping fatto 💪",
+      "body": "Ora passiamo alle regole di spedizione: lì racconteremo all'app cosa aggiungere oltre al primario per ogni tipo di spedizione."
+    }
+  },
+  "shipping_rules": {
+    "intro": {
+      "title": "Le regole di spedizione",
+      "body": "Qui definisci cosa aggiungere a ogni spedizione oltre all'imballaggio primario. Parliamo di:\n• Secondario: la scatola/busta esterna\n• Riempitivo: ciò che protegge il prodotto\n• Nastro: per sigillare\n\nClicca sul pulsante in alto a destra per creare la tua prima regola."
+    },
+    "modal_name": {
+      "title": "Dai un nome alla regola",
+      "body": "Scegli un nome chiaro, ti aiuterà a riconoscerla. Esempio: \"Spedizione singolo articolo\" o \"Ordine multiplo medio\"."
+    },
+    "modal_range": {
+      "title": "A quanti articoli si applica?",
+      "body": "Indica il minimo e il massimo di articoli a cui questa regola si applica. Esempio: da 1 a 3 articoli usa una scatola piccola; da 4 a 10 una scatola grande."
+    },
+    "modal_group": {
+      "title": "Per quali prodotti?",
+      "body": "Se la regola vale solo per un gruppo di prodotti (es. \"fragili\"), selezionalo qui. Se vale per tutti, lascia \"Tutti i prodotti\"."
+    },
+    "modal_secondary": {
+      "title": "Imballaggio secondario",
+      "body": "È la scatola o busta esterna usata per la spedizione. Scegli quello giusto per questa fascia di articoli."
+    },
+    "modal_filler": {
+      "title": "Riempitivo",
+      "body": "Il materiale che protegge il prodotto: carta, pluriball, chips. Aggiungilo se serve."
+    },
+    "modal_tape": {
+      "title": "Nastro",
+      "body": "Il nastro usato per sigillare la scatola. Aggiungilo per avere un calcolo del peso davvero completo."
+    },
+    "modal_save": {
+      "title": "Salva la regola",
+      "body": "Tutto pronto! Clicca su \"Crea regola\" qui sotto per salvarla. Da questo momento verrà applicata automaticamente alle spedizioni che rientrano nei parametri scelti."
+    },
+    "next": {
+      "title": "Regole create 🎯",
+      "body": "Manca solo un ultimo passo: recuperare gli ordini già fatti, così i report saranno completi. Torniamo in dashboard."
+    }
+  },
+  "backfill": {
+    "intro": {
+      "title": "Recupera gli ordini pregressi",
+      "body": "Ultimo passaggio! L'app inizia a tracciare gli ordini da adesso, ma puoi recuperare quelli già fatti dall'inizio dell'anno. Esempio: oggi è {{today}} — clicca qui e recuperiamo tutti gli ordini dal 1° gennaio in modo che i prossimi report siano completi.\n\nL'operazione gira in background, puoi continuare a usare l'app nel frattempo."
+    }
+  },
+  "completed": {
+    "title": "Tutto pronto! 🚀",
+    "body": "Ottimo lavoro: ora l'app è configurata. Da qui in poi gestirà tutto in automatico: ogni nuovo ordine viene tracciato e i report arrivano puntuali. Se hai bisogno di rivedere qualcosa, le pagine sono sempre disponibili dal menu di sinistra."
+  },
+  "confirmations": {
+    "dismiss_title": "Sicuro di non voler più vedere il tour?",
+    "dismiss_body": "Non lo mostreremo più. Puoi sempre rifare la configurazione manualmente dalle singole pagine.",
+    "dismiss_confirm": "Sì, non mostrarlo più",
+    "dismiss_cancel": "Annulla"
+  }
+}

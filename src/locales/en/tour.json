@@ -1,0 +1,120 @@
+{
+  "buttons": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "close": "Close",
+    "last": "Finish",
+    "dismiss_forever": "Don't show again",
+    "got_it": "Got it, let's go!",
+    "open_inventory": "Open inventory",
+    "open_mapping": "Go to mapping",
+    "open_rules": "Go to rules",
+    "back_to_dashboard": "Back to dashboard"
+  },
+  "progress": "Step {{current}} of {{total}}",
+  "welcome": {
+    "intro": {
+      "title": "Welcome aboard! 👋",
+      "body": "We'll set things up together in just a few minutes. Take it step by step — you can pause whenever you want and pick up right where you left off."
+    },
+    "reports": {
+      "title": "Your reports, ready to go",
+      "body": "See this \"Reports\" item? Once your setup is done, the app will automatically generate EPR reports ready to upload to each country's portal. You'll also get an email every time a new one is ready."
+    },
+    "checklist": {
+      "title": "Your mini-checklist",
+      "body": "Here's what you need to complete. Let's start with the first one: your packaging inventory. Hit \"Next\" and I'll take you to the right page."
+    }
+  },
+  "inventory": {
+    "intro": {
+      "title": "Let's build your inventory",
+      "body": "This is your packaging page. Add everything you use to ship: boxes, tape, fillers. Click the button at the top right to add your first packaging."
+    },
+    "categories": {
+      "title": "Pick a category",
+      "body": "There are four categories: Primary (the product's own packaging), Secondary (the shipping box), Filler (paper, bubble wrap) and Tape. Start with a Primary one — pick from the categories above."
+    },
+    "add_items": {
+      "title": "Fill up your inventory",
+      "body": "From here you add every packaging you use: boxes, tape, fillers. You can add them as-is (the standard types, ready to go) or customize size and grammage for even more accurate calculations. Once you've added enough, hit \"Next\"."
+    },
+    "next": {
+      "title": "Inventory ready ✅",
+      "body": "You've got everything you need. Now it's time to tell the app which primary packaging goes with each product. Shall we?"
+    }
+  },
+  "mapping": {
+    "intro": {
+      "title": "Match products to packaging",
+      "body": "Here you link each product to its primary packaging — the one it actually comes in. AI will suggest likely matches, but you always have the final say."
+    },
+    "row_add": {
+      "title": "Add a packaging",
+      "body": "Click \"Add\" on any product to assign it a packaging. Remember: we're talking about PRIMARY packaging (the product's own box, not the shipping one)."
+    },
+    "bulk": {
+      "title": "Speed it up with bulk actions",
+      "body": "Got many similar products? Select multiple rows and use the bulk actions, or use \"Assign by group\" at the top to apply the same packaging to a whole group in one go."
+    },
+    "next": {
+      "title": "Mapping done 💪",
+      "body": "Now let's set up shipping rules: that's where we'll tell the app what to add on top of the primary packaging for each kind of shipment."
+    }
+  },
+  "shipping_rules": {
+    "intro": {
+      "title": "Shipping rules",
+      "body": "Here you define what to add to every shipment on top of the primary packaging:\n• Secondary: the outer box or mailer\n• Filler: what protects the product\n• Tape: to seal the box\n\nClick the button at the top right to create your first rule."
+    },
+    "modal_name": {
+      "title": "Give the rule a name",
+      "body": "Pick something clear — it'll help you recognize it later. Example: \"Single-item shipment\" or \"Medium multi-item order\"."
+    },
+    "modal_range": {
+      "title": "How many items does it apply to?",
+      "body": "Set the minimum and maximum number of items this rule applies to. Example: 1 to 3 items uses a small box; 4 to 10 uses a large one."
+    },
+    "modal_group": {
+      "title": "Which products?",
+      "body": "If this rule only applies to a group of products (e.g. \"fragile\"), pick it here. If it applies to everything, leave \"All products\"."
+    },
+    "modal_secondary": {
+      "title": "Secondary packaging",
+      "body": "The outer box or mailer used for shipping. Pick the right one for this item range."
+    },
+    "modal_filler": {
+      "title": "Filler",
+      "body": "What protects the product: paper, bubble wrap, chips. Add it if you use one."
+    },
+    "modal_tape": {
+      "title": "Tape",
+      "body": "The tape used to seal the box. Add it for truly accurate weight tracking."
+    },
+    "modal_save": {
+      "title": "Save the rule",
+      "body": "All set! Click \"Create rule\" below to save it. From now on it'll be applied automatically to shipments matching the parameters you picked."
+    },
+    "next": {
+      "title": "Rules created 🎯",
+      "body": "Just one last step: catch up on past orders so your reports are complete. Let's head back to the dashboard."
+    }
+  },
+  "backfill": {
+    "intro": {
+      "title": "Catch up on past orders",
+      "body": "Last step! The app starts tracking orders from now on, but you can also pull in past ones from the start of the year. Example: today is {{today}} — click here and we'll recover every order from January 1st so your upcoming reports are complete.\n\nIt runs in the background — keep using the app while it works."
+    }
+  },
+  "completed": {
+    "title": "All set! 🚀",
+    "body": "Great job: the app is configured. From now on it'll handle everything automatically — every new order is tracked and reports show up right on time. If you ever want to review something, the pages are always there in the left menu."
+  },
+  "confirmations": {
+    "dismiss_title": "Sure you don't want to see the tour again?",
+    "dismiss_body": "We won't show it again. You can always do the setup manually from each page.",
+    "dismiss_confirm": "Yes, don't show it again",
+    "dismiss_cancel": "Cancel"
+  }
+}

@@ -381,56 +381,68 @@ export default function ShippingRules() {
         <Modal.Section>
           <Form onSubmit={handleRuleSubmit}>
             <FormLayout>
-              <TextField
-                label={t('modal.form.name_label')}
-                value={name}
-                onChange={setName}
-                autoComplete="off"
-                placeholder={t('modal.form.name_placeholder')}
-                helpText={t('modal.form.name_help')}
-              />
-              <FormLayout.Group>
-                <TextField label={t('modal.form.min_items_label')} type="number" value={minItems} onChange={setMinItems} autoComplete="off" min={1} />
-                <TextField label={t('modal.form.max_items_label')} type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" min={1} helpText={t('modal.form.max_items_help')} />
-              </FormLayout.Group>
-              <BlockStack gap="100">
-                <PolarisSelect
-                  label={t('modal.form.group_label')}
-                  options={groupOptions}
-                  value={productGroupId}
-                  onChange={setProductGroupId}
+              <div data-tour="rules-modal-name">
+                <TextField
+                  label={t('modal.form.name_label')}
+                  value={name}
+                  onChange={setName}
+                  autoComplete="off"
+                  placeholder={t('modal.form.name_placeholder')}
+                  helpText={t('modal.form.name_help')}
                 />
-                <Text as="p" variant="bodySm" tone="subdued">
-                  {groups.length === 0 ? t('modal.form.group_help_empty') : t('modal.form.group_help_with_groups')}
-                </Text>
-              </BlockStack>
-              <BlockStack gap="100">
-                <PolarisSelect
-                  label={t('modal.form.secondary_label')}
-                  options={optionsByCategory.secondary}
-                  value={secondaryPackagingId}
-                  onChange={setSecondaryPackagingId}
-                />
-                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.secondary_help')}</Text>
-              </BlockStack>
-              <BlockStack gap="100">
-                <PolarisSelect
-                  label={t('modal.form.filler_label')}
-                  options={optionsByCategory.filler}
-                  value={fillerPackagingId}
-                  onChange={setFillerPackagingId}
-                />
-                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.filler_help')}</Text>
-              </BlockStack>
-              <BlockStack gap="100">
-                <PolarisSelect
-                  label={t('modal.form.tape_label')}
-                  options={optionsByCategory.tape}
-                  value={tapePackagingId}
-                  onChange={setTapePackagingId}
-                />
-                <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.tape_help')}</Text>
-              </BlockStack>
+              </div>
+              <div data-tour="rules-modal-range">
+                <FormLayout.Group>
+                  <TextField label={t('modal.form.min_items_label')} type="number" value={minItems} onChange={setMinItems} autoComplete="off" min={1} />
+                  <TextField label={t('modal.form.max_items_label')} type="number" value={maxItems} onChange={setMaxItems} autoComplete="off" min={1} helpText={t('modal.form.max_items_help')} />
+                </FormLayout.Group>
+              </div>
+              <div data-tour="rules-modal-group">
+                <BlockStack gap="100">
+                  <PolarisSelect
+                    label={t('modal.form.group_label')}
+                    options={groupOptions}
+                    value={productGroupId}
+                    onChange={setProductGroupId}
+                  />
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    {groups.length === 0 ? t('modal.form.group_help_empty') : t('modal.form.group_help_with_groups')}
+                  </Text>
+                </BlockStack>
+              </div>
+              <div data-tour="rules-modal-secondary">
+                <BlockStack gap="100">
+                  <PolarisSelect
+                    label={t('modal.form.secondary_label')}
+                    options={optionsByCategory.secondary}
+                    value={secondaryPackagingId}
+                    onChange={setSecondaryPackagingId}
+                  />
+                  <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.secondary_help')}</Text>
+                </BlockStack>
+              </div>
+              <div data-tour="rules-modal-filler">
+                <BlockStack gap="100">
+                  <PolarisSelect
+                    label={t('modal.form.filler_label')}
+                    options={optionsByCategory.filler}
+                    value={fillerPackagingId}
+                    onChange={setFillerPackagingId}
+                  />
+                  <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.filler_help')}</Text>
+                </BlockStack>
+              </div>
+              <div data-tour="rules-modal-tape">
+                <BlockStack gap="100">
+                  <PolarisSelect
+                    label={t('modal.form.tape_label')}
+                    options={optionsByCategory.tape}
+                    value={tapePackagingId}
+                    onChange={setTapePackagingId}
+                  />
+                  <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.tape_help')}</Text>
+                </BlockStack>
+              </div>
               <RangeSlider
                 label={t('priority.with_label', { level: getPriorityLabel(priority) })}
                 value={priority}

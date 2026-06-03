@@ -1,0 +1,120 @@
+{
+  "buttons": {
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Vorerst überspringen",
+    "close": "Schließen",
+    "last": "Fertig",
+    "dismiss_forever": "Nicht mehr anzeigen",
+    "got_it": "Verstanden, los geht's!",
+    "open_inventory": "Inventar öffnen",
+    "open_mapping": "Zur Zuordnung",
+    "open_rules": "Zu den Regeln",
+    "back_to_dashboard": "Zurück zum Dashboard"
+  },
+  "progress": "Schritt {{current}} von {{total}}",
+  "welcome": {
+    "intro": {
+      "title": "Willkommen an Bord! 👋",
+      "body": "In wenigen Minuten richten wir die App gemeinsam ein. Wir gehen Schritt für Schritt vor — du kannst jederzeit pausieren und genau dort weitermachen, wo du aufgehört hast."
+    },
+    "reports": {
+      "title": "Deine Berichte, bereit zum Loslegen",
+      "body": "Siehst du den Punkt \"Berichte\"? Sobald die Einrichtung steht, erstellt die App automatisch EPR-Berichte, die du auf den Portalen der Länder hochladen kannst. Du bekommst auch eine E-Mail, sobald ein neuer Bericht fertig ist."
+    },
+    "checklist": {
+      "title": "Deine Mini-Checkliste",
+      "body": "Hier siehst du, was zu tun ist. Starten wir mit dem ersten Punkt: dem Verpackungs-Inventar. Klick auf \"Weiter\" und ich bringe dich auf die richtige Seite."
+    }
+  },
+  "inventory": {
+    "intro": {
+      "title": "Bauen wir dein Inventar auf",
+      "body": "Das ist deine Verpackungsseite. Hier fügst du alles hinzu, was du zum Versenden nutzt: Kartons, Klebebänder, Füllmaterial. Klick oben rechts, um deine erste Verpackung hinzuzufügen."
+    },
+    "categories": {
+      "title": "Wähle eine Kategorie",
+      "body": "Es gibt vier Kategorien: Primär (die Produktverpackung), Sekundär (der Versandkarton), Füllmaterial (Papier, Luftpolster) und Klebeband. Beginnen wir mit einem Primär — wähle aus den Kategorien oben."
+    },
+    "add_items": {
+      "title": "Fülle dein Inventar auf",
+      "body": "Von hier fügst du alle Verpackungen hinzu, die du nutzt: Kartons, Klebebänder, Füllmaterial. Du kannst sie so wie sie sind hinzufügen (die Standardtypen, sofort einsatzbereit) oder Maße und Grammatur für noch präzisere Berechnungen anpassen. Wenn du genug hinzugefügt hast, klick \"Weiter\"."
+    },
+    "next": {
+      "title": "Inventar steht ✅",
+      "body": "Du hast alles, was du brauchst. Jetzt sagen wir der App, welche Primärverpackung zu welchem Produkt gehört. Auf geht's?"
+    }
+  },
+  "mapping": {
+    "intro": {
+      "title": "Produkte mit Verpackungen verknüpfen",
+      "body": "Hier verbindest du jedes Produkt mit seiner Primärverpackung — also derjenigen, in der es tatsächlich kommt. Die KI schlägt wahrscheinliche Treffer vor, aber du entscheidest immer am Ende."
+    },
+    "row_add": {
+      "title": "Eine Verpackung hinzufügen",
+      "body": "Klick auf \"Hinzufügen\" bei einem Produkt, um ihm eine Verpackung zuzuweisen. Denk dran: wir reden hier von PRIMÄR-Verpackung (die eigene Verpackung des Produkts, nicht die Versandbox)."
+    },
+    "bulk": {
+      "title": "Mit Bulk-Aktionen schneller",
+      "body": "Viele ähnliche Produkte? Wähle mehrere Zeilen aus und nutze die Bulk-Aktionen, oder verwende \"Per Gruppe zuweisen\" oben, um die gleiche Verpackung in einem Rutsch auf eine ganze Gruppe anzuwenden."
+    },
+    "next": {
+      "title": "Mapping erledigt 💪",
+      "body": "Jetzt zu den Versandregeln: dort sagen wir der App, was zusätzlich zur Primärverpackung in jede Sendung soll."
+    }
+  },
+  "shipping_rules": {
+    "intro": {
+      "title": "Versandregeln",
+      "body": "Hier definierst du, was zusätzlich zur Primärverpackung in jede Sendung kommt:\n• Sekundär: die äußere Box oder Versandtasche\n• Füllmaterial: was das Produkt schützt\n• Klebeband: zum Verschließen\n\nKlick oben rechts, um deine erste Regel zu erstellen."
+    },
+    "modal_name": {
+      "title": "Gib der Regel einen Namen",
+      "body": "Wähle etwas Klares — so erkennst du sie später wieder. Beispiel: \"Einzelartikel-Versand\" oder \"Mittlerer Mehrartikel-Auftrag\"."
+    },
+    "modal_range": {
+      "title": "Für wie viele Artikel gilt sie?",
+      "body": "Setz die Mindest- und Höchstanzahl der Artikel, für die diese Regel gilt. Beispiel: 1 bis 3 Artikel → kleine Box; 4 bis 10 → große Box."
+    },
+    "modal_group": {
+      "title": "Für welche Produkte?",
+      "body": "Wenn die Regel nur für eine Produktgruppe gilt (z.B. \"zerbrechlich\"), wähle sie hier aus. Wenn sie für alle gilt, lass \"Alle Produkte\" stehen."
+    },
+    "modal_secondary": {
+      "title": "Sekundärverpackung",
+      "body": "Die äußere Box oder Versandtasche. Wähle die richtige für diese Artikelspanne."
+    },
+    "modal_filler": {
+      "title": "Füllmaterial",
+      "body": "Was das Produkt schützt: Papier, Luftpolsterfolie, Chips. Füge es hinzu, wenn du eines verwendest."
+    },
+    "modal_tape": {
+      "title": "Klebeband",
+      "body": "Das Klebeband zum Versiegeln der Box. Für eine wirklich präzise Gewichtsberechnung lohnt es sich."
+    },
+    "modal_save": {
+      "title": "Regel speichern",
+      "body": "Alles bereit! Klick unten auf \"Regel erstellen\", um sie zu speichern. Ab jetzt wird sie automatisch auf Sendungen angewendet, die in die gewählten Parameter passen."
+    },
+    "next": {
+      "title": "Regeln erstellt 🎯",
+      "body": "Nur noch ein letzter Schritt: vergangene Bestellungen nachholen, damit deine Berichte vollständig sind. Zurück zum Dashboard."
+    }
+  },
+  "backfill": {
+    "intro": {
+      "title": "Vergangene Bestellungen nachholen",
+      "body": "Letzter Schritt! Die App trackt Bestellungen ab jetzt, aber du kannst auch alte vom Jahresanfang einlesen. Beispiel: heute ist {{today}} — klick hier, und wir holen alle Bestellungen seit dem 1. Januar nach, damit deine nächsten Berichte komplett sind.\n\nDas läuft im Hintergrund — du kannst die App in der Zwischenzeit weiter nutzen."
+    }
+  },
+  "completed": {
+    "title": "Alles bereit! 🚀",
+    "body": "Super gemacht: die App ist eingerichtet. Ab jetzt läuft alles automatisch — jede neue Bestellung wird getrackt und Berichte kommen pünktlich. Wenn du irgendwas nochmal anschauen willst, sind die Seiten immer über das linke Menü erreichbar."
+  },
+  "confirmations": {
+    "dismiss_title": "Tour wirklich nicht mehr anzeigen?",
+    "dismiss_body": "Wir zeigen sie nicht mehr. Du kannst die Einrichtung jederzeit manuell von den einzelnen Seiten aus machen.",
+    "dismiss_confirm": "Ja, nicht mehr anzeigen",
+    "dismiss_cancel": "Abbrechen"
+  }
+}

@@ -283,6 +283,7 @@ export default function Inventory() {
           </Layout.Section>
         )}
         <Layout.Section>
+          <div data-tour="inventory-items">
           <Card padding="0">
             {items.length === 0 && !loading ? (
               <EmptyState
@@ -331,6 +332,7 @@ export default function Inventory() {
               </BlockStack>
             )}
           </Card>
+          </div>
         </Layout.Section>
       </Layout>
 
@@ -353,6 +355,7 @@ export default function Inventory() {
         <Modal.Section>
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
+              <div data-tour="inventory-modal-categories">
               <InlineStack gap="200" blockAlign="center">
                 <Text as="span" variant="bodySm" tone="subdued">{t('modal.category_label')}:</Text>
                 <ButtonGroup variant="segmented">
@@ -368,6 +371,7 @@ export default function Inventory() {
                   ))}
                 </ButtonGroup>
               </InlineStack>
+              </div>
               {materialTabs.length > 0 ? (
                 <Tabs tabs={materialTabs} selected={selectedTab} onSelect={setSelectedTab}>
                   <Box paddingBlockStart="400">

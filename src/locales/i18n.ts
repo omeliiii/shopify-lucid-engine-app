@@ -9,6 +9,7 @@ import itPackagingInventory from './it/packaging_inventory.json';
 import itProductMapping from './it/product_mapping.json';
 import itShippingRules from './it/shipping_rules.json';
 import itReports from './it/reports.json';
+import itTour from './it/tour.json';
 
 // ── EN ─────────────────────────────────────────────────────────────────────────
 import enCommon from './en/common.json';
@@ -17,6 +18,7 @@ import enPackagingInventory from './en/packaging_inventory.json';
 import enProductMapping from './en/product_mapping.json';
 import enShippingRules from './en/shipping_rules.json';
 import enReports from './en/reports.json';
+import enTour from './en/tour.json';
 
 // ── DE ─────────────────────────────────────────────────────────────────────────
 import deCommon from './de/common.json';
@@ -25,6 +27,7 @@ import dePackagingInventory from './de/packaging_inventory.json';
 import deProductMapping from './de/product_mapping.json';
 import deShippingRules from './de/shipping_rules.json';
 import deReports from './de/reports.json';
+import deTour from './de/tour.json';
 
 // ── FR ─────────────────────────────────────────────────────────────────────────
 import frCommon from './fr/common.json';
@@ -33,6 +36,7 @@ import frPackagingInventory from './fr/packaging_inventory.json';
 import frProductMapping from './fr/product_mapping.json';
 import frShippingRules from './fr/shipping_rules.json';
 import frReports from './fr/reports.json';
+import frTour from './fr/tour.json';
 
 export const SUPPORTED_LOCALES = ['it', 'en', 'de', 'fr'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -44,6 +48,7 @@ export const NAMESPACES = [
   'product_mapping',
   'shipping_rules',
   'reports',
+  'tour',
 ] as const;
 
 const resources = {
@@ -54,6 +59,7 @@ const resources = {
     product_mapping: itProductMapping,
     shipping_rules: itShippingRules,
     reports: itReports,
+    tour: itTour,
   },
   en: {
     common: enCommon,
@@ -62,6 +68,7 @@ const resources = {
     product_mapping: enProductMapping,
     shipping_rules: enShippingRules,
     reports: enReports,
+    tour: enTour,
   },
   de: {
     common: deCommon,
@@ -70,6 +77,7 @@ const resources = {
     product_mapping: deProductMapping,
     shipping_rules: deShippingRules,
     reports: deReports,
+    tour: deTour,
   },
   fr: {
     common: frCommon,
@@ -78,6 +86,7 @@ const resources = {
     product_mapping: frProductMapping,
     shipping_rules: frShippingRules,
     reports: frReports,
+    tour: frTour,
   },
 } as const;
 
