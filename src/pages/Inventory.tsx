@@ -288,54 +288,54 @@ export default function Inventory() {
         )}
         <Layout.Section>
           <div data-tour="inventory-items">
-          <Card padding="0">
-            {items.length === 0 && !loading ? (
-              <EmptyState
-                heading={t('empty_state.heading')}
-                action={{ content: t('empty_state.cta'), onAction: () => { resetForm(); setModalOpen(true); } }}
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-              >
-                <Text as="p">{t('empty_state.body')}</Text>
-              </EmptyState>
-            ) : (
-              <BlockStack gap="025">
-                {suggestedItems.length > 0 && (
-                  <AISuggestion.Section
-                    subtitle={t('ai_section.subtitle')}
-                    count={suggestedItems.length}
-                  >
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                      {suggestedItems.map((item) => (
-                        <PackagingCard
-                          key={item.id}
-                          item={item}
-                          onEdit={handleEditItem}
-                          onDelete={handleDeleteItem}
-                          onAccept={handleAcceptSuggested}
-                          isAiSuggested
-                        />
-                      ))}
-                    </div>
-                  </AISuggestion.Section>
-                )}
+            <Card padding="0">
+              {items.length === 0 && !loading ? (
+                <EmptyState
+                  heading={t('empty_state.heading')}
+                  action={{ content: t('empty_state.cta'), onAction: () => { resetForm(); setModalOpen(true); } }}
+                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                >
+                  <Text as="p">{t('empty_state.body')}</Text>
+                </EmptyState>
+              ) : (
+                <BlockStack gap="025">
+                  {suggestedItems.length > 0 && (
+                    <AISuggestion.Section
+                      subtitle={t('ai_section.subtitle')}
+                      count={suggestedItems.length}
+                    >
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                        {suggestedItems.map((item) => (
+                          <PackagingCard
+                            key={item.id}
+                            item={item}
+                            onEdit={handleEditItem}
+                            onDelete={handleDeleteItem}
+                            onAccept={handleAcceptSuggested}
+                            isAiSuggested
+                          />
+                        ))}
+                      </div>
+                    </AISuggestion.Section>
+                  )}
 
-                {activeItems.length > 0 && (
-                  <Box padding="400">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                      {activeItems.map((item) => (
-                        <PackagingCard
-                          key={item.id}
-                          item={item}
-                          onEdit={handleEditItem}
-                          onDelete={handleDeleteItem}
-                        />
-                      ))}
-                    </div>
-                  </Box>
-                )}
-              </BlockStack>
-            )}
-          </Card>
+                  {activeItems.length > 0 && (
+                    <Box padding="400">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                        {activeItems.map((item) => (
+                          <PackagingCard
+                            key={item.id}
+                            item={item}
+                            onEdit={handleEditItem}
+                            onDelete={handleDeleteItem}
+                          />
+                        ))}
+                      </div>
+                    </Box>
+                  )}
+                </BlockStack>
+              )}
+            </Card>
           </div>
         </Layout.Section>
       </Layout>
@@ -360,70 +360,70 @@ export default function Inventory() {
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
               <div data-tour="inventory-modal-categories">
-              <Tabs tabs={categoryTabs} selected={selectedTab} onSelect={setSelectedTab}>
-                <Box paddingBlockStart="400">
-                  {typesForCurrentTab.length > 0 ? (
-                    <BlockStack gap="400">
-                      {Object.entries(groupedTypesForTab).map(([material, types], idx) => {
-                        const isExpanded = expandedMaterials[material] ?? true;
-                        return (
-                          <BlockStack key={material} gap="0">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedMaterials(prev => ({ ...prev, [material]: !isExpanded }))}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                width: '100%',
-                                padding: '8px 0',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              <span style={{ display: 'inline-flex', width: '20px', height: '20px', flexShrink: 0 }}>
-                                <Icon source={isExpanded ? ChevronUpIcon : ChevronDownIcon} tone="subdued" />
-                              </span>
-                              <Text as="h3" variant="headingSm">{tCommon(`materials.${material}` as 'materials.PAPER')}</Text>
-                            </button>
-                            <Collapsible open={isExpanded} id={`collapsible-${material}`}>
-                              <Box paddingBlockStart="300" paddingBlockEnd="100">
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
-                                  {types.map(type => (
-                                    <Card key={type.id} padding="300" background="bg-surface-secondary">
-                                      <BlockStack gap="150">
-                                        <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
-                                        {type.formulaType === 'STATIC' ? (
-                                          type.defaultStaticWeightG != null && (
-                                            <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.weight_g', { value: type.defaultStaticWeightG })}</Text>
-                                          )
-                                        ) : (
-                                          type.defaultGsm != null && (
-                                            <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
-                                          )
-                                        )}
-                                        <InlineStack gap="100" align="end">
-                                          <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
-                                          <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>{t('modal.standard_card.add_cta')}</Button>
-                                        </InlineStack>
-                                      </BlockStack>
-                                    </Card>
-                                  ))}
-                                </div>
-                              </Box>
-                            </Collapsible>
-                          </BlockStack>
-                        );
-                      })}
-                    </BlockStack>
-                  ) : (
-                    <Box paddingBlockStart="200" paddingBlockEnd="200">
-                      <Text as="p" tone="subdued">{t('modal.no_types_for_category')}</Text>
-                    </Box>
-                  )}
-                </Box>
-              </Tabs>
+                <Tabs tabs={categoryTabs} selected={selectedTab} onSelect={setSelectedTab}>
+                  <Box paddingBlockStart="400">
+                    {typesForCurrentTab.length > 0 ? (
+                      <BlockStack gap="400">
+                        {Object.entries(groupedTypesForTab).map(([material, types], _idx) => {
+                          const isExpanded = expandedMaterials[material] ?? true;
+                          return (
+                            <BlockStack key={material} gap="0">
+                              <button
+                                type="button"
+                                onClick={() => setExpandedMaterials(prev => ({ ...prev, [material]: !isExpanded }))}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  width: '100%',
+                                  padding: '8px 0',
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <span style={{ display: 'inline-flex', width: '20px', height: '20px', flexShrink: 0 }}>
+                                  <Icon source={isExpanded ? ChevronUpIcon : ChevronDownIcon} tone="subdued" />
+                                </span>
+                                <Text as="h3" variant="headingSm">{tCommon(`materials.${material}` as 'materials.PAPER')}</Text>
+                              </button>
+                              <Collapsible open={isExpanded} id={`collapsible-${material}`}>
+                                <Box paddingBlockStart="300" paddingBlockEnd="100">
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
+                                    {types.map(type => (
+                                      <Card key={type.id} padding="300" background="bg-surface-secondary">
+                                        <BlockStack gap="150">
+                                          <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
+                                          {type.formulaType === 'STATIC' ? (
+                                            type.defaultStaticWeightG != null && (
+                                              <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.weight_g', { value: type.defaultStaticWeightG })}</Text>
+                                            )
+                                          ) : (
+                                            type.defaultGsm != null && (
+                                              <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
+                                            )
+                                          )}
+                                          <InlineStack gap="100" align="end">
+                                            <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
+                                            <Button size="micro" tone="success" onClick={() => handleAcceptType(type)} loading={submitting}>{t('modal.standard_card.add_cta')}</Button>
+                                          </InlineStack>
+                                        </BlockStack>
+                                      </Card>
+                                    ))}
+                                  </div>
+                                </Box>
+                              </Collapsible>
+                            </BlockStack>
+                          );
+                        })}
+                      </BlockStack>
+                    ) : (
+                      <Box paddingBlockStart="200" paddingBlockEnd="200">
+                        <Text as="p" tone="subdued">{t('modal.no_types_for_category')}</Text>
+                      </Box>
+                    )}
+                  </Box>
+                </Tabs>
               </div>
               <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
                 <Button onClick={() => setShowCustomForm(true)}>{t('modal.create_custom_cta')}</Button>
