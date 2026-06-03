@@ -49,7 +49,9 @@
       "width_label": "Width (mm)",
       "height_label": "Height (mm)",
       "custom_gsm_label": "Custom grammage (g/m²)",
-      "custom_gsm_help": "Leave empty to use the material's default grammage."
+      "custom_gsm_help": "Leave empty to use the material's default grammage.",
+      "custom_static_weight_g_label": "Custom unit weight (g)",
+      "custom_static_weight_g_help": "Leave empty to use the material's default unit weight."
     }
   },
   "toasts": {

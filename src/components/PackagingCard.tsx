@@ -10,6 +10,7 @@ interface PackagingType {
   agnosticMaterial: string;
   category: PackagingCategory;
   imageUrl?: string;
+  formulaType?: string;
 }
 
 export interface InventoryItem {
@@ -20,6 +21,7 @@ export interface InventoryItem {
   wMm: number | null;
   hMm: number | null;
   customGsm: number | null;
+  customStaticWeightG: number | null;
   calculatedUnitWeightGrams: number;
   role: 'PRIMARY' | 'SECONDARY';
   isActive: boolean;
@@ -105,10 +107,18 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           <Text as="span" tone="subdued" variant="bodySm">
             {t('units.dimensions_lwh', { l: item.lMm || 0, w: item.wMm || 0, h: item.hMm || 0 })}
           </Text>
-          {item.customGsm && (
-            <Text as="span" tone="subdued" variant="bodySm">
-              {t('units.gsm_label')}: {t('units.gsm', { value: item.customGsm })}
-            </Text>
+          {item.packagingType?.formulaType === 'STATIC' ? (
+            item.customStaticWeightG != null && (
+              <Text as="span" tone="subdued" variant="bodySm">
+                {t('units.weight_g', { value: item.customStaticWeightG })}
+              </Text>
+            )
+          ) : (
+            item.customGsm != null && (
+              <Text as="span" tone="subdued" variant="bodySm">
+                {t('units.gsm_label')}: {t('units.gsm', { value: item.customGsm })}
+              </Text>
+            )
           )}
           <div style={{ paddingTop: '8px' }}>
             <InlineStack gap="200" align="space-between">

@@ -15,6 +15,7 @@ interface PackagingType {
   agnosticMaterial: string;
   category: 'PRIMARY' | 'TAPE' | 'FILLER';
   defaultGsm?: number;
+  defaultStaticWeightG?: number;
   formulaType?: string;
   defaultOverlapFactor?: number;
   defaultLMm?: number;
@@ -40,6 +41,7 @@ export default function Inventory() {
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
   const [customGsm, setCustomGsm] = useState('');
+  const [customStaticWeightG, setCustomStaticWeightG] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
   const [expandedMaterials, setExpandedMaterials] = useState<Record<string, boolean>>({});
@@ -68,13 +70,16 @@ export default function Inventory() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    const selectedType = standardTypes.find(t => t.id === packagingTypeId);
+    const isStatic = selectedType?.formulaType === 'STATIC';
     const bodyParams = {
       packagingTypeId,
       name,
       lMm: length ? Number(length) : null,
       wMm: width ? Number(width) : null,
       hMm: height ? Number(height) : null,
-      customGsm: customGsm ? Number(customGsm) : null,
+      customGsm: !isStatic && customGsm ? Number(customGsm) : null,
+      customStaticWeightG: isStatic && customStaticWeightG ? Number(customStaticWeightG) : null,
       role: 'PRIMARY'
     };
 
@@ -115,6 +120,7 @@ export default function Inventory() {
     setWidth('');
     setHeight('');
     setCustomGsm('');
+    setCustomStaticWeightG('');
     setEditingItemId(null);
     setShowCustomForm(false);
     setSelectedTab(0);
@@ -133,6 +139,7 @@ export default function Inventory() {
     setWidth(item.wMm?.toString() || '');
     setHeight(item.hMm?.toString() || '');
     setCustomGsm(item.customGsm?.toString() || '');
+    setCustomStaticWeightG(item.customStaticWeightG?.toString() || '');
     setEditingItemId(item.id);
     setShowCustomForm(true);
     setModalOpen(true);
@@ -144,7 +151,13 @@ export default function Inventory() {
     setLength(type.defaultLMm?.toString() || '');
     setWidth(type.defaultWMm?.toString() || '');
     setHeight(type.defaultHMm?.toString() || '');
-    setCustomGsm(type.defaultGsm?.toString() || '');
+    if (type.formulaType === 'STATIC') {
+      setCustomGsm('');
+      setCustomStaticWeightG(type.defaultStaticWeightG?.toString() || '');
+    } else {
+      setCustomGsm(type.defaultGsm?.toString() || '');
+      setCustomStaticWeightG('');
+    }
     setShowCustomForm(true);
   };
 
@@ -381,8 +394,14 @@ export default function Inventory() {
                                     <Card key={type.id} padding="300" background="bg-surface-secondary">
                                       <BlockStack gap="150">
                                         <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
-                                        {type.defaultGsm && (
-                                          <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
+                                        {type.formulaType === 'STATIC' ? (
+                                          type.defaultStaticWeightG != null && (
+                                            <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.weight_g', { value: type.defaultStaticWeightG })}</Text>
+                                          )
+                                        ) : (
+                                          type.defaultGsm != null && (
+                                            <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.gsm', { value: type.defaultGsm })}</Text>
+                                          )
                                         )}
                                         <InlineStack gap="100" align="end">
                                           <Button size="micro" onClick={() => handleEditStandardType(type)}>{t('modal.standard_card.customize_cta')}</Button>
@@ -451,14 +470,25 @@ export default function Inventory() {
                     {standardTypes.find(t => t.id === packagingTypeId)?.defaultHMm !== null && (
                       <TextField label={t('modal.form.height_label')} value={height} onChange={setHeight} type="number" autoComplete="off" />
                     )}
-                    <TextField
-                      label={t('modal.form.custom_gsm_label')}
-                      value={customGsm}
-                      onChange={setCustomGsm}
-                      type="number"
-                      autoComplete="off"
-                      helpText={t('modal.form.custom_gsm_help')}
-                    />
+                    {standardTypes.find(t => t.id === packagingTypeId)?.formulaType === 'STATIC' ? (
+                      <TextField
+                        label={t('modal.form.custom_static_weight_g_label')}
+                        value={customStaticWeightG}
+                        onChange={setCustomStaticWeightG}
+                        type="number"
+                        autoComplete="off"
+                        helpText={t('modal.form.custom_static_weight_g_help')}
+                      />
+                    ) : (
+                      <TextField
+                        label={t('modal.form.custom_gsm_label')}
+                        value={customGsm}
+                        onChange={setCustomGsm}
+                        type="number"
+                        autoComplete="off"
+                        helpText={t('modal.form.custom_gsm_help')}
+                      />
+                    )}
                   </FormLayout.Group>
                 </FormLayout>
               </Form>

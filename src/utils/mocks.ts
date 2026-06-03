@@ -71,6 +71,7 @@ export const MOCKS: Record<string, any> = {
       name: 'Bustina Calzini Custom',
       lMm: 150, wMm: 100, hMm: 20,
       customGsm: null,
+      customStaticWeightG: null,
       calculatedUnitWeightGrams: 7.92,
       role: 'PRIMARY',
       isActive: true,
@@ -82,6 +83,7 @@ export const MOCKS: Record<string, any> = {
       name: 'Scatola Standard',
       lMm: 300, wMm: 200, hMm: 100,
       customGsm: null,
+      customStaticWeightG: null,
       calculatedUnitWeightGrams: 150,
       role: 'PRIMARY',
       isActive: true,
@@ -93,9 +95,9 @@ export const MOCKS: Record<string, any> = {
     { id: 't1', name: 'Scatola Cartone Singola Onda', agnosticMaterial: 'PAPER', category: 'PRIMARY', defaultGsm: 400, formulaType: 'BOX', defaultOverlapFactor: 1.05 },
     { id: 't2', name: 'Busta Imbottita', agnosticMaterial: 'PAPER', category: 'PRIMARY', defaultGsm: 150, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
     { id: 't3', name: 'Busta Polietilene', agnosticMaterial: 'PLASTIC', category: 'PRIMARY', defaultGsm: 50, formulaType: 'ENVELOPE', defaultOverlapFactor: 1.10 },
-    { id: 't4', name: 'Nastro Adesivo', agnosticMaterial: 'PLASTIC', category: 'TAPE', defaultGsm: 30, formulaType: 'STATIC', defaultOverlapFactor: 1.0 },
+    { id: 't4', name: 'Nastro Adesivo', agnosticMaterial: 'PLASTIC', category: 'TAPE', defaultStaticWeightG: 5, formulaType: 'STATIC', defaultOverlapFactor: 1.0 },
     { id: 't5', name: 'Tubo Postale Cartone', agnosticMaterial: 'COMPOSITE', category: 'PRIMARY', defaultGsm: 600, formulaType: 'BOX', defaultOverlapFactor: 1.05 },
-    { id: 't6', name: 'Carta Velina', agnosticMaterial: 'PAPER', category: 'FILLER', defaultGsm: 20, formulaType: 'STATIC', defaultOverlapFactor: 1.0 }
+    { id: 't6', name: 'Carta Velina', agnosticMaterial: 'PAPER', category: 'FILLER', defaultStaticWeightG: 3, formulaType: 'STATIC', defaultOverlapFactor: 1.0 }
   ],
 
   '/products/mappings': {

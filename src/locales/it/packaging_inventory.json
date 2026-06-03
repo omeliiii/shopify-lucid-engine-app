@@ -49,7 +49,9 @@
       "width_label": "Larghezza (mm)",
       "height_label": "Altezza (mm)",
       "custom_gsm_label": "Grammatura personalizzata (g/m²)",
-      "custom_gsm_help": "Lascia vuoto per usare la grammatura standard del materiale."
+      "custom_gsm_help": "Lascia vuoto per usare la grammatura standard del materiale.",
+      "custom_static_weight_g_label": "Peso unitario personalizzato (g)",
+      "custom_static_weight_g_help": "Lascia vuoto per usare il peso unitario standard del materiale."
     }
   },
   "toasts": {
