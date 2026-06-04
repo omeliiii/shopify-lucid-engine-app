@@ -135,10 +135,12 @@ export default function BillingStart() {
           {/* ── Basic ── */}
           <div style={cardStyle(false)}>
             <BlockStack gap="400">
-              <div style={{ minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <BlockStack gap="200">
                 <Text as="h2" variant="headingLg">{t('billing.plans.one_country.name')}</Text>
-                {showTrialBadge && <Badge tone="info">{t('billing.plan_selection.trial_badge', { days: trialDays })}</Badge>}
-              </div>
+                <div style={{ minHeight: '28px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {showTrialBadge && <Badge tone="info">{t('billing.plan_selection.trial_badge', { days: trialDays })}</Badge>}
+                </div>
+              </BlockStack>
 
               <InlineStack gap="100" blockAlign="baseline">
                 <Text as="span" variant="heading2xl">
@@ -221,13 +223,13 @@ export default function BillingStart() {
           {/* ── Unlimited ── */}
           <div style={cardStyle(true)}>
             <BlockStack gap="400">
-              <div style={{ minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <BlockStack gap="200">
                 <Text as="h2" variant="headingLg">{t('billing.plans.multi_country.name')} ✨</Text>
-                <InlineStack gap="200" wrap={false}>
+                <div style={{ minHeight: '28px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   {showTrialBadge && <Badge tone="info">{t('billing.plan_selection.trial_badge', { days: trialDays })}</Badge>}
                   <Badge tone="success">{t('billing.plans.multi_country.best_value_badge')}</Badge>
-                </InlineStack>
-              </div>
+                </div>
+              </BlockStack>
 
               <InlineStack gap="100" blockAlign="baseline">
                 <Text as="span" variant="heading2xl">
