@@ -1,0 +1,21 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "8603b1bff4ca04f44744e4542bb93f81"
+name = "EPR Pack Report"
+application_url = "https://app.eprpackreport.com"
+embedded = true
+
+[webhooks]
+api_version = "2026-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_orders,read_products"
+optional_scopes = [ ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ "https://api.eprpackreport.com/auth/callback" ]
+
+[app_preferences]
+url = "https://app.eprpackreport.com/preferences"
