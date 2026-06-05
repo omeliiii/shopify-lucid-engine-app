@@ -440,10 +440,12 @@ export default function Tour() {
     continuous: true,
     locale: {
       next: t('buttons.next'),
-      back: t('buttons.back'),
       skip: t('buttons.skip'),
       close: t('buttons.close'),
       last: t('buttons.last'),
+    },
+    floatingOptions: {
+      shiftOptions: { padding: 20 },
     },
     options: {
       arrowColor: '#ffffff',
@@ -452,8 +454,9 @@ export default function Tour() {
       overlayColor: 'rgba(0, 0, 0, 0.45)',
       primaryColor: '#005bd3',
       zIndex: 10000,
-      buttons: ['back', 'skip', 'primary'],
-      targetWaitTimeout: 30000,
+      buttons: ['skip', 'primary'],
+      width: 340,
+      targetWaitTimeout: 5000,
       blockTargetInteraction: false,
       disableFocusTrap: true,
     },
@@ -587,6 +590,26 @@ export default function Tour() {
     });
     return unsubscribe;
   }, [on, stage, suspend, complete, goToStage]);
+
+  // Fallback when joyride can't find a step's target within targetWaitTimeout:
+  // skip the missing step instead of hanging in the loader. If it's the last
+  // step of the current stage, advance the stage so the user isn't stuck.
+  useEffect(() => {
+    const unsubscribe = on(EVENTS.TARGET_NOT_FOUND, (data) => {
+      const isLast = data.index >= data.size - 1;
+      if (isLast) {
+        const next = nextStage(stage);
+        if (next === 'completed') {
+          complete();
+        } else {
+          goToStage(next);
+        }
+        return;
+      }
+      controls.next();
+    });
+    return unsubscribe;
+  }, [on, controls, stage, complete, goToStage]);
 
   return (
     <>
