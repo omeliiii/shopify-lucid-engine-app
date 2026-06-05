@@ -492,9 +492,7 @@ export default function Mapping() {
   const unmappedTab = {
     id: 'unmapped',
     content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }),
-    ...(hasUnmapped
-      ? { icon: AlertCircleIcon, badge: String(meta.totalUnmapped) }
-      : {}),
+    ...(hasUnmapped ? { icon: AlertCircleIcon } : {}),
   };
   const tabs = hasUnmapped
     ? [unmappedTab, allTab, mappedTab, pendingTab]
