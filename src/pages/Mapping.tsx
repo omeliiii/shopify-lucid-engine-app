@@ -24,7 +24,7 @@ import {
   useIndexResourceState,
   useSetIndexFiltersMode,
 } from '@shopify/polaris';
-import { DeleteIcon, PlusIcon, CheckIcon } from '@shopify/polaris-icons';
+import { DeleteIcon, PlusIcon, CheckIcon, AlertCircleIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
@@ -86,12 +86,7 @@ interface ProductGroup {
 
 const PURPOSE_VALUES: PackagingComponent['purpose'][] = ['CONTAINER', 'WRAP', 'SEAL', 'LABEL', 'CUSHION'];
 
-const STATUS_FILTER_MAP: Record<number, MappingStatus | undefined> = {
-  0: undefined,    // "All"
-  1: 'mapped',     // "Matched"
-  2: 'pending',    // "To review"
-  3: 'unmapped',   // "No packaging"
-};
+type TabKey = 'all' | 'mapped' | 'pending' | 'unmapped';
 
 const PAGE_LIMIT = 25;
 
@@ -121,7 +116,7 @@ export default function Mapping() {
   const [packagingOptions, setPackagingOptions] = useState<PackagingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTabKey, setSelectedTabKey] = useState<TabKey>('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   // IndexFilters query + mode
@@ -184,7 +179,8 @@ export default function Mapping() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const statusParam = STATUS_FILTER_MAP[selectedTab];
+      const statusParam: MappingStatus | undefined =
+        selectedTabKey === 'all' ? undefined : selectedTabKey;
       const params = new URLSearchParams();
       params.set('page', String(currentPage));
       params.set('limit', String(PAGE_LIMIT));
@@ -213,7 +209,7 @@ export default function Mapping() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, selectedTab, queryDebounced, toast, t]);
+  }, [currentPage, selectedTabKey, queryDebounced, toast, t]);
 
   useEffect(() => {
     loadData();
@@ -471,7 +467,9 @@ export default function Mapping() {
   // ── Tab handling ──────────────────────────────────────────────────────────
 
   const handleTabChange = (tabIndex: number) => {
-    setSelectedTab(tabIndex);
+    const next = tabs[tabIndex]?.id as TabKey | undefined;
+    if (!next) return;
+    setSelectedTabKey(next);
     setCurrentPage(1);
     clearSelection();
   };
@@ -487,12 +485,21 @@ export default function Mapping() {
   // ── Tab labels with server-side counts ────────────────────────────────────
 
   const totalAll = meta.totalMapped + meta.totalPending + meta.totalUnmapped;
-  const tabs = [
-    { id: 'all', content: t('mapping.tabs.all', { count: totalAll }) },
-    { id: 'mapped', content: t('mapping.tabs.mapped', { count: meta.totalMapped }) },
-    { id: 'pending', content: t('mapping.tabs.pending', { count: meta.totalPending }) },
-    { id: 'unmapped', content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }) },
-  ];
+  const hasUnmapped = meta.totalUnmapped > 0;
+  const allTab = { id: 'all', content: t('mapping.tabs.all', { count: totalAll }) };
+  const mappedTab = { id: 'mapped', content: t('mapping.tabs.mapped', { count: meta.totalMapped }) };
+  const pendingTab = { id: 'pending', content: t('mapping.tabs.pending', { count: meta.totalPending }) };
+  const unmappedTab = {
+    id: 'unmapped',
+    content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }),
+    ...(hasUnmapped
+      ? { icon: AlertCircleIcon, badge: String(meta.totalUnmapped) }
+      : {}),
+  };
+  const tabs = hasUnmapped
+    ? [unmappedTab, allTab, mappedTab, pendingTab]
+    : [allTab, mappedTab, pendingTab, unmappedTab];
+  const selectedTabIndex = Math.max(0, tabs.findIndex((tb) => tb.id === selectedTabKey));
 
   const totalPages = Math.max(1, Math.ceil(meta.total / PAGE_LIMIT));
 
@@ -649,7 +656,7 @@ export default function Mapping() {
           <Card padding="0">
             <IndexFilters
               tabs={tabs}
-              selected={selectedTab}
+              selected={selectedTabIndex}
               onSelect={handleTabChange}
               queryValue={queryValue}
               queryPlaceholder={t('mapping.search_placeholder')}
@@ -676,7 +683,7 @@ export default function Mapping() {
             ) : products.length === 0 ? (
               <EmptyState
                 heading={
-                  selectedTab === 3
+                  selectedTabKey === 'unmapped'
                     ? t('mapping.empty_state.all_mapped_heading')
                     : queryDebounced
                       ? t('mapping.empty_state.no_search_results_heading')
@@ -690,7 +697,7 @@ export default function Mapping() {
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
                 <Text as="p">
-                  {selectedTab === 3
+                  {selectedTabKey === 'unmapped'
                     ? t('mapping.empty_state.all_mapped_body')
                     : queryDebounced
                       ? t('mapping.empty_state.no_search_results_body', { query: queryDebounced })
