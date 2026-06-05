@@ -375,7 +375,7 @@ export default function ShippingRules() {
         open={ruleModalOpen}
         onClose={() => setRuleModalOpen(false)}
         title={editingRuleId ? t('modal.title_edit') : t('modal.title_new')}
-        primaryAction={{ content: t('modal.primary'), onAction: handleRuleSubmit, loading: saving }}
+        primaryAction={{ content: t('modal.primary'), onAction: handleRuleSubmit, loading: saving, disabled: !name.trim() }}
         secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setRuleModalOpen(false) }]}
       >
         <Modal.Section>
