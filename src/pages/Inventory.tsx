@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Layout, Card, Text, Button, Collapsible, Icon, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner } from '@shopify/polaris';
+import { Page, Layout, Card, Text, Button, Collapsible, Icon, Modal, Form, FormLayout, TextField, Box, BlockStack, InlineStack, EmptyState, Tabs, Banner, Thumbnail } from '@shopify/polaris';
 import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
@@ -14,6 +14,7 @@ interface PackagingType {
   name: string;
   agnosticMaterial: string;
   category: 'PRIMARY' | 'TAPE' | 'FILLER';
+  imageUrl?: string;
   defaultGsm?: number;
   defaultStaticWeightG?: number;
   formulaType?: string;
@@ -401,7 +402,12 @@ export default function Inventory() {
                                     {types.map(type => (
                                       <Card key={type.id} padding="300" background="bg-surface-secondary">
                                         <BlockStack gap="150">
-                                          <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
+                                          <InlineStack gap="200" blockAlign="center" wrap={false}>
+                                            {type.imageUrl && (
+                                              <Thumbnail source={type.imageUrl} alt={type.name} size="extraSmall" />
+                                            )}
+                                            <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
+                                          </InlineStack>
                                           {type.formulaType === 'STATIC' ? (
                                             type.defaultStaticWeightG != null && (
                                               <Text as="span" tone="subdued" variant="bodySm">{tCommon('units.weight_g', { value: type.defaultStaticWeightG })}</Text>
