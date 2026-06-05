@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, Box, BlockStack, Text, InlineStack, Badge, Button } from '@shopify/polaris';
 import { DeleteIcon, EditIcon, CheckIcon } from '@shopify/polaris-icons';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ interface PackagingCardProps {
 
 export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested }: PackagingCardProps) {
   const { t } = useTranslation('common');
+  const [isHovered, setIsHovered] = useState(false);
   const material = item.packagingType?.agnosticMaterial || 'PAPER';
   const imageUrl = item.packagingType?.imageUrl || '';
   const category = item.packagingType?.category || 'PRIMARY';
@@ -51,13 +53,31 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
 
   if (isAiSuggested) {
     return (
-      <Card padding="0">
-        <img
-          src={imageUrl}
-          alt={materialLabel}
-          style={{ width: '100%', height: '90px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-        />
-        <Box padding="200">
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+          boxShadow: isHovered ? '0 6px 20px rgba(0, 0, 0, 0.12)' : 'none',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          borderRadius: '12px',
+        }}
+      >
+        <Card padding="0">
+          <div style={{ overflow: 'hidden', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
+            <img
+              src={imageUrl}
+              alt={materialLabel}
+              style={{
+                width: '100%',
+                height: '90px',
+                objectFit: 'contain',
+                transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+          </div>
+          <Box padding="200">
           <BlockStack gap="150">
             <Text as="h3" variant="headingXs" truncate>{item.name}</Text>
             <InlineStack gap="100" align="space-between">
@@ -81,18 +101,37 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
             </InlineStack>
           </BlockStack>
         </Box>
-      </Card>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card padding="0">
-      <img
-        src={imageUrl}
-        alt={materialLabel}
-        style={{ width: '100%', height: '160px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-      />
-      <Box padding="400">
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+        boxShadow: isHovered ? '0 6px 20px rgba(0, 0, 0, 0.12)' : 'none',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        borderRadius: '12px',
+      }}
+    >
+      <Card padding="0">
+        <div style={{ overflow: 'hidden', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
+          <img
+            src={imageUrl}
+            alt={materialLabel}
+            style={{
+              width: '100%',
+              height: '160px',
+              objectFit: 'contain',
+              transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+              transition: 'transform 0.3s ease',
+            }}
+          />
+        </div>
+        <Box padding="400">
         <BlockStack gap="200">
           <Text as="h3" variant="headingSm" truncate>{item.name}</Text>
           <InlineStack gap="200" align="space-between">
@@ -128,6 +167,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           </div>
         </BlockStack>
       </Box>
-    </Card>
+      </Card>
+    </div>
   );
 }
