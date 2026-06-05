@@ -433,8 +433,8 @@ export default function Dashboard() {
   }
 
   const logRows = logs.map((log) => {
-    const componentsLabel = log.lineItems
-      .flatMap(li => li.packaging_components.map(c => c.packaging_name))
+    const componentsLabel = (log.lineItems ?? [])
+      .flatMap(li => (li.packaging_components ?? []).map(c => c.packaging_name))
       .filter((v, i, a) => a.indexOf(v) === i)
       .join(', ');
 
