@@ -28,6 +28,7 @@
       "columns": {
         "product": "Prodotto",
         "status": "Stato",
+        "groups": "Gruppi",
         "packaging": "Imballaggio",
         "action": "Azione"
       },
@@ -83,6 +84,9 @@
       "bulk_group": {
         "title": "Applica un imballaggio a un gruppo",
         "primary": "Applica al gruppo",
+        "product_count_banner": "La regola sarà applicata a <strong>{{count}}</strong> prodotti di questo gruppo.",
+        "product_count_banner_one": "La regola sarà applicata a <strong>1</strong> prodotto di questo gruppo.",
+        "product_count_banner_empty": "Questo gruppo non contiene ancora prodotti.",
         "form": {
           "group_label": "Gruppo di prodotti",
           "packaging_label": "Imballaggio",

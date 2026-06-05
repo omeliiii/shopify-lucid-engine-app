@@ -194,7 +194,8 @@ export const MOCKS: Record<string, any> = {
             similarityScore: 0.94,
             reason: 'AI match: Bustina Calzini Custom (PAPER) — 94%'
           }
-        ]
+        ],
+        groups: [{ id: 'grp-1', name: 'Abbigliamento' }]
       },
       {
         shopifyProductId: 992,
@@ -212,7 +213,8 @@ export const MOCKS: Record<string, any> = {
             unitWeightGrams: 150
           }
         ],
-        pendingComponents: []
+        pendingComponents: [],
+        groups: [{ id: 'grp-3', name: 'Fragili' }]
       },
       {
         shopifyProductId: 993,
@@ -232,7 +234,8 @@ export const MOCKS: Record<string, any> = {
             similarityScore: 0.78,
             reason: 'AI match: Bustina Calzini Custom (PAPER) — 78%'
           }
-        ]
+        ],
+        groups: [{ id: 'grp-1', name: 'Abbigliamento' }]
       },
       {
         shopifyProductId: 994,
@@ -240,7 +243,8 @@ export const MOCKS: Record<string, any> = {
         imageUrl: 'https://via.placeholder.com/100',
         status: 'unmapped',
         confirmedComponents: [],
-        pendingComponents: []
+        pendingComponents: [],
+        groups: [{ id: 'grp-1', name: 'Abbigliamento' }]
       }
     ],
     meta: {
@@ -254,7 +258,7 @@ export const MOCKS: Record<string, any> = {
   },
 
   '/products/groups': [
-    { id: 'grp-1', name: 'Abbigliamento', matchType: 'PRODUCT_TYPE', matchValue: 'Clothing', members: [] },
+    { id: 'grp-1', name: 'Abbigliamento', matchType: 'PRODUCT_TYPE', matchValue: 'Clothing', members: [{ shopifyProductId: 991 }, { shopifyProductId: 993 }, { shopifyProductId: 994 }] },
     { id: 'grp-2', name: 'Accessori', matchType: 'PRODUCT_TYPE', matchValue: 'Accessories', members: [] },
     { id: 'grp-3', name: 'Fragili', matchType: 'MANUAL', matchValue: null, members: [{ shopifyProductId: 992 }] },
   ],

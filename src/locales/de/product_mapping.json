@@ -28,6 +28,7 @@
       "columns": {
         "product": "Produkt",
         "status": "Status",
+        "groups": "Gruppen",
         "packaging": "Verpackung",
         "action": "Aktion"
       },
@@ -83,6 +84,9 @@
       "bulk_group": {
         "title": "Verpackung auf eine Gruppe anwenden",
         "primary": "Auf Gruppe anwenden",
+        "product_count_banner": "Die Regel wird auf <strong>{{count}}</strong> Produkte dieser Gruppe angewendet.",
+        "product_count_banner_one": "Die Regel wird auf <strong>1</strong> Produkt dieser Gruppe angewendet.",
+        "product_count_banner_empty": "Diese Gruppe enthält noch keine Produkte.",
         "form": {
           "group_label": "Produktgruppe",
           "packaging_label": "Verpackung",

@@ -18,6 +18,7 @@ import {
   Pagination,
   Checkbox,
   Banner,
+  Tag,
   IndexTable,
   IndexFilters,
   useIndexResourceState,
@@ -78,6 +79,7 @@ interface MergedViewMeta {
 interface ProductGroup {
   id: string;
   name: string;
+  members?: { shopifyProductId: number }[];
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -515,6 +517,18 @@ export default function Mapping() {
       </IndexTable.Cell>
 
       <IndexTable.Cell>
+        {product.groups && product.groups.length > 0 ? (
+          <InlineStack gap="100" wrap>
+            {product.groups.map((g) => (
+              <Tag key={g.id}>{g.name}</Tag>
+            ))}
+          </InlineStack>
+        ) : (
+          <Text as="span" tone="subdued" variant="bodySm">—</Text>
+        )}
+      </IndexTable.Cell>
+
+      <IndexTable.Cell>
         <BlockStack gap="200">
           {product.confirmedComponents.length > 0 && (
             <BlockStack gap="150">
@@ -694,6 +708,7 @@ export default function Mapping() {
                   headings={[
                     { title: t('mapping.table.columns.product') },
                     { title: t('mapping.table.columns.status') },
+                    { title: t('mapping.table.columns.groups') },
                     { title: t('mapping.table.columns.packaging') },
                     { title: t('mapping.table.columns.action') },
                   ]}
@@ -736,40 +751,67 @@ export default function Mapping() {
         secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setBulkGroupModalOpen(false) }]}
       >
         <Modal.Section>
-          <FormLayout>
-            <PolarisSelect
-              label={t('mapping.modal.bulk_group.form.group_label')}
-              options={groups.map((g) => ({ label: g.name, value: g.id }))}
-              value={bulkGroupForm.groupId}
-              onChange={(v) => setBulkGroupForm((f) => ({ ...f, groupId: v }))}
-            />
-            <PolarisSelect
-              label={t('mapping.modal.bulk_group.form.packaging_label')}
-              options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
-              value={bulkGroupForm.packagingId}
-              onChange={(v) => setBulkGroupForm((f) => ({ ...f, packagingId: v }))}
-            />
-            <PolarisSelect
-              label={t('mapping.modal.bulk_group.form.purpose_label')}
-              options={purposeOptions}
-              value={bulkGroupForm.purpose}
-              onChange={(v) => setBulkGroupForm((f) => ({ ...f, purpose: v }))}
-            />
-            <TextField
-              label={t('mapping.modal.bulk_group.form.quantity_label')}
-              type="number"
-              value={bulkGroupForm.quantityPerUnit}
-              onChange={(v) => setBulkGroupForm((f) => ({ ...f, quantityPerUnit: v }))}
-              autoComplete="off"
-              min={1}
-            />
-            <Checkbox
-              label={t('mapping.modal.bulk_group.form.overwrite_label')}
-              checked={bulkGroupForm.overwrite}
-              onChange={(v) => setBulkGroupForm((f) => ({ ...f, overwrite: v }))}
-              helpText={t('mapping.modal.bulk_group.form.overwrite_help')}
-            />
-          </FormLayout>
+          <BlockStack gap="300">
+            {(() => {
+              const selectedGroup = groups.find((g) => g.id === bulkGroupForm.groupId);
+              const count = selectedGroup?.members?.length ?? 0;
+              if (!selectedGroup) return null;
+              return (
+                <Banner tone={count === 0 ? 'warning' : 'info'}>
+                  <p>
+                    {count === 0 ? (
+                      t('mapping.modal.bulk_group.product_count_banner_empty')
+                    ) : (
+                      <Trans
+                        ns="product_mapping"
+                        i18nKey={
+                          count === 1
+                            ? 'mapping.modal.bulk_group.product_count_banner_one'
+                            : 'mapping.modal.bulk_group.product_count_banner'
+                        }
+                        values={{ count }}
+                        components={{ strong: <strong /> }}
+                      />
+                    )}
+                  </p>
+                </Banner>
+              );
+            })()}
+            <FormLayout>
+              <PolarisSelect
+                label={t('mapping.modal.bulk_group.form.group_label')}
+                options={groups.map((g) => ({ label: g.name, value: g.id }))}
+                value={bulkGroupForm.groupId}
+                onChange={(v) => setBulkGroupForm((f) => ({ ...f, groupId: v }))}
+              />
+              <PolarisSelect
+                label={t('mapping.modal.bulk_group.form.packaging_label')}
+                options={packagingOptions.map((p) => ({ label: p.name, value: p.id }))}
+                value={bulkGroupForm.packagingId}
+                onChange={(v) => setBulkGroupForm((f) => ({ ...f, packagingId: v }))}
+              />
+              <PolarisSelect
+                label={t('mapping.modal.bulk_group.form.purpose_label')}
+                options={purposeOptions}
+                value={bulkGroupForm.purpose}
+                onChange={(v) => setBulkGroupForm((f) => ({ ...f, purpose: v }))}
+              />
+              <TextField
+                label={t('mapping.modal.bulk_group.form.quantity_label')}
+                type="number"
+                value={bulkGroupForm.quantityPerUnit}
+                onChange={(v) => setBulkGroupForm((f) => ({ ...f, quantityPerUnit: v }))}
+                autoComplete="off"
+                min={1}
+              />
+              <Checkbox
+                label={t('mapping.modal.bulk_group.form.overwrite_label')}
+                checked={bulkGroupForm.overwrite}
+                onChange={(v) => setBulkGroupForm((f) => ({ ...f, overwrite: v }))}
+                helpText={t('mapping.modal.bulk_group.form.overwrite_help')}
+              />
+            </FormLayout>
+          </BlockStack>
         </Modal.Section>
       </Modal>
 
