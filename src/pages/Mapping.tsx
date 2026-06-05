@@ -24,7 +24,7 @@ import {
   useIndexResourceState,
   useSetIndexFiltersMode,
 } from '@shopify/polaris';
-import { DeleteIcon, PlusIcon, CheckIcon, AlertCircleIcon } from '@shopify/polaris-icons';
+import { DeleteIcon, PlusIcon, CheckIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
