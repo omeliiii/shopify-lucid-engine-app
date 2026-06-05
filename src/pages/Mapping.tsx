@@ -489,11 +489,7 @@ export default function Mapping() {
   const allTab = { id: 'all', content: t('mapping.tabs.all', { count: totalAll }) };
   const mappedTab = { id: 'mapped', content: t('mapping.tabs.mapped', { count: meta.totalMapped }) };
   const pendingTab = { id: 'pending', content: t('mapping.tabs.pending', { count: meta.totalPending }) };
-  const unmappedTab = {
-    id: 'unmapped',
-    content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }),
-    ...(hasUnmapped ? { icon: AlertCircleIcon } : {}),
-  };
+  const unmappedTab = { id: 'unmapped', content: t('mapping.tabs.unmapped', { count: meta.totalUnmapped }) };
   const tabs = hasUnmapped
     ? [unmappedTab, allTab, mappedTab, pendingTab]
     : [allTab, mappedTab, pendingTab, unmappedTab];
@@ -651,93 +647,93 @@ export default function Mapping() {
               aria-hidden
               style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 1, pointerEvents: 'none' }}
             />
-          <Card padding="0">
-            <IndexFilters
-              tabs={tabs}
-              selected={selectedTabIndex}
-              onSelect={handleTabChange}
-              queryValue={queryValue}
-              queryPlaceholder={t('mapping.search_placeholder')}
-              onQueryChange={setQueryValue}
-              onQueryClear={() => setQueryValue('')}
-              mode={mode}
-              setMode={setMode}
-              filters={[]}
-              appliedFilters={[]}
-              onClearAll={() => setQueryValue('')}
-              cancelAction={{
-                onAction: () => setQueryValue(''),
-                disabled: false,
-                loading: false,
-              }}
-              hideFilters
-              canCreateNewView={false}
-            />
+            <Card padding="0">
+              <IndexFilters
+                tabs={tabs}
+                selected={selectedTabIndex}
+                onSelect={handleTabChange}
+                queryValue={queryValue}
+                queryPlaceholder={t('mapping.search_placeholder')}
+                onQueryChange={setQueryValue}
+                onQueryClear={() => setQueryValue('')}
+                mode={mode}
+                setMode={setMode}
+                filters={[]}
+                appliedFilters={[]}
+                onClearAll={() => setQueryValue('')}
+                cancelAction={{
+                  onAction: () => setQueryValue(''),
+                  disabled: false,
+                  loading: false,
+                }}
+                hideFilters
+                canCreateNewView={false}
+              />
 
-            {loading ? (
-              <Box padding="400">
-                <SkeletonBodyText lines={6} />
-              </Box>
-            ) : products.length === 0 ? (
-              <EmptyState
-                heading={
-                  selectedTabKey === 'unmapped'
-                    ? t('mapping.empty_state.all_mapped_heading')
-                    : queryDebounced
-                      ? t('mapping.empty_state.no_search_results_heading')
-                      : t('mapping.empty_state.no_products_heading')
-                }
-                action={
-                  !queryDebounced
-                    ? { content: t('mapping.page.primary_action'), onAction: handleSync, loading: syncing }
-                    : undefined
-                }
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-              >
-                <Text as="p">
-                  {selectedTabKey === 'unmapped'
-                    ? t('mapping.empty_state.all_mapped_body')
-                    : queryDebounced
-                      ? t('mapping.empty_state.no_search_results_body', { query: queryDebounced })
-                      : t('mapping.empty_state.no_products_body')}
-                </Text>
-              </EmptyState>
-            ) : (
-              <BlockStack>
-                <IndexTable
-                  resourceName={{ singular: t('mapping.table.resource_singular'), plural: t('mapping.table.resource_plural') }}
-                  itemCount={productsWithId.length}
-                  selectedItemsCount={allResourcesSelected ? 'All' : selectedResources.length}
-                  onSelectionChange={handleSelectionChange}
-                  promotedBulkActions={promotedBulkActions}
-                  headings={[
-                    { title: t('mapping.table.columns.product') },
-                    { title: t('mapping.table.columns.status') },
-                    { title: t('mapping.table.columns.groups') },
-                    { title: t('mapping.table.columns.packaging') },
-                    { title: t('mapping.table.columns.action') },
-                  ]}
+              {loading ? (
+                <Box padding="400">
+                  <SkeletonBodyText lines={6} />
+                </Box>
+              ) : products.length === 0 ? (
+                <EmptyState
+                  heading={
+                    selectedTabKey === 'unmapped'
+                      ? t('mapping.empty_state.all_mapped_heading')
+                      : queryDebounced
+                        ? t('mapping.empty_state.no_search_results_heading')
+                        : t('mapping.empty_state.no_products_heading')
+                  }
+                  action={
+                    !queryDebounced
+                      ? { content: t('mapping.page.primary_action'), onAction: handleSync, loading: syncing }
+                      : undefined
+                  }
+                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                 >
-                  {rowMarkup}
-                </IndexTable>
-                {totalPages > 1 && (
-                  <Box padding="400" paddingBlockStart="200">
-                    <InlineStack align="center" gap="300" blockAlign="center">
-                      <Pagination
-                        hasPrevious={currentPage > 1}
-                        hasNext={currentPage < totalPages}
-                        onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      />
-                      <Text as="span" variant="bodySm" tone="subdued">
-                        {t('mapping.table.pagination', { current: currentPage, total: totalPages, count: meta.total })}
-                      </Text>
-                    </InlineStack>
-                  </Box>
-                )}
-              </BlockStack>
-            )}
-          </Card>
+                  <Text as="p">
+                    {selectedTabKey === 'unmapped'
+                      ? t('mapping.empty_state.all_mapped_body')
+                      : queryDebounced
+                        ? t('mapping.empty_state.no_search_results_body', { query: queryDebounced })
+                        : t('mapping.empty_state.no_products_body')}
+                  </Text>
+                </EmptyState>
+              ) : (
+                <BlockStack>
+                  <IndexTable
+                    resourceName={{ singular: t('mapping.table.resource_singular'), plural: t('mapping.table.resource_plural') }}
+                    itemCount={productsWithId.length}
+                    selectedItemsCount={allResourcesSelected ? 'All' : selectedResources.length}
+                    onSelectionChange={handleSelectionChange}
+                    promotedBulkActions={promotedBulkActions}
+                    headings={[
+                      { title: t('mapping.table.columns.product') },
+                      { title: t('mapping.table.columns.status') },
+                      { title: t('mapping.table.columns.groups') },
+                      { title: t('mapping.table.columns.packaging') },
+                      { title: t('mapping.table.columns.action') },
+                    ]}
+                  >
+                    {rowMarkup}
+                  </IndexTable>
+                  {totalPages > 1 && (
+                    <Box padding="400" paddingBlockStart="200">
+                      <InlineStack align="center" gap="300" blockAlign="center">
+                        <Pagination
+                          hasPrevious={currentPage > 1}
+                          hasNext={currentPage < totalPages}
+                          onPrevious={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        />
+                        <Text as="span" variant="bodySm" tone="subdued">
+                          {t('mapping.table.pagination', { current: currentPage, total: totalPages, count: meta.total })}
+                        </Text>
+                      </InlineStack>
+                    </Box>
+                  )}
+                </BlockStack>
+              )}
+            </Card>
           </div>
         </Layout.Section>
       </Layout>
