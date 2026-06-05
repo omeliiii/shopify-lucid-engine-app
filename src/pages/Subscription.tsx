@@ -362,7 +362,7 @@ export default function Subscription() {
                   {t('billing.subscription_page.danger_zone_title')}
                 </Text>
                 <Text as="p" tone="subdued">
-                  {t('billing.subscription_page.danger_zone_body', { date: formatDate(sub.currentPeriodEnd) })}
+                  {t('billing.subscription_page.danger_zone_body', { date: formatDate(sub.isInTrial ? sub.trialEndsAt : sub.currentPeriodEnd) })}
                 </Text>
                 <Box>
                   <Button tone="critical" onClick={() => setCancelOpen(true)}>
@@ -457,7 +457,7 @@ export default function Subscription() {
             <Trans
               ns="common"
               i18nKey="billing.modals.cancel.body"
-              values={{ date: formatDate(sub.currentPeriodEnd) }}
+              values={{ date: formatDate(sub.isInTrial ? sub.trialEndsAt : sub.currentPeriodEnd) }}
               components={{ strong: <strong /> }}
             />
           </Text>
