@@ -148,7 +148,6 @@
     "cm": "cm",
     "g": "g",
     "kg": "kg",
-    "dimensions_lwh": "{{l}} × {{w}} × {{h}} mm",
     "weight_g": "{{value}} g",
     "weight_kg": "{{value}} kg",
     "gsm": "{{value}} g/m²",

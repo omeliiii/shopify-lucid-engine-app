@@ -71,7 +71,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
             </InlineStack>
             {(item.lMm || item.wMm || item.hMm) && (
               <Text as="span" tone="subdued" variant="bodySm">
-                {t('units.dimensions_lwh', { l: item.lMm || 0, w: item.wMm || 0, h: item.hMm || 0 })}
+                {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
               </Text>
             )}
             <InlineStack gap="100" align="start" wrap={false}>
@@ -105,7 +105,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
             <Text as="span" tone="subdued" variant="bodySm">{t('units.weight_g', { value: Number(item.calculatedUnitWeightGrams.toFixed(2)) })}</Text>
           </InlineStack>
           <Text as="span" tone="subdued" variant="bodySm">
-            {t('units.dimensions_lwh', { l: item.lMm || 0, w: item.wMm || 0, h: item.hMm || 0 })}
+            {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
           </Text>
           {item.packagingType?.formulaType === 'STATIC' ? (
             item.customStaticWeightG != null && (
