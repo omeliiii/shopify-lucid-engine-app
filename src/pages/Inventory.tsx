@@ -192,12 +192,10 @@ export default function Inventory() {
     try {
       await apiFetch('/packaging/inventory', { method: 'POST', body: JSON.stringify(bodyParams) });
       toast.success(t('toasts.added'));
-      closeModal();
       loadData();
     } catch (e) {
       toast.error(t('toasts.add_failed'));
       console.error(e);
-      closeModal();
     } finally {
       setSubmitting(false);
     }
@@ -287,7 +285,12 @@ export default function Inventory() {
           </Layout.Section>
         )}
         <Layout.Section>
-          <div data-tour="inventory-items">
+          <div data-tour="inventory-items" style={{ position: 'relative' }}>
+            <span
+              data-tour="inventory-items-anchor"
+              aria-hidden
+              style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 1, pointerEvents: 'none' }}
+            />
             <Card padding="0">
               {items.length === 0 && !loading ? (
                 <EmptyState
@@ -359,7 +362,12 @@ export default function Inventory() {
         <Modal.Section>
           {!isCustomFormVisible && standardTypes.length > 0 ? (
             <BlockStack gap="400">
-              <div data-tour="inventory-modal-categories">
+              <div data-tour="inventory-modal-categories" style={{ position: 'relative' }}>
+                <span
+                  data-tour="inventory-modal-categories-anchor"
+                  aria-hidden
+                  style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 1, pointerEvents: 'none' }}
+                />
                 <Tabs tabs={categoryTabs} selected={selectedTab} onSelect={setSelectedTab}>
                   <Box paddingBlockStart="400">
                     {typesForCurrentTab.length > 0 ? (

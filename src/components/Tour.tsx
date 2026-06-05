@@ -118,7 +118,8 @@ function buildInventorySteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
       data: { advanceOnTargetClick: true },
     },
     {
-      target: '[data-tour="inventory-modal-categories"]',
+      target: '[data-tour="inventory-modal-categories-anchor"]',
+      spotlightTarget: '[data-tour="inventory-modal-categories"]',
       placement: 'bottom',
       content: (
         <StepBody
@@ -131,8 +132,9 @@ function buildInventorySteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
       skipBeacon: true,
     },
     {
-      target: '[data-tour="inventory-items"]',
-      placement: 'top',
+      target: '[data-tour="inventory-items-anchor"]',
+      spotlightTarget: '[data-tour="inventory-items"]',
+      placement: 'bottom',
       content: (
         <StepBody
           title={t('inventory.add_items.title')}
@@ -164,8 +166,9 @@ function buildMappingSteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
   const dismissLabel = t('buttons.dismiss_forever');
   return [
     {
-      target: '[data-tour="mapping-table"]',
-      placement: 'top',
+      target: '[data-tour="mapping-table-anchor"]',
+      spotlightTarget: '[data-tour="mapping-table"]',
+      placement: 'bottom',
       content: (
         <StepBody
           title={t('mapping.intro.title')}
@@ -177,8 +180,9 @@ function buildMappingSteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
       skipBeacon: true,
     },
     {
-      target: '[data-tour="mapping-table"]',
-      placement: 'top',
+      target: '[data-tour="mapping-table-anchor"]',
+      spotlightTarget: '[data-tour="mapping-table"]',
+      placement: 'bottom',
       content: (
         <StepBody
           title={t('mapping.row_add.title')}

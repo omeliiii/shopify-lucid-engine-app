@@ -626,7 +626,12 @@ export default function Mapping() {
           </Layout.Section>
         )}
         <Layout.Section>
-          <div data-tour="mapping-table">
+          <div data-tour="mapping-table" style={{ position: 'relative' }}>
+            <span
+              data-tour="mapping-table-anchor"
+              aria-hidden
+              style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 1, pointerEvents: 'none' }}
+            />
           <Card padding="0">
             <IndexFilters
               tabs={tabs}
