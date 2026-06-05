@@ -90,7 +90,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <Frame navigation={navigationMarkup}>
-      {children}
+      <div style={{ paddingBottom: 'var(--p-space-800)' }}>
+        {children}
+      </div>
     </Frame>
   );
 }
