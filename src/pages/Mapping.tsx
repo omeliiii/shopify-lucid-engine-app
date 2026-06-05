@@ -117,6 +117,7 @@ export default function Mapping() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [selectedTabKey, setSelectedTabKey] = useState<TabKey>('all');
+  const [didInitialTabAutoselect, setDidInitialTabAutoselect] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   // IndexFilters query + mode
@@ -214,6 +215,14 @@ export default function Mapping() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (didInitialTabAutoselect || loading) return;
+    if (meta.totalUnmapped > 0) {
+      setSelectedTabKey('unmapped');
+    }
+    setDidInitialTabAutoselect(true);
+  }, [didInitialTabAutoselect, loading, meta.totalUnmapped]);
 
   useEffect(() => {
     apiFetch('/products/groups')
