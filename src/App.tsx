@@ -1,4 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import {
+  Layout,
+  Card,
+  SkeletonPage,
+  SkeletonBodyText,
+  SkeletonDisplayText,
+} from '@shopify/polaris';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
@@ -18,8 +25,28 @@ import Tour from './components/Tour';
 function PaywallGate({ children }: { children: React.ReactNode }) {
   const { isPaywallRequired, loading } = useBilling();
 
-  // Don't flash the paywall while we're still loading billing state
-  if (loading) return null;
+  // Show a skeleton while billing/auth state is loading so the page doesn't
+  // appear blank during the initial Shopify admin handshake.
+  if (loading) {
+    return (
+      <SkeletonPage primaryAction>
+        <Layout>
+          <Layout.Section>
+            <Card>
+              <SkeletonDisplayText size="small" />
+              <SkeletonBodyText lines={3} />
+            </Card>
+          </Layout.Section>
+          <Layout.Section>
+            <Card>
+              <SkeletonDisplayText size="small" />
+              <SkeletonBodyText lines={8} />
+            </Card>
+          </Layout.Section>
+        </Layout>
+      </SkeletonPage>
+    );
+  }
 
   if (isPaywallRequired) {
     return <Navigate to="/billing/start" replace />;
