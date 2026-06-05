@@ -280,7 +280,7 @@ export default function ShippingRules() {
 
               return (
                 <Card key={item.id} padding="400">
-                  <InlineStack align="space-between" blockAlign="center">
+                  <InlineStack align="space-between" blockAlign="center" gap="400">
                     <BlockStack gap="200">
                       <InlineStack gap="200" blockAlign="center">
                         <Text as="h3" variant="headingMd">{item.name}</Text>
