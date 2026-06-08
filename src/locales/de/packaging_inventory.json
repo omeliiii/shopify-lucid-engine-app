@@ -45,6 +45,15 @@
       "name_placeholder": "z. B. Sock-Mailer Marke X",
       "name_help": "Wähle einen wiedererkennbaren Namen – du ordnest später Produkte zu.",
       "type_label": "Verpackungstyp",
+      "material_label": "Material",
+      "category_label": "Kategorie",
+      "formula_type_label": "Berechnungsmodell",
+      "formula_type_options": {
+        "BOX": "Karton (6 Flächen)",
+        "ENVELOPE": "Umschlag (2 Flächen)",
+        "WRAP": "Einzelbogen",
+        "STATIC": "Festgewicht"
+      },
       "length_label": "Länge (mm)",
       "width_label": "Breite (mm)",
       "height_label": "Höhe (mm)",

@@ -45,6 +45,15 @@
       "name_placeholder": "e.g. Branded sock mailer",
       "name_help": "Use a name you'll recognize: you'll match products against it.",
       "type_label": "Packaging type",
+      "material_label": "Material",
+      "category_label": "Category",
+      "formula_type_label": "Weight model",
+      "formula_type_options": {
+        "BOX": "Box (6 faces)",
+        "ENVELOPE": "Envelope (2 faces)",
+        "WRAP": "Single sheet",
+        "STATIC": "Fixed weight"
+      },
       "length_label": "Length (mm)",
       "width_label": "Width (mm)",
       "height_label": "Height (mm)",

@@ -45,6 +45,15 @@
       "name_placeholder": "es. Bustina calzini brand",
       "name_help": "Dagli un nome riconoscibile: ti servirà per associarlo ai prodotti.",
       "type_label": "Tipo di imballaggio",
+      "material_label": "Materiale",
+      "category_label": "Categoria",
+      "formula_type_label": "Modello di calcolo",
+      "formula_type_options": {
+        "BOX": "Scatola (6 facce)",
+        "ENVELOPE": "Busta (2 facce)",
+        "WRAP": "Foglio singolo",
+        "STATIC": "Peso fisso"
+      },
       "length_label": "Lunghezza (mm)",
       "width_label": "Larghezza (mm)",
       "height_label": "Altezza (mm)",

@@ -38,6 +38,9 @@ export default function Inventory() {
   // Form state
   const [name, setName] = useState('');
   const [packagingTypeId, setPackagingTypeId] = useState('');
+  const [customAgnosticMaterial, setCustomAgnosticMaterial] = useState<'PAPER' | 'PLASTIC' | 'GLASS' | 'METAL' | 'ALUMINIUM' | 'COMPOSITE' | 'OTHER'>('PAPER');
+  const [customCategory, setCustomCategory] = useState<'PRIMARY' | 'TAPE' | 'FILLER'>('PRIMARY');
+  const [customFormulaType, setCustomFormulaType] = useState<'BOX' | 'ENVELOPE' | 'WRAP' | 'STATIC'>('BOX');
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
@@ -71,18 +74,26 @@ export default function Inventory() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    const hasParent = !!packagingTypeId;
     const selectedType = standardTypes.find(t => t.id === packagingTypeId);
-    const isStatic = selectedType?.formulaType === 'STATIC';
-    const bodyParams = {
-      packagingTypeId,
+    const effectiveFormulaType = hasParent ? selectedType?.formulaType : customFormulaType;
+    const isStatic = effectiveFormulaType === 'STATIC';
+    const bodyParams: Record<string, unknown> = {
       name,
       lMm: length ? Number(length) : null,
       wMm: width ? Number(width) : null,
       hMm: height ? Number(height) : null,
       customGsm: !isStatic && customGsm ? Number(customGsm) : null,
       customStaticWeightG: isStatic && customStaticWeightG ? Number(customStaticWeightG) : null,
-      role: 'PRIMARY'
+      role: 'PRIMARY',
     };
+    if (hasParent) {
+      bodyParams.packagingTypeId = packagingTypeId;
+    } else {
+      bodyParams.agnosticMaterial = customAgnosticMaterial;
+      bodyParams.category = customCategory;
+      bodyParams.formulaType = customFormulaType;
+    }
 
     try {
       if (editingItemId) {
@@ -122,6 +133,9 @@ export default function Inventory() {
     setHeight('');
     setCustomGsm('');
     setCustomStaticWeightG('');
+    setCustomAgnosticMaterial('PAPER');
+    setCustomCategory('PRIMARY');
+    setCustomFormulaType('BOX');
     setEditingItemId(null);
     setShowCustomForm(false);
     setSelectedTab(0);
@@ -133,9 +147,28 @@ export default function Inventory() {
     }
   };
 
+  const startCustomForm = () => {
+    setName('');
+    setPackagingTypeId('');
+    setCustomAgnosticMaterial('PAPER');
+    setCustomCategory('PRIMARY');
+    setCustomFormulaType('BOX');
+    setLength('');
+    setWidth('');
+    setHeight('');
+    setCustomGsm('');
+    setCustomStaticWeightG('');
+    setShowCustomForm(true);
+  };
+
   const handleEditItem = (item: InventoryItem) => {
     setName(item.name);
-    setPackagingTypeId(item.packagingTypeId);
+    setPackagingTypeId(item.packagingTypeId ?? '');
+    if (!item.packagingTypeId) {
+      setCustomAgnosticMaterial((item.agnosticMaterial as typeof customAgnosticMaterial) || 'PAPER');
+      setCustomCategory((item.category as typeof customCategory) || 'PRIMARY');
+      setCustomFormulaType((item.formulaType as typeof customFormulaType) || 'BOX');
+    }
     setLength(item.lMm?.toString() || '');
     setWidth(item.wMm?.toString() || '');
     setHeight(item.hMm?.toString() || '');
@@ -236,8 +269,8 @@ export default function Inventory() {
   const activeItems = items.filter(i => i.isActive && (!i.isAiSuggested || i.isConfirmed));
   const suggestedItems = items.filter(i => i.isAiSuggested && !i.isConfirmed);
 
-  const hasTape = activeItems.some(i => i.packagingType?.category === 'TAPE');
-  const hasFiller = activeItems.some(i => i.packagingType?.category === 'FILLER');
+  const hasTape = activeItems.some(i => (i.packagingType?.category ?? i.category) === 'TAPE');
+  const hasFiller = activeItems.some(i => (i.packagingType?.category ?? i.category) === 'FILLER');
   const missingCategories: Array<'TAPE' | 'FILLER'> = [];
   if (!hasTape) missingCategories.push('TAPE');
   if (!hasFiller) missingCategories.push('FILLER');
@@ -440,7 +473,7 @@ export default function Inventory() {
                 </Tabs>
               </div>
               <Box borderBlockStartWidth="025" borderColor="border" paddingBlockStart="400">
-                <Button onClick={() => setShowCustomForm(true)}>{t('modal.create_custom_cta')}</Button>
+                <Button onClick={startCustomForm}>{t('modal.create_custom_cta')}</Button>
               </Box>
             </BlockStack>
           ) : (
@@ -464,45 +497,84 @@ export default function Inventory() {
                     placeholder={t('modal.form.name_placeholder')}
                     helpText={t('modal.form.name_help')}
                   />
-                  <PolarisSelect
-                    label={t('modal.form.type_label')}
-                    options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
-                    value={packagingTypeId}
-                    onChange={(val) => {
-                      setPackagingTypeId(val);
-                      const type = standardTypes.find(t => t.id === val);
-                      if (type) {
-                        setLength(type.defaultLMm?.toString() || '');
-                        setWidth(type.defaultWMm?.toString() || '');
-                        setHeight(type.defaultHMm?.toString() || '');
-                      }
-                    }}
-                  />
+                  {packagingTypeId ? (
+                    <PolarisSelect
+                      label={t('modal.form.type_label')}
+                      options={standardTypes.map(t => ({ label: t.name, value: t.id }))}
+                      value={packagingTypeId}
+                      onChange={(val) => {
+                        setPackagingTypeId(val);
+                        const type = standardTypes.find(t => t.id === val);
+                        if (type) {
+                          setLength(type.defaultLMm?.toString() || '');
+                          setWidth(type.defaultWMm?.toString() || '');
+                          setHeight(type.defaultHMm?.toString() || '');
+                        }
+                      }}
+                    />
+                  ) : (
+                    <FormLayout.Group>
+                      <PolarisSelect
+                        label={t('modal.form.material_label')}
+                        options={(['PAPER','PLASTIC','GLASS','METAL','ALUMINIUM','COMPOSITE','OTHER'] as const).map(m => ({ label: tCommon(`materials.${m}` as 'materials.PAPER'), value: m }))}
+                        value={customAgnosticMaterial}
+                        onChange={(val) => setCustomAgnosticMaterial(val as typeof customAgnosticMaterial)}
+                      />
+                      <PolarisSelect
+                        label={t('modal.form.category_label')}
+                        options={(['PRIMARY','TAPE','FILLER'] as const).map(c => ({ label: tCommon(`categories.${c}` as 'categories.PRIMARY'), value: c }))}
+                        value={customCategory}
+                        onChange={(val) => setCustomCategory(val as typeof customCategory)}
+                      />
+                      <PolarisSelect
+                        label={t('modal.form.formula_type_label')}
+                        options={(['BOX','ENVELOPE','WRAP','STATIC'] as const).map(f => ({ label: t(`modal.form.formula_type_options.${f}` as 'modal.form.formula_type_options.BOX'), value: f }))}
+                        value={customFormulaType}
+                        onChange={(val) => setCustomFormulaType(val as typeof customFormulaType)}
+                      />
+                    </FormLayout.Group>
+                  )}
                   <FormLayout.Group>
-                    <TextField label={t('modal.form.length_label')} value={length} onChange={setLength} type="number" autoComplete="off" />
-                    <TextField label={t('modal.form.width_label')} value={width} onChange={setWidth} type="number" autoComplete="off" />
-                    {standardTypes.find(t => t.id === packagingTypeId)?.defaultHMm !== null && (
-                      <TextField label={t('modal.form.height_label')} value={height} onChange={setHeight} type="number" autoComplete="off" />
-                    )}
-                    {standardTypes.find(t => t.id === packagingTypeId)?.formulaType === 'STATIC' ? (
-                      <TextField
-                        label={t('modal.form.custom_static_weight_g_label')}
-                        value={customStaticWeightG}
-                        onChange={setCustomStaticWeightG}
-                        type="number"
-                        autoComplete="off"
-                        helpText={t('modal.form.custom_static_weight_g_help')}
-                      />
-                    ) : (
-                      <TextField
-                        label={t('modal.form.custom_gsm_label')}
-                        value={customGsm}
-                        onChange={setCustomGsm}
-                        type="number"
-                        autoComplete="off"
-                        helpText={t('modal.form.custom_gsm_help')}
-                      />
-                    )}
+                    {(() => {
+                      const standardType = standardTypes.find(t => t.id === packagingTypeId);
+                      const effectiveFormulaType = packagingTypeId ? standardType?.formulaType : customFormulaType;
+                      const isStatic = effectiveFormulaType === 'STATIC';
+                      const showHeight = packagingTypeId
+                        ? standardType?.defaultHMm !== null
+                        : effectiveFormulaType === 'BOX';
+                      return (
+                        <>
+                          {!isStatic && (
+                            <>
+                              <TextField label={t('modal.form.length_label')} value={length} onChange={setLength} type="number" autoComplete="off" />
+                              <TextField label={t('modal.form.width_label')} value={width} onChange={setWidth} type="number" autoComplete="off" />
+                              {showHeight && (
+                                <TextField label={t('modal.form.height_label')} value={height} onChange={setHeight} type="number" autoComplete="off" />
+                              )}
+                            </>
+                          )}
+                          {isStatic ? (
+                            <TextField
+                              label={t('modal.form.custom_static_weight_g_label')}
+                              value={customStaticWeightG}
+                              onChange={setCustomStaticWeightG}
+                              type="number"
+                              autoComplete="off"
+                              helpText={t('modal.form.custom_static_weight_g_help')}
+                            />
+                          ) : (
+                            <TextField
+                              label={t('modal.form.custom_gsm_label')}
+                              value={customGsm}
+                              onChange={setCustomGsm}
+                              type="number"
+                              autoComplete="off"
+                              helpText={t('modal.form.custom_gsm_help')}
+                            />
+                          )}
+                        </>
+                      );
+                    })()}
                   </FormLayout.Group>
                 </FormLayout>
               </Form>

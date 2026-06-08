@@ -45,6 +45,15 @@
       "name_placeholder": "ex. Pochette chaussettes marque",
       "name_help": "Donne-lui un nom reconnaissable : tu l'associeras ensuite aux produits.",
       "type_label": "Type d'emballage",
+      "material_label": "Matériau",
+      "category_label": "Catégorie",
+      "formula_type_label": "Modèle de calcul",
+      "formula_type_options": {
+        "BOX": "Boîte (6 faces)",
+        "ENVELOPE": "Enveloppe (2 faces)",
+        "WRAP": "Feuille unique",
+        "STATIC": "Poids fixe"
+      },
       "length_label": "Longueur (mm)",
       "width_label": "Largeur (mm)",
       "height_label": "Hauteur (mm)",

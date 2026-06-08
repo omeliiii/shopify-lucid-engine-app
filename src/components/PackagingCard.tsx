@@ -16,7 +16,10 @@ interface PackagingType {
 
 export interface InventoryItem {
   id: string;
-  packagingTypeId: string;
+  packagingTypeId: string | null;
+  agnosticMaterial: string | null;
+  category: PackagingCategory | null;
+  formulaType: string | null;
   name: string;
   lMm: number | null;
   wMm: number | null;
@@ -26,7 +29,7 @@ export interface InventoryItem {
   calculatedUnitWeightGrams: number;
   role: 'PRIMARY' | 'SECONDARY';
   isActive: boolean;
-  packagingType: PackagingType;
+  packagingType: PackagingType | null;
   isAiSuggested: boolean;
   isConfirmed: boolean;
 }
@@ -42,9 +45,10 @@ interface PackagingCardProps {
 export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested }: PackagingCardProps) {
   const { t } = useTranslation('common');
   const [isHovered, setIsHovered] = useState(false);
-  const material = item.packagingType?.agnosticMaterial || 'PAPER';
+  const material = item.packagingType?.agnosticMaterial || item.agnosticMaterial || 'PAPER';
   const imageUrl = item.packagingType?.imageUrl || '';
-  const category = item.packagingType?.category || 'PRIMARY';
+  const category = item.packagingType?.category || item.category || 'PRIMARY';
+  const formulaType = item.packagingType?.formulaType || item.formulaType;
   const categoryTone: 'attention' | 'magic' | undefined =
     category === 'TAPE' ? 'attention' : category === 'FILLER' ? 'magic' : undefined;
 
@@ -146,7 +150,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           <Text as="span" tone="subdued" variant="bodySm">
             {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
           </Text>
-          {item.packagingType?.formulaType === 'STATIC' ? (
+          {formulaType === 'STATIC' ? (
             item.customStaticWeightG != null && (
               <Text as="span" tone="subdued" variant="bodySm">
                 {t('units.weight_g', { value: item.customStaticWeightG })}
