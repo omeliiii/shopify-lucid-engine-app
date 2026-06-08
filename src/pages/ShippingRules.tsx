@@ -114,7 +114,7 @@ export default function ShippingRules() {
       { label: t('modal.form.none_option'), value: 'none' },
       ...inventoryRaw
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((i: any) => i?.packagingType?.category === cat)
+        .filter((i: any) => (i?.packagingType?.category ?? i?.category) === cat)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((i: any) => ({ label: i.name, value: i.id })),
     ];
