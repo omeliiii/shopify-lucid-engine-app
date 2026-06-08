@@ -56,6 +56,11 @@
         "description_rerun": "Die Historie wurde bereits importiert. Starte den Import erneut, um neue Bestellungen nachzutragen.",
         "cta_first_run": "Bestellungen dieses Jahres importieren",
         "cta_rerun": "Import erneut starten"
+      },
+      "compliance": {
+        "title": "EPR-Registrierungsnummern hinzufügen",
+        "description": "Du versendest in Länder, die eine EPR-Registrierung erfordern. Ergänze die fehlenden Nummern in den Einstellungen: {{items}}.",
+        "cta": "Zu den Einstellungen"
       }
     }
   },
@@ -82,5 +87,10 @@
       "load_dashboard": "Die Dashboard-Daten konnten nicht geladen werden. Bitte versuche es gleich noch einmal.",
       "unknown": "Unbekannter Fehler beim Import."
     }
+  },
+  "compliance_banner": {
+    "title": "Fehlende EPR-Registrierungsnummern",
+    "body": "Du versendest in Länder, die eine Registrierung erfordern, aber einige Nummern wurden noch nicht eingegeben: {{items}}. Ergänze sie in den Einstellungen.",
+    "cta": "Zu den Einstellungen"
   }
 }

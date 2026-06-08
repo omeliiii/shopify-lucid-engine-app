@@ -74,7 +74,8 @@
     "groups": "Product groups",
     "shipping_rules": "Shipping rules",
     "reports": "Reports & declarations",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "settings": "Settings"
   },
   "countries": {
     "all": "All countries",
@@ -272,6 +273,17 @@
         "body": "You'll be redirected to Shopify to confirm the upgrade to the Unlimited plan at {{currency}}{{amount}}/year. Shopify handles the prorated charge.",
         "toast_failed": "Something went wrong during the upgrade. Please try again."
       }
+    },
+    "compliance": {
+      "title": "EPR registration numbers",
+      "description": "Enter your registration numbers for the national extended-producer-responsibility portals. Each number refers to the country shown.",
+      "field_help": "{{portal}} registration number for {{country}}.",
+      "save": "Save registration numbers",
+      "toast_saved": "Registration numbers saved.",
+      "toast_failed": "Couldn't save the registration numbers. Please try again."
     }
+  },
+  "settings_page": {
+    "title": "Settings"
   }
 }

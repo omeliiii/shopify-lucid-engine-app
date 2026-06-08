@@ -56,6 +56,11 @@
         "description_rerun": "Lo storico è stato già importato. Puoi rilanciarlo per recuperare gli ordini più recenti.",
         "cta_first_run": "Importa gli ordini di quest'anno",
         "cta_rerun": "Rilancia l'importazione"
+      },
+      "compliance": {
+        "title": "Aggiungi i numeri di registrazione EPR",
+        "description": "Stai spedendo verso paesi che richiedono una registrazione EPR. Aggiungi i numeri mancanti nelle impostazioni: {{items}}.",
+        "cta": "Vai alle impostazioni"
       }
     }
   },
@@ -82,5 +87,10 @@
       "load_dashboard": "Non siamo riusciti a caricare i dati della dashboard. Riprova tra qualche istante.",
       "unknown": "Errore sconosciuto durante l'importazione."
     }
+  },
+  "compliance_banner": {
+    "title": "Numeri di registrazione EPR mancanti",
+    "body": "Stai spedendo verso paesi che richiedono una registrazione, ma alcuni numeri non sono ancora stati inseriti: {{items}}. Aggiungili nelle impostazioni.",
+    "cta": "Vai alle impostazioni"
   }
 }

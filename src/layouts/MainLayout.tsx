@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Frame, Navigation } from '@shopify/polaris';
-import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, CreditCardIcon, CollectionIcon } from '@shopify/polaris-icons';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, DeliveryIcon, CollectionIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
@@ -61,7 +61,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {
             url: '/shipping-rules',
             label: t('navigation.shipping_rules'),
-            icon: SettingsIcon,
+            icon: DeliveryIcon,
             onClick: () => navigate('/shipping-rules'),
             selected: location.pathname === '/shipping-rules',
           },
@@ -77,11 +77,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             selected: location.pathname === '/reports',
           },
           {
-            url: '/subscription',
-            label: t('navigation.subscription'),
-            icon: CreditCardIcon,
-            onClick: () => navigate('/subscription'),
-            selected: location.pathname === '/subscription',
+            url: '/settings',
+            label: t('navigation.settings'),
+            icon: SettingsIcon,
+            onClick: () => navigate('/settings'),
+            selected: location.pathname === '/settings',
           },
         ]}
       />

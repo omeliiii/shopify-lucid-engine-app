@@ -14,7 +14,7 @@ import Groups from './pages/Groups';
 import ShippingRules from './pages/ShippingRules';
 import Reports from './pages/Reports';
 import BillingStart from './pages/BillingStart';
-import Subscription from './pages/Subscription';
+import Settings from './pages/Settings';
 import { BillingProvider, useBilling } from './contexts/BillingProvider';
 import { BillingReturnHandler } from './components/BillingReturnHandler';
 import { TourProvider } from './contexts/TourProvider';
@@ -106,11 +106,13 @@ function App() {
               }
             />
             <Route
-              path="/subscription"
+              path="/settings"
               element={
-                <PaywallGate><Subscription /></PaywallGate>
+                <PaywallGate><Settings /></PaywallGate>
               }
             />
+            {/* Legacy route — keep old links working */}
+            <Route path="/subscription" element={<Navigate to="/settings" replace />} />
           </Routes>
         </MainLayout>
       </TourProvider>

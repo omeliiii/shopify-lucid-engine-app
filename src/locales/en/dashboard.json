@@ -56,6 +56,11 @@
         "description_rerun": "History has already been imported. Run it again to pick up the most recent orders.",
         "cta_first_run": "Import this year's orders",
         "cta_rerun": "Re-run import"
+      },
+      "compliance": {
+        "title": "Add your EPR registration numbers",
+        "description": "You're shipping to countries that require an EPR registration. Add the missing numbers in settings: {{items}}.",
+        "cta": "Go to settings"
       }
     }
   },
@@ -82,5 +87,10 @@
       "load_dashboard": "We couldn't load the dashboard data. Please try again in a moment.",
       "unknown": "Unknown error during import."
     }
+  },
+  "compliance_banner": {
+    "title": "Missing EPR registration numbers",
+    "body": "You're shipping to countries that require a registration, but some numbers haven't been entered yet: {{items}}. Add them in settings.",
+    "cta": "Go to settings"
   }
 }

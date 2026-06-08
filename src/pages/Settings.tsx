@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Page,
   Layout,
@@ -15,6 +15,7 @@ import {
   Banner,
   Box,
   Tooltip,
+  TextField,
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
@@ -23,6 +24,22 @@ import { useBilling } from '../contexts/BillingProvider';
 import { countryDisplay, countryFlag, countryLabel, countryOptions } from '../utils/countries';
 import type { SubscriptionStatus } from '../types/billingTypes';
 import { isBillingError } from '../utils/api';
+import {
+  COMPLIANCE_FIELDS,
+  fetchComplianceInfo,
+  updateComplianceInfo,
+  type ComplianceInfo,
+  type ComplianceFieldKey,
+} from '../utils/complianceApi';
+
+type ComplianceForm = Record<ComplianceFieldKey, string>;
+
+function toComplianceForm(info: ComplianceInfo): ComplianceForm {
+  return COMPLIANCE_FIELDS.reduce((acc, f) => {
+    acc[f.key] = info[f.key] ?? '';
+    return acc;
+  }, {} as ComplianceForm);
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -33,7 +50,7 @@ function daysUntil(iso: string): number {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function Subscription() {
+export default function Settings() {
   const {
     catalog,
     subscription: sub,
@@ -109,6 +126,37 @@ export default function Subscription() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
 
+  // ── Compliance / registration numbers ──
+  const [complianceForm, setComplianceForm] = useState<ComplianceForm | null>(null);
+  const [complianceOriginal, setComplianceOriginal] = useState<ComplianceForm | null>(null);
+  const [complianceLoading, setComplianceLoading] = useState(true);
+  const [savingCompliance, setSavingCompliance] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchComplianceInfo()
+      .then((info) => {
+        if (cancelled) return;
+        const form = toComplianceForm(info);
+        setComplianceForm(form);
+        setComplianceOriginal(form);
+      })
+      .catch((e) => console.error('[Settings] compliance fetch failed', e))
+      .finally(() => {
+        if (!cancelled) setComplianceLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const complianceDirty = useMemo(() => {
+    if (!complianceForm || !complianceOriginal) return false;
+    return COMPLIANCE_FIELDS.some(
+      (f) => (complianceForm[f.key] ?? '').trim() !== (complianceOriginal[f.key] ?? '').trim(),
+    );
+  }, [complianceForm, complianceOriginal]);
+
   const [endingTrial, setEndingTrial] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,7 +188,7 @@ export default function Subscription() {
   // ── Loading state ──
   if (loading || !sub || !catalog) {
     return (
-      <SkeletonPage title={t('billing.subscription_page.title')}>
+      <SkeletonPage title={t('settings_page.title')}>
         <Layout>
           <Layout.Section><Card><SkeletonBodyText lines={6} /></Card></Layout.Section>
           <Layout.Section><Card><SkeletonBodyText lines={4} /></Card></Layout.Section>
@@ -213,6 +261,33 @@ export default function Subscription() {
     }
   };
 
+  const handleSaveCompliance = async () => {
+    if (!complianceForm || !complianceOriginal) return;
+    // Only send fields whose trimmed value actually changed.
+    const patch: Partial<ComplianceInfo> = {};
+    for (const f of COMPLIANCE_FIELDS) {
+      const next = (complianceForm[f.key] ?? '').trim();
+      if (next !== (complianceOriginal[f.key] ?? '').trim()) {
+        patch[f.key] = next || null;
+      }
+    }
+    if (Object.keys(patch).length === 0) return;
+
+    setSavingCompliance(true);
+    try {
+      const updated = await updateComplianceInfo(patch);
+      const form = toComplianceForm(updated);
+      setComplianceForm(form);
+      setComplianceOriginal(form);
+      showToast(t('billing.compliance.toast_saved'));
+    } catch (e) {
+      console.error('[Settings] compliance save failed', e);
+      showToast(t('billing.compliance.toast_failed'), { isError: true });
+    } finally {
+      setSavingCompliance(false);
+    }
+  };
+
   const handleCancel = async () => {
     setCancelling(true);
     try {
@@ -232,7 +307,7 @@ export default function Subscription() {
   };
 
   return (
-    <Page title={t('billing.subscription_page.title')} narrowWidth>
+    <Page title={t('settings_page.title')} narrowWidth>
       <Layout>
         {/* ── Header: Plan + Status ── */}
         <Layout.Section>
@@ -358,6 +433,63 @@ export default function Subscription() {
             </Card>
           </Layout.Section>
         )}
+
+        {/* ── Compliance / Registration Numbers ── */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="400">
+              <BlockStack gap="100">
+                <Text as="h2" variant="headingMd">
+                  {t('billing.compliance.title')}
+                </Text>
+                <Text as="p" tone="subdued">
+                  {t('billing.compliance.description')}
+                </Text>
+              </BlockStack>
+
+              {complianceLoading || !complianceForm ? (
+                <SkeletonBodyText lines={4} />
+              ) : (
+                <BlockStack gap="400">
+                  {COMPLIANCE_FIELDS.map((f) => (
+                    <TextField
+                      key={f.key}
+                      label={
+                        <InlineStack gap="150" blockAlign="center">
+                          <Text as="span" variant="bodyMd" fontWeight="semibold">
+                            {countryFlag(f.country)} {countryLabel(f.country)}
+                          </Text>
+                          <Badge>{f.portal}</Badge>
+                        </InlineStack>
+                      }
+                      labelHidden={false}
+                      autoComplete="off"
+                      placeholder={f.placeholder}
+                      value={complianceForm[f.key] ?? ''}
+                      onChange={(value) =>
+                        setComplianceForm((prev) => (prev ? { ...prev, [f.key]: value } : prev))
+                      }
+                      helpText={t('billing.compliance.field_help', {
+                        country: countryLabel(f.country),
+                        portal: f.portal,
+                      })}
+                    />
+                  ))}
+                  <Box>
+                    <Button
+                      variant="primary"
+                      loading={savingCompliance}
+                      disabled={!complianceDirty}
+                      onClick={handleSaveCompliance}
+                    >
+                      {t('billing.compliance.save')}
+                    </Button>
+                  </Box>
+                </BlockStack>
+              )}
+            </BlockStack>
+          </Card>
+        </Layout.Section>
 
         {/* ── Danger Zone ── */}
         {sub.status === 'ACTIVE' && (

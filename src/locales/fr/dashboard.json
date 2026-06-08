@@ -56,6 +56,11 @@
         "description_rerun": "L'historique a déjà été importé. Tu peux le relancer pour récupérer les commandes les plus récentes.",
         "cta_first_run": "Importer les commandes de l'année",
         "cta_rerun": "Relancer l'import"
+      },
+      "compliance": {
+        "title": "Ajoute tes numéros d'enregistrement REP",
+        "description": "Tu expédies vers des pays qui exigent un enregistrement REP. Ajoute les numéros manquants dans les paramètres : {{items}}.",
+        "cta": "Aller aux paramètres"
       }
     }
   },
@@ -82,5 +87,10 @@
       "load_dashboard": "Impossible de charger les données du tableau de bord. Réessaie dans un instant.",
       "unknown": "Erreur inconnue pendant l'import."
     }
+  },
+  "compliance_banner": {
+    "title": "Numéros d'enregistrement REP manquants",
+    "body": "Tu expédies vers des pays qui exigent un enregistrement, mais certains numéros n'ont pas encore été saisis : {{items}}. Ajoute-les dans les paramètres.",
+    "cta": "Aller aux paramètres"
   }
 }

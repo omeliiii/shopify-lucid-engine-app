@@ -74,7 +74,8 @@
     "groups": "Groupes de produits",
     "shipping_rules": "Règles d'expédition",
     "reports": "Rapports et déclarations",
-    "subscription": "Abonnement"
+    "subscription": "Abonnement",
+    "settings": "Paramètres"
   },
   "countries": {
     "all": "Tous les pays",
@@ -272,6 +273,17 @@
         "body": "Tu seras redirigé vers Shopify pour confirmer le passage à l'offre Unlimited à {{currency}}{{amount}}/an. Shopify gère la facturation au prorata.",
         "toast_failed": "Une erreur est survenue lors de l'upgrade. Réessaie."
       }
+    },
+    "compliance": {
+      "title": "Numéros d'enregistrement REP",
+      "description": "Saisis tes numéros d'enregistrement auprès des portails nationaux de responsabilité élargie des producteurs. Chaque numéro se réfère au pays indiqué.",
+      "field_help": "Numéro d'enregistrement {{portal}} pour {{country}}.",
+      "save": "Enregistrer les numéros",
+      "toast_saved": "Numéros d'enregistrement enregistrés.",
+      "toast_failed": "Impossible d'enregistrer les numéros. Réessaie."
     }
+  },
+  "settings_page": {
+    "title": "Paramètres"
   }
 }

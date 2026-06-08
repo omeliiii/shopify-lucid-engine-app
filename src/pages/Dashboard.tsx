@@ -20,9 +20,11 @@ import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { shopKey } from '../utils/storage';
 import { useToast } from '../utils/toast';
+import { countryLabel } from '../utils/countries';
 import { CountryDateFilters } from '../components/CountryDateFilters';
 import { FlagBadge } from '../components/FlagBadge';
 import { OnboardingChecklist, type OnboardingStep } from '../components/OnboardingChecklist';
+import { computeMissingCompliance, type ComplianceInfo } from '../utils/complianceApi';
 
 interface ShippingLog {
   id: string;
@@ -136,6 +138,7 @@ export default function Dashboard() {
   const [hasInventory, setHasInventory] = useState(false);
   const [hasMappings, setHasMappings] = useState(false);
   const [hasRules, setHasRules] = useState(false);
+  const [complianceInfo, setComplianceInfo] = useState<ComplianceInfo | null>(null);
   const [setupLoading, setSetupLoading] = useState(true);
 
   // Backfill state
@@ -193,10 +196,11 @@ export default function Dashboard() {
   const loadSetupState = useCallback(async () => {
     setSetupLoading(true);
     try {
-      const [invRes, mappedRes, rulesRes] = await Promise.allSettled([
+      const [invRes, mappedRes, rulesRes, complianceRes] = await Promise.allSettled([
         apiFetch('/packaging/inventory'),
         apiFetch('/products/merged-view?page=1&limit=1&status=mapped'),
         apiFetch('/orders/shipping-rules'),
+        apiFetch('/shops/compliance-info'),
       ]);
 
       if (invRes.status === 'fulfilled') {
@@ -217,6 +221,10 @@ export default function Dashboard() {
       if (rulesRes.status === 'fulfilled') {
         const rules = Array.isArray(rulesRes.value) ? rulesRes.value : [];
         setHasRules(rules.length > 0);
+      }
+
+      if (complianceRes.status === 'fulfilled' && complianceRes.value) {
+        setComplianceInfo(complianceRes.value as ComplianceInfo);
       }
     } finally {
       setSetupLoading(false);
@@ -325,7 +333,20 @@ export default function Dashboard() {
     setBackfillState('idle');
   };
 
+  // ── Compliance: registration numbers still required ──────────────────────────
+  // A number is "required" only when the shop has actually shipped to that
+  // country (taken from the per-country orders KPI) and it hasn't been entered.
+  const shippedCountryCodes = (kpis?.weightByCountry ?? [])
+    .filter((c) => c.weightKg > 0)
+    .map((c) => c.countryCode);
+  const missingCompliance = computeMissingCompliance(complianceInfo, shippedCountryCodes);
+  const missingComplianceLabel = missingCompliance
+    .map((f) => `${f.portal} (${countryLabel(f.country)})`)
+    .join(', ');
+
   // ── Onboarding checklist ─────────────────────────────────────────────────────
+  // While onboarding is in progress the checklist carries the compliance step;
+  // once it's done the standalone warning banner below takes over.
   const setupComplete = hasInventory && hasMappings && hasRules && hasRunBackfillBefore;
 
   const backfillProgressPercent = backfillProgress && backfillProgress.fetched > 0
@@ -411,6 +432,18 @@ export default function Dashboard() {
     },
   ];
 
+  // Only nudge for registration numbers once they're actually required.
+  if (missingCompliance.length > 0) {
+    steps.push({
+      id: 'compliance',
+      title: t('onboarding.steps.compliance.title'),
+      description: t('onboarding.steps.compliance.description', { items: missingComplianceLabel }),
+      done: false,
+      ctaLabel: t('onboarding.steps.compliance.cta'),
+      onAction: () => navigate('/settings'),
+    });
+  }
+
   if (loading && !kpis) {
     return (
       <SkeletonPage primaryAction>
@@ -454,6 +487,19 @@ export default function Dashboard() {
         {!setupLoading && !setupComplete && (
           <Layout.Section>
             <OnboardingChecklist steps={steps} />
+          </Layout.Section>
+        )}
+
+        {/* Compliance reminder — persistent warning once onboarding is complete */}
+        {!setupLoading && setupComplete && missingCompliance.length > 0 && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title={t('compliance_banner.title')}
+              action={{ content: t('compliance_banner.cta'), onAction: () => navigate('/settings') }}
+            >
+              <p>{t('compliance_banner.body', { items: missingComplianceLabel })}</p>
+            </Banner>
           </Layout.Section>
         )}
 

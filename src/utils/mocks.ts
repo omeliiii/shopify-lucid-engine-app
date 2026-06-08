@@ -268,6 +268,11 @@ export const MOCKS: Record<string, any> = {
     { id: 'rule-2', name: 'Scatola Grande (> 5 Articoli)', minItems: 6, maxItems: 20, secondaryPackagingId: 'inv-1', fillerPackagingId: 'inv-2', productGroupId: null, priority: 1, isActive: false, productGroup: null }
   ],
 
+  '/shops/compliance-info': {
+    lucidRegistrationNumber: null,
+    siretNumber: null,
+  },
+
   '/billing/catalog': {
     currency: 'USD',
     trialDays: 7,
