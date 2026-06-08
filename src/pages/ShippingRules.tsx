@@ -24,8 +24,11 @@ interface ShippingRule {
   minItems: number;
   maxItems: number;
   secondaryPackagingId: string | null;
+  secondaryStaticWeightGOverride: number | null;
   fillerPackagingId: string | null;
+  fillerStaticWeightGOverride: number | null;
   tapePackagingId: string | null;
+  tapeStaticWeightGOverride: number | null;
   productGroupId: string | null;
   priority: number;
   isActive: boolean;
@@ -65,8 +68,11 @@ export default function ShippingRules() {
   const [minItems, setMinItems] = useState('1');
   const [maxItems, setMaxItems] = useState('5');
   const [secondaryPackagingId, setSecondaryPackagingId] = useState('none');
+  const [secondaryStaticWeightG, setSecondaryStaticWeightG] = useState('');
   const [fillerPackagingId, setFillerPackagingId] = useState('none');
+  const [fillerStaticWeightG, setFillerStaticWeightG] = useState('');
   const [tapePackagingId, setTapePackagingId] = useState('none');
+  const [tapeStaticWeightG, setTapeStaticWeightG] = useState('');
   const [productGroupId, setProductGroupId] = useState('none');
   const [priority, setPriority] = useState(2);
   const [isActive, setIsActive] = useState(true);
@@ -124,6 +130,14 @@ export default function ShippingRules() {
     return inventoryRaw.find((i: any) => i.id === id)?.name;
   };
 
+  const isStaticInventoryItem = (id: string | null | undefined): boolean => {
+    if (!id || id === 'none') return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const inv = inventoryRaw.find((i: any) => i.id === id);
+    const formulaType = inv?.formulaType ?? inv?.packagingType?.formulaType;
+    return formulaType === 'STATIC';
+  };
+
   // ── Group options for rule form ──
   const groupOptions = [
     { label: t('modal.form.group_none_option'), value: 'none' },
@@ -138,13 +152,18 @@ export default function ShippingRules() {
       return;
     }
     setSaving(true);
+    const toOverride = (raw: string, id: string) =>
+      isStaticInventoryItem(id) && raw.trim() !== '' ? Number(raw) : null;
     const body = {
       name,
       minItems: Number(minItems),
       maxItems: Number(maxItems),
       secondaryPackagingId: secondaryPackagingId === 'none' ? null : secondaryPackagingId,
+      secondaryStaticWeightGOverride: toOverride(secondaryStaticWeightG, secondaryPackagingId),
       fillerPackagingId: fillerPackagingId === 'none' ? null : fillerPackagingId,
+      fillerStaticWeightGOverride: toOverride(fillerStaticWeightG, fillerPackagingId),
       tapePackagingId: tapePackagingId === 'none' ? null : tapePackagingId,
+      tapeStaticWeightGOverride: toOverride(tapeStaticWeightG, tapePackagingId),
       productGroupId: productGroupId === 'none' ? null : productGroupId,
       priority,
       isActive,
@@ -179,8 +198,11 @@ export default function ShippingRules() {
     setMinItems(rule.minItems?.toString() || '1');
     setMaxItems(rule.maxItems?.toString() || '5');
     setSecondaryPackagingId(rule.secondaryPackagingId || 'none');
+    setSecondaryStaticWeightG(rule.secondaryStaticWeightGOverride?.toString() ?? '');
     setFillerPackagingId(rule.fillerPackagingId || 'none');
+    setFillerStaticWeightG(rule.fillerStaticWeightGOverride?.toString() ?? '');
     setTapePackagingId(rule.tapePackagingId || 'none');
+    setTapeStaticWeightG(rule.tapeStaticWeightGOverride?.toString() ?? '');
     setProductGroupId(rule.productGroupId || 'none');
     setPriority(rule.priority || 2);
     setIsActive(rule.isActive);
@@ -215,8 +237,11 @@ export default function ShippingRules() {
     setMinItems('1');
     setMaxItems('5');
     setSecondaryPackagingId('none');
+    setSecondaryStaticWeightG('');
     setFillerPackagingId('none');
+    setFillerStaticWeightG('');
     setTapePackagingId('none');
+    setTapeStaticWeightG('');
     setProductGroupId('none');
     setPriority(2);
     setIsActive(true);
@@ -419,6 +444,17 @@ export default function ShippingRules() {
                     onChange={setSecondaryPackagingId}
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.secondary_help')}</Text>
+                  {isStaticInventoryItem(secondaryPackagingId) && (
+                    <TextField
+                      label={t('modal.form.weight_override_label')}
+                      type="number"
+                      value={secondaryStaticWeightG}
+                      onChange={setSecondaryStaticWeightG}
+                      autoComplete="off"
+                      min={0}
+                      helpText={t('modal.form.weight_override_help')}
+                    />
+                  )}
                 </BlockStack>
               </div>
               <div data-tour="rules-modal-filler">
@@ -430,6 +466,17 @@ export default function ShippingRules() {
                     onChange={setFillerPackagingId}
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.filler_help')}</Text>
+                  {isStaticInventoryItem(fillerPackagingId) && (
+                    <TextField
+                      label={t('modal.form.weight_override_label')}
+                      type="number"
+                      value={fillerStaticWeightG}
+                      onChange={setFillerStaticWeightG}
+                      autoComplete="off"
+                      min={0}
+                      helpText={t('modal.form.weight_override_help')}
+                    />
+                  )}
                 </BlockStack>
               </div>
               <div data-tour="rules-modal-tape">
@@ -441,6 +488,17 @@ export default function ShippingRules() {
                     onChange={setTapePackagingId}
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.tape_help')}</Text>
+                  {isStaticInventoryItem(tapePackagingId) && (
+                    <TextField
+                      label={t('modal.form.weight_override_label')}
+                      type="number"
+                      value={tapeStaticWeightG}
+                      onChange={setTapeStaticWeightG}
+                      autoComplete="off"
+                      min={0}
+                      helpText={t('modal.form.weight_override_help')}
+                    />
+                  )}
                 </BlockStack>
               </div>
               <RangeSlider

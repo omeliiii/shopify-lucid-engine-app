@@ -65,6 +65,8 @@
       "filler_help": "Material that fills empty space in the box (bubble wrap, paper, chips…).",
       "tape_label": "Tape",
       "tape_help": "The tape you use to seal the box.",
+      "weight_override_label": "Unit weight for this rule (g)",
+      "weight_override_help": "Leave empty to use the packaging's standard weight. Use this if this rule consumes more material than usual.",
       "none_option": "None",
       "priority_label": "Rule priority",
       "priority_help": "When two rules overlap for the same order, the higher priority wins.",
