@@ -492,7 +492,7 @@ export default function Dashboard() {
 
         {/* Compliance reminder — persistent warning once onboarding is complete */}
         {!setupLoading && setupComplete && missingCompliance.length > 0 && (
-          <Layout.Section>
+          <Layout.Section variant="fullWidth">
             <Banner
               tone="warning"
               title={t('compliance_banner.title')}
