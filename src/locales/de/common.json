@@ -95,7 +95,7 @@
     "PLASTIC": "Kunststoff",
     "GLASS": "Glas",
     "METAL": "Metall",
-    "WOOD": "Holz",
+    "ALUMINIUM": "Aluminium",
     "COMPOSITE": "Verbundstoff",
     "OTHER": "Sonstiges"
   },
