@@ -70,10 +70,13 @@ export default function ShippingRules() {
   const [maxItems, setMaxItems] = useState('5');
   const [secondaryPackagingId, setSecondaryPackagingId] = useState('none');
   const [secondaryStaticWeightG, setSecondaryStaticWeightG] = useState('');
+  const [secondaryOverrideEnabled, setSecondaryOverrideEnabled] = useState(false);
   const [fillerPackagingId, setFillerPackagingId] = useState('none');
   const [fillerStaticWeightG, setFillerStaticWeightG] = useState('');
+  const [fillerOverrideEnabled, setFillerOverrideEnabled] = useState(false);
   const [tapePackagingId, setTapePackagingId] = useState('none');
   const [tapeStaticWeightG, setTapeStaticWeightG] = useState('');
+  const [tapeOverrideEnabled, setTapeOverrideEnabled] = useState(false);
   const [productGroupId, setProductGroupId] = useState('none');
   const [priority, setPriority] = useState(2);
   const [isActive, setIsActive] = useState(true);
@@ -139,6 +142,14 @@ export default function ShippingRules() {
     return formulaType === 'STATIC';
   };
 
+  const getDefaultWeightG = (id: string | null | undefined): number | null => {
+    if (!id || id === 'none') return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const inv = inventoryRaw.find((i: any) => i.id === id);
+    const value = inv?.calculatedUnitWeightGrams;
+    return typeof value === 'number' ? Number(value.toFixed(2)) : null;
+  };
+
   // ── Group options for rule form ──
   const groupOptions = [
     { label: t('modal.form.group_none_option'), value: 'none' },
@@ -153,18 +164,18 @@ export default function ShippingRules() {
       return;
     }
     setSaving(true);
-    const toOverride = (raw: string, id: string) =>
-      isStaticInventoryItem(id) && raw.trim() !== '' ? Number(raw) : null;
+    const toOverride = (enabled: boolean, raw: string, id: string) =>
+      enabled && isStaticInventoryItem(id) && raw.trim() !== '' ? Number(raw) : null;
     const body = {
       name,
       minItems: Number(minItems),
       maxItems: Number(maxItems),
       secondaryPackagingId: secondaryPackagingId === 'none' ? null : secondaryPackagingId,
-      secondaryStaticWeightGOverride: toOverride(secondaryStaticWeightG, secondaryPackagingId),
+      secondaryStaticWeightGOverride: toOverride(secondaryOverrideEnabled, secondaryStaticWeightG, secondaryPackagingId),
       fillerPackagingId: fillerPackagingId === 'none' ? null : fillerPackagingId,
-      fillerStaticWeightGOverride: toOverride(fillerStaticWeightG, fillerPackagingId),
+      fillerStaticWeightGOverride: toOverride(fillerOverrideEnabled, fillerStaticWeightG, fillerPackagingId),
       tapePackagingId: tapePackagingId === 'none' ? null : tapePackagingId,
-      tapeStaticWeightGOverride: toOverride(tapeStaticWeightG, tapePackagingId),
+      tapeStaticWeightGOverride: toOverride(tapeOverrideEnabled, tapeStaticWeightG, tapePackagingId),
       productGroupId: productGroupId === 'none' ? null : productGroupId,
       priority,
       isActive,
@@ -200,10 +211,13 @@ export default function ShippingRules() {
     setMaxItems(rule.maxItems?.toString() || '5');
     setSecondaryPackagingId(rule.secondaryPackagingId || 'none');
     setSecondaryStaticWeightG(rule.secondaryStaticWeightGOverride?.toString() ?? '');
+    setSecondaryOverrideEnabled(rule.secondaryStaticWeightGOverride != null);
     setFillerPackagingId(rule.fillerPackagingId || 'none');
     setFillerStaticWeightG(rule.fillerStaticWeightGOverride?.toString() ?? '');
+    setFillerOverrideEnabled(rule.fillerStaticWeightGOverride != null);
     setTapePackagingId(rule.tapePackagingId || 'none');
     setTapeStaticWeightG(rule.tapeStaticWeightGOverride?.toString() ?? '');
+    setTapeOverrideEnabled(rule.tapeStaticWeightGOverride != null);
     setProductGroupId(rule.productGroupId || 'none');
     setPriority(rule.priority || 2);
     setIsActive(rule.isActive);
@@ -239,10 +253,13 @@ export default function ShippingRules() {
     setMaxItems('5');
     setSecondaryPackagingId('none');
     setSecondaryStaticWeightG('');
+    setSecondaryOverrideEnabled(false);
     setFillerPackagingId('none');
     setFillerStaticWeightG('');
+    setFillerOverrideEnabled(false);
     setTapePackagingId('none');
     setTapeStaticWeightG('');
+    setTapeOverrideEnabled(false);
     setProductGroupId('none');
     setPriority(2);
     setIsActive(true);
@@ -446,15 +463,29 @@ export default function ShippingRules() {
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.secondary_help')}</Text>
                   {isStaticInventoryItem(secondaryPackagingId) && (
-                    <TextField
-                      label={t('modal.form.weight_override_label')}
-                      type="number"
-                      value={secondaryStaticWeightG}
-                      onChange={setSecondaryStaticWeightG}
-                      autoComplete="off"
-                      min={0}
-                      helpText={t('modal.form.weight_override_help')}
-                    />
+                    <BlockStack gap="100">
+                      <Checkbox
+                        label={t('modal.form.weight_override_toggle_label', { default: getDefaultWeightG(secondaryPackagingId) ?? 0 })}
+                        checked={secondaryOverrideEnabled}
+                        onChange={(checked) => {
+                          setSecondaryOverrideEnabled(checked);
+                          if (checked && secondaryStaticWeightG.trim() === '') {
+                            setSecondaryStaticWeightG(String(getDefaultWeightG(secondaryPackagingId) ?? ''));
+                          }
+                        }}
+                      />
+                      {secondaryOverrideEnabled && (
+                        <TextField
+                          label={t('modal.form.weight_override_label', { default: getDefaultWeightG(secondaryPackagingId) ?? 0 })}
+                          type="number"
+                          value={secondaryStaticWeightG}
+                          onChange={setSecondaryStaticWeightG}
+                          autoComplete="off"
+                          min={0}
+                          helpText={t('modal.form.weight_override_help')}
+                        />
+                      )}
+                    </BlockStack>
                   )}
                 </BlockStack>
               </div>
@@ -468,15 +499,29 @@ export default function ShippingRules() {
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.filler_help')}</Text>
                   {isStaticInventoryItem(fillerPackagingId) && (
-                    <TextField
-                      label={t('modal.form.weight_override_label')}
-                      type="number"
-                      value={fillerStaticWeightG}
-                      onChange={setFillerStaticWeightG}
-                      autoComplete="off"
-                      min={0}
-                      helpText={t('modal.form.weight_override_help')}
-                    />
+                    <BlockStack gap="100">
+                      <Checkbox
+                        label={t('modal.form.weight_override_toggle_label', { default: getDefaultWeightG(fillerPackagingId) ?? 0 })}
+                        checked={fillerOverrideEnabled}
+                        onChange={(checked) => {
+                          setFillerOverrideEnabled(checked);
+                          if (checked && fillerStaticWeightG.trim() === '') {
+                            setFillerStaticWeightG(String(getDefaultWeightG(fillerPackagingId) ?? ''));
+                          }
+                        }}
+                      />
+                      {fillerOverrideEnabled && (
+                        <TextField
+                          label={t('modal.form.weight_override_label', { default: getDefaultWeightG(fillerPackagingId) ?? 0 })}
+                          type="number"
+                          value={fillerStaticWeightG}
+                          onChange={setFillerStaticWeightG}
+                          autoComplete="off"
+                          min={0}
+                          helpText={t('modal.form.weight_override_help')}
+                        />
+                      )}
+                    </BlockStack>
                   )}
                 </BlockStack>
               </div>
@@ -490,15 +535,29 @@ export default function ShippingRules() {
                   />
                   <Text as="p" variant="bodySm" tone="subdued">{t('modal.form.tape_help')}</Text>
                   {isStaticInventoryItem(tapePackagingId) && (
-                    <TextField
-                      label={t('modal.form.weight_override_label')}
-                      type="number"
-                      value={tapeStaticWeightG}
-                      onChange={setTapeStaticWeightG}
-                      autoComplete="off"
-                      min={0}
-                      helpText={t('modal.form.weight_override_help')}
-                    />
+                    <BlockStack gap="100">
+                      <Checkbox
+                        label={t('modal.form.weight_override_toggle_label', { default: getDefaultWeightG(tapePackagingId) ?? 0 })}
+                        checked={tapeOverrideEnabled}
+                        onChange={(checked) => {
+                          setTapeOverrideEnabled(checked);
+                          if (checked && tapeStaticWeightG.trim() === '') {
+                            setTapeStaticWeightG(String(getDefaultWeightG(tapePackagingId) ?? ''));
+                          }
+                        }}
+                      />
+                      {tapeOverrideEnabled && (
+                        <TextField
+                          label={t('modal.form.weight_override_label', { default: getDefaultWeightG(tapePackagingId) ?? 0 })}
+                          type="number"
+                          value={tapeStaticWeightG}
+                          onChange={setTapeStaticWeightG}
+                          autoComplete="off"
+                          min={0}
+                          helpText={t('modal.form.weight_override_help')}
+                        />
+                      )}
+                    </BlockStack>
                   )}
                 </BlockStack>
               </div>
