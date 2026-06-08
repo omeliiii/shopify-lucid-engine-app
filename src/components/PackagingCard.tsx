@@ -49,7 +49,6 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
   const material = item.packagingType?.agnosticMaterial || item.agnosticMaterial || 'PAPER';
   const imageUrl = item.packagingType?.imageUrl || FALLBACK_PACKAGING_IMAGE_URL;
   const category = item.packagingType?.category || item.category || 'PRIMARY';
-  const formulaType = item.packagingType?.formulaType || item.formulaType;
   const categoryTone: 'attention' | 'magic' | undefined =
     category === 'TAPE' ? 'attention' : category === 'FILLER' ? 'magic' : undefined;
 
