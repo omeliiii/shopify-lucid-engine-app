@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
+import { FALLBACK_PACKAGING_IMAGE_URL } from '../utils/packagingImage';
 import { PolarisSelect } from '../components/PolarisSelect';
 
 // ── Types ──
@@ -329,10 +330,10 @@ export default function ShippingRules() {
                         {item.secondaryPackagingId && (() => {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           const inv = inventoryRaw.find((i: any) => i.id === item.secondaryPackagingId);
-                          const imgUrl = inv?.packagingType?.imageUrl;
+                          const imgUrl = inv?.packagingType?.imageUrl || FALLBACK_PACKAGING_IMAGE_URL;
                           return (
                             <InlineStack gap="200" blockAlign="center">
-                              {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
+                              <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || inv?.agnosticMaterial || 'packaging'} size="small" />
                               <Text as="span" variant="bodySm">
                                 <b>{t('rule_card.secondary_label')}:</b> {item.secondaryPackaging?.name || lookupInventoryName(item.secondaryPackagingId) || item.secondaryPackagingId}
                               </Text>
@@ -342,10 +343,10 @@ export default function ShippingRules() {
                         {item.fillerPackagingId && (() => {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           const inv = inventoryRaw.find((i: any) => i.id === item.fillerPackagingId);
-                          const imgUrl = inv?.packagingType?.imageUrl;
+                          const imgUrl = inv?.packagingType?.imageUrl || FALLBACK_PACKAGING_IMAGE_URL;
                           return (
                             <InlineStack gap="200" blockAlign="center">
-                              {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
+                              <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || inv?.agnosticMaterial || 'packaging'} size="small" />
                               <Text as="span" variant="bodySm">
                                 <b>{t('rule_card.filler_label')}:</b> {item.fillerPackaging?.name || lookupInventoryName(item.fillerPackagingId) || item.fillerPackagingId}
                               </Text>
@@ -355,10 +356,10 @@ export default function ShippingRules() {
                         {item.tapePackagingId && (() => {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           const inv = inventoryRaw.find((i: any) => i.id === item.tapePackagingId);
-                          const imgUrl = inv?.packagingType?.imageUrl;
+                          const imgUrl = inv?.packagingType?.imageUrl || FALLBACK_PACKAGING_IMAGE_URL;
                           return (
                             <InlineStack gap="200" blockAlign="center">
-                              {imgUrl && <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || 'packaging'} size="small" />}
+                              <Thumbnail source={imgUrl} alt={inv?.packagingType?.agnosticMaterial || inv?.agnosticMaterial || 'packaging'} size="small" />
                               <Text as="span" variant="bodySm">
                                 <b>{t('rule_card.tape_label')}:</b> {item.tapePackaging?.name || lookupInventoryName(item.tapePackagingId) || item.tapePackagingId}
                               </Text>

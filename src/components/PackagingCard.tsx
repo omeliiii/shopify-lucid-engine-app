@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Box, BlockStack, Text, InlineStack, Badge, Button } from '@shopify/polaris';
 import { DeleteIcon, EditIcon, CheckIcon } from '@shopify/polaris-icons';
 import { useTranslation } from 'react-i18next';
+import { FALLBACK_PACKAGING_IMAGE_URL } from '../utils/packagingImage';
 
 export type PackagingCategory = 'PRIMARY' | 'TAPE' | 'FILLER';
 
@@ -46,7 +47,7 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
   const { t } = useTranslation('common');
   const [isHovered, setIsHovered] = useState(false);
   const material = item.packagingType?.agnosticMaterial || item.agnosticMaterial || 'PAPER';
-  const imageUrl = item.packagingType?.imageUrl || '';
+  const imageUrl = item.packagingType?.imageUrl || FALLBACK_PACKAGING_IMAGE_URL;
   const category = item.packagingType?.category || item.category || 'PRIMARY';
   const formulaType = item.packagingType?.formulaType || item.formulaType;
   const categoryTone: 'attention' | 'magic' | undefined =

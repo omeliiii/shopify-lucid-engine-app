@@ -4,6 +4,7 @@ import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from '@shopify/polaris-
 import { useTranslation, Trans } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { useToast } from '../utils/toast';
+import { FALLBACK_PACKAGING_IMAGE_URL } from '../utils/packagingImage';
 import { PolarisSelect } from '../components/PolarisSelect';
 import { PackagingCard, type InventoryItem } from '../components/PackagingCard';
 import { AISuggestion } from '../components/AISuggestion';
@@ -436,9 +437,7 @@ export default function Inventory() {
                                       <Card key={type.id} padding="300" background="bg-surface-secondary">
                                         <BlockStack gap="150">
                                           <InlineStack gap="200" blockAlign="center" wrap={false}>
-                                            {type.imageUrl && (
-                                              <Thumbnail source={type.imageUrl} alt={type.name} size="extraSmall" />
-                                            )}
+                                            <Thumbnail source={type.imageUrl || FALLBACK_PACKAGING_IMAGE_URL} alt={type.name} size="extraSmall" />
                                             <Text as="span" variant="bodyMd" fontWeight="semibold">{type.name}</Text>
                                           </InlineStack>
                                           {type.formulaType === 'STATIC' ? (
