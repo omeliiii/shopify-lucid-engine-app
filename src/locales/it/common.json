@@ -267,6 +267,9 @@
         "toast_failed": "Non siamo riusciti a terminare la prova. Riprova."
       },
       "upgrade": {
+        "title": "Confermi l'upgrade?",
+        "primary": "Sì, fai l'upgrade",
+        "body": "Verrai reindirizzato a Shopify per confermare l'upgrade al piano Unlimited a {{currency}}{{amount}}/anno. Il calcolo prorata viene gestito da Shopify.",
         "toast_failed": "Si è verificato un errore durante l'upgrade. Riprova."
       }
     }

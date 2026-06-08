@@ -106,6 +106,9 @@ export default function Subscription() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+
   const [endingTrial, setEndingTrial] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,11 +191,14 @@ export default function Subscription() {
   };
 
   const handleUpgrade = async () => {
+    setUpgrading(true);
     try {
       await redirectToUpgrade();
     } catch (e) {
       console.error('[Subscription] upgrade failed', e);
       showToast(t('billing.modals.upgrade.toast_failed'), { isError: true });
+      setUpgrading(false);
+      setUpgradeOpen(false);
     }
   };
 
@@ -344,7 +350,7 @@ export default function Subscription() {
                   {t('billing.subscription_page.upgrade_body', { currency, amount: multiAmount })}
                 </Text>
                 <Box>
-                  <Button variant="primary" onClick={handleUpgrade}>
+                  <Button variant="primary" onClick={() => setUpgradeOpen(true)}>
                     {t('billing.subscription_page.upgrade_cta')}
                   </Button>
                 </Box>
@@ -460,6 +466,25 @@ export default function Subscription() {
               values={{ date: formatDate(sub.isInTrial ? sub.trialEndsAt : sub.currentPeriodEnd) }}
               components={{ strong: <strong /> }}
             />
+          </Text>
+        </Modal.Section>
+      </Modal>
+
+      {/* ── Modal: Upgrade Confirmation ── */}
+      <Modal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        title={t('billing.modals.upgrade.title')}
+        primaryAction={{
+          content: t('billing.modals.upgrade.primary'),
+          onAction: handleUpgrade,
+          loading: upgrading,
+        }}
+        secondaryActions={[{ content: t('actions.cancel'), onAction: () => setUpgradeOpen(false) }]}
+      >
+        <Modal.Section>
+          <Text as="p">
+            {t('billing.modals.upgrade.body', { currency, amount: multiAmount })}
           </Text>
         </Modal.Section>
       </Modal>

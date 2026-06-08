@@ -267,6 +267,9 @@
         "toast_failed": "Die Testphase konnte nicht beendet werden. Bitte erneut versuchen."
       },
       "upgrade": {
+        "title": "Upgrade bestätigen?",
+        "primary": "Ja, upgraden",
+        "body": "Du wirst zu Shopify weitergeleitet, um das Upgrade auf den Unlimited-Plan für {{currency}}{{amount}}/Jahr zu bestätigen. Shopify übernimmt die anteilige Berechnung.",
         "toast_failed": "Beim Upgrade ist ein Fehler aufgetreten. Bitte erneut versuchen."
       }
     }

@@ -267,6 +267,9 @@
         "toast_failed": "We couldn't end the trial. Please try again."
       },
       "upgrade": {
+        "title": "Confirm upgrade?",
+        "primary": "Yes, upgrade",
+        "body": "You'll be redirected to Shopify to confirm the upgrade to the Unlimited plan at {{currency}}{{amount}}/year. Shopify handles the prorated charge.",
         "toast_failed": "Something went wrong during the upgrade. Please try again."
       }
     }
