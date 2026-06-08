@@ -16,9 +16,9 @@
     "MONTHLY": "Mensile"
   },
   "status": {
-    "processing": "In elaborazione",
-    "ready": "Pronto",
-    "error": "Errore",
+    "draft": "Bozza",
+    "generated": "Pronto",
+    "submitted": "Inviato",
     "new_badge": "Nuovo"
   },
   "sections": {
@@ -39,16 +39,14 @@
   },
   "actions": {
     "download": "Scarica",
-    "download_unavailable": "Non disponibile",
     "download_locked": "Bloccato",
     "renew": "Rinnova",
     "subscribe": "Abbonati",
     "add_country": "Aggiungi {{country}} ({{currency}}{{amount}})"
   },
   "tooltips": {
-    "processing": "Il report sarà disponibile non appena l'elaborazione sarà completata.",
-    "error_default": "Si è verificato un errore durante la generazione del report.",
-    "trial_locked": "Esci dal periodo di prova o passa a un piano a pagamento per scaricare i report."
+    "trial_locked": "Esci dal periodo di prova o passa a un piano a pagamento per scaricare i report.",
+    "draft": "Il report è ancora in bozza e non è ancora disponibile per il download."
   },
   "empty_state": {
     "past_heading": "Nessun report scaricato",

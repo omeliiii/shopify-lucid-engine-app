@@ -16,9 +16,9 @@
     "MONTHLY": "Mensuelle"
   },
   "status": {
-    "processing": "En cours de génération",
-    "ready": "Prêt",
-    "error": "Erreur",
+    "draft": "Brouillon",
+    "generated": "Prêt",
+    "submitted": "Soumis",
     "new_badge": "Nouveau"
   },
   "sections": {
@@ -39,16 +39,14 @@
   },
   "actions": {
     "download": "Télécharger",
-    "download_unavailable": "Indisponible",
     "download_locked": "Verrouillé",
     "renew": "Renouveler",
     "subscribe": "S'abonner",
     "add_country": "Ajouter {{country}} ({{currency}}{{amount}})"
   },
   "tooltips": {
-    "processing": "Le rapport sera disponible dès la fin du traitement.",
-    "error_default": "Une erreur est survenue lors de la génération du rapport.",
-    "trial_locked": "Mets fin à la période d'essai ou passe à une offre payante pour télécharger les rapports."
+    "trial_locked": "Mets fin à la période d'essai ou passe à une offre payante pour télécharger les rapports.",
+    "draft": "Ce rapport est encore un brouillon et n'est pas encore disponible au téléchargement."
   },
   "empty_state": {
     "past_heading": "Aucun rapport téléchargé",

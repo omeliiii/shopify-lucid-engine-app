@@ -16,9 +16,9 @@
     "MONTHLY": "Monthly"
   },
   "status": {
-    "processing": "Processing",
-    "ready": "Ready",
-    "error": "Error",
+    "draft": "Draft",
+    "generated": "Ready",
+    "submitted": "Submitted",
     "new_badge": "New"
   },
   "sections": {
@@ -39,16 +39,14 @@
   },
   "actions": {
     "download": "Download",
-    "download_unavailable": "Unavailable",
     "download_locked": "Locked",
     "renew": "Renew",
     "subscribe": "Subscribe",
     "add_country": "Add {{country}} ({{currency}}{{amount}})"
   },
   "tooltips": {
-    "processing": "The report will be available as soon as processing is complete.",
-    "error_default": "Something went wrong while generating this report.",
-    "trial_locked": "End your free trial or move to a paid plan to download reports."
+    "trial_locked": "End your free trial or move to a paid plan to download reports.",
+    "draft": "This report is still a draft and isn't available to download yet."
   },
   "empty_state": {
     "past_heading": "No downloaded reports yet",

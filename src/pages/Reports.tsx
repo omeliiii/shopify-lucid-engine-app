@@ -23,7 +23,11 @@ interface ReportExport {
   outputFormat: string;
 }
 
-type ReportStatus = 'PROCESSING' | 'READY' | 'ERROR';
+// Mirrors the backend ReportStatus enum (report_periods.status):
+//   DRAFT     → created but not yet generated (transient; rarely surfaced)
+//   GENERATED → data computed & exports ready, downloadable
+//   SUBMITTED → merchant confirmed all exports were filed with the registries
+type ReportStatus = 'DRAFT' | 'GENERATED' | 'SUBMITTED';
 
 interface Report {
   id: string;
@@ -37,10 +41,8 @@ interface Report {
   exports: ReportExport[];
   canDownload?: boolean;
   lockedReason?: LockedReason | null;
-  /** Backend lifecycle of the report. Defaults to READY when missing. */
+  /** Backend lifecycle of the report. Defaults to GENERATED when missing. */
   status?: ReportStatus;
-  /** Human-readable error when status === 'ERROR'. */
-  errorMessage?: string | null;
 }
 
 interface ReportListResponse {
@@ -65,14 +67,15 @@ export default function Reports() {
   const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
 
   const ReportStatusBadge = ({ report }: { report: Report }) => {
-    const status: ReportStatus = report.status ?? 'READY';
-    if (status === 'PROCESSING') {
-      return <Badge tone="info" progress="incomplete">{t('status.processing')}</Badge>;
+    const status: ReportStatus = report.status ?? 'GENERATED';
+    if (status === 'DRAFT') {
+      return <Badge progress="incomplete">{t('status.draft')}</Badge>;
     }
-    if (status === 'ERROR') {
-      return <Badge tone="critical">{t('status.error')}</Badge>;
+    if (status === 'SUBMITTED') {
+      return <Badge tone="success" progress="complete">{t('status.submitted')}</Badge>;
     }
-    return <Badge tone="success" progress="complete">{t('status.ready')}</Badge>;
+    // GENERATED — ready to download / submit
+    return <Badge tone="info" progress="complete">{t('status.generated')}</Badge>;
   };
 
   const [newReports, setNewReports] = useState<Report[]>([]);
@@ -211,8 +214,10 @@ export default function Reports() {
       ? report.exports.map((e) => e.outputFormat.toUpperCase()).join(' + ')
       : '—';
 
-    const status: ReportStatus = report.status ?? 'READY';
-    const canDownload = report.canDownload !== false && status === 'READY';
+    const status: ReportStatus = report.status ?? 'GENERATED';
+    // A DRAFT has no generated data yet; GENERATED/SUBMITTED are downloadable
+    // (subject to the backend entitlement flag).
+    const canDownload = report.canDownload !== false && status !== 'DRAFT';
     const lockedReason = report.lockedReason;
     const addonAmount = catalog?.addon.amount ?? 99;
     const currency = catalog?.currency === 'USD' ? '$' : (catalog?.currency ?? '$');
@@ -220,16 +225,10 @@ export default function Reports() {
     // Build the action cell based on download access
     let actionCell: React.ReactNode;
 
-    if (status === 'PROCESSING') {
+    if (status === 'DRAFT') {
       actionCell = (
-        <Tooltip content={t('tooltips.processing')} dismissOnMouseOut>
+        <Tooltip content={t('tooltips.draft')} dismissOnMouseOut>
           <Button size="micro" icon={ExportIcon} disabled>{t('actions.download')}</Button>
-        </Tooltip>
-      );
-    } else if (status === 'ERROR') {
-      actionCell = (
-        <Tooltip content={report.errorMessage || t('tooltips.error_default')} dismissOnMouseOut>
-          <Button size="micro" disabled>{t('actions.download_unavailable')}</Button>
         </Tooltip>
       );
     } else if (canDownload) {
@@ -293,7 +292,7 @@ export default function Reports() {
       <InlineStack gap="200" align="start" blockAlign="center">
         <FlagBadge countryCode={report.countryCode} />
         {isNew && <Badge tone="info">{t('status.new_badge')}</Badge>}
-        {!canDownload && lockedReason === 'TRIAL' && status === 'READY' && (
+        {!canDownload && lockedReason === 'TRIAL' && status !== 'DRAFT' && (
           <Icon source={LockIcon} tone="subdued" />
         )}
       </InlineStack>,

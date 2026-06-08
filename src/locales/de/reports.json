@@ -16,9 +16,9 @@
     "MONTHLY": "Monatlich"
   },
   "status": {
-    "processing": "Wird erstellt",
-    "ready": "Bereit",
-    "error": "Fehler",
+    "draft": "Entwurf",
+    "generated": "Bereit",
+    "submitted": "Eingereicht",
     "new_badge": "Neu"
   },
   "sections": {
@@ -39,16 +39,14 @@
   },
   "actions": {
     "download": "Herunterladen",
-    "download_unavailable": "Nicht verfügbar",
     "download_locked": "Gesperrt",
     "renew": "Verlängern",
     "subscribe": "Abonnieren",
     "add_country": "{{country}} hinzufügen ({{currency}}{{amount}})"
   },
   "tooltips": {
-    "processing": "Der Bericht steht zur Verfügung, sobald die Erstellung abgeschlossen ist.",
-    "error_default": "Beim Erstellen des Berichts ist ein Fehler aufgetreten.",
-    "trial_locked": "Beende die Testphase oder wechsle zu einem bezahlten Tarif, um Berichte herunterzuladen."
+    "trial_locked": "Beende die Testphase oder wechsle zu einem bezahlten Tarif, um Berichte herunterzuladen.",
+    "draft": "Dieser Bericht ist noch ein Entwurf und steht noch nicht zum Download bereit."
   },
   "empty_state": {
     "past_heading": "Noch keine heruntergeladenen Berichte",
