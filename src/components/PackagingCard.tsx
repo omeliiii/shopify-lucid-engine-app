@@ -83,29 +83,29 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
             />
           </div>
           <Box padding="200">
-          <BlockStack gap="150">
-            <Text as="h3" variant="headingXs" truncate>{item.name}</Text>
-            <InlineStack gap="100" align="space-between">
-              <InlineStack gap="100">
-                <Badge tone={material === 'PAPER' ? 'success' : 'info'} size="small">{materialLabel}</Badge>
-                {category !== 'PRIMARY' && (
-                  <Badge tone={categoryTone} size="small">{categoryLabel}</Badge>
-                )}
+            <BlockStack gap="150">
+              <Text as="h3" variant="headingXs" truncate>{item.name}</Text>
+              <InlineStack gap="100" align="space-between">
+                <InlineStack gap="100">
+                  <Badge tone={material === 'PAPER' ? 'success' : 'info'} size="small">{materialLabel}</Badge>
+                  {category !== 'PRIMARY' && (
+                    <Badge tone={categoryTone} size="small">{categoryLabel}</Badge>
+                  )}
+                </InlineStack>
+                <Text as="span" tone="subdued" variant="bodySm">{t('units.weight_g', { value: Number(item.calculatedUnitWeightGrams.toFixed(2)) })}</Text>
               </InlineStack>
-              <Text as="span" tone="subdued" variant="bodySm">{t('units.weight_g', { value: Number(item.calculatedUnitWeightGrams.toFixed(2)) })}</Text>
-            </InlineStack>
-            {(item.lMm || item.wMm || item.hMm) && (
-              <Text as="span" tone="subdued" variant="bodySm">
-                {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
-              </Text>
-            )}
-            <InlineStack gap="100" align="start" wrap={false}>
-              <Button size="micro" tone="success" icon={CheckIcon} onClick={() => onAccept?.(item)}>{t('actions.accept')}</Button>
-              <Button size="micro" icon={EditIcon} onClick={() => onEdit(item)}>{t('actions.edit')}</Button>
-              <Button size="micro" tone="critical" onClick={() => onDelete(item.id)}>{t('actions.reject')}</Button>
-            </InlineStack>
-          </BlockStack>
-        </Box>
+              {(item.lMm || item.wMm || item.hMm) && (
+                <Text as="span" tone="subdued" variant="bodySm">
+                  {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
+                </Text>
+              )}
+              <InlineStack gap="100" align="start" wrap={false}>
+                <Button size="micro" tone="success" icon={CheckIcon} onClick={() => onAccept?.(item)}>{t('actions.accept')}</Button>
+                <Button size="micro" icon={EditIcon} onClick={() => onEdit(item)}>{t('actions.edit')}</Button>
+                <Button size="micro" tone="critical" onClick={() => onDelete(item.id)}>{t('actions.reject')}</Button>
+              </InlineStack>
+            </BlockStack>
+          </Box>
         </Card>
       </div>
     );
@@ -137,41 +137,35 @@ export function PackagingCard({ item, onEdit, onDelete, onAccept, isAiSuggested 
           />
         </div>
         <Box padding="400">
-        <BlockStack gap="200">
-          <Text as="h3" variant="headingSm" truncate>{item.name}</Text>
-          <InlineStack gap="200" align="space-between">
-            <InlineStack gap="100">
-              <Badge tone={material === 'PAPER' ? 'success' : 'info'}>{materialLabel}</Badge>
-              {category !== 'PRIMARY' && (
-                <Badge tone={categoryTone}>{categoryLabel}</Badge>
-              )}
+          <BlockStack gap="200">
+            <Text as="h3" variant="headingSm" truncate>{item.name}</Text>
+            <InlineStack gap="200" align="space-between">
+              <InlineStack gap="100">
+                <Badge tone={material === 'PAPER' ? 'success' : 'info'}>{materialLabel}</Badge>
+                {category !== 'PRIMARY' && (
+                  <Badge tone={categoryTone}>{categoryLabel}</Badge>
+                )}
+              </InlineStack>
+              <Text as="span" tone="subdued" variant="bodySm">{t('units.weight_g', { value: Number(item.calculatedUnitWeightGrams.toFixed(2)) })}</Text>
             </InlineStack>
-            <Text as="span" tone="subdued" variant="bodySm">{t('units.weight_g', { value: Number(item.calculatedUnitWeightGrams.toFixed(2)) })}</Text>
-          </InlineStack>
-          <Text as="span" tone="subdued" variant="bodySm">
-            {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
-          </Text>
-          {formulaType === 'STATIC' ? (
-            item.customStaticWeightG != null && (
+            {(item.lMm || item.wMm || item.hMm) && (
               <Text as="span" tone="subdued" variant="bodySm">
-                {t('units.weight_g', { value: item.customStaticWeightG })}
+                {[item.lMm, item.wMm, item.hMm].filter((d) => d).join(' × ')} mm
               </Text>
-            )
-          ) : (
-            item.customGsm != null && (
+            )}
+            {item.customGsm != null && (
               <Text as="span" tone="subdued" variant="bodySm">
                 {t('units.gsm_label')}: {t('units.gsm', { value: item.customGsm })}
               </Text>
-            )
-          )}
-          <div style={{ paddingTop: '8px' }}>
-            <InlineStack gap="200" align="space-between">
-              <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => onDelete(item.id)}>{t('actions.delete')}</Button>
-              <Button size="micro" icon={EditIcon} onClick={() => onEdit(item)}>{t('actions.edit')}</Button>
-            </InlineStack>
-          </div>
-        </BlockStack>
-      </Box>
+            )}
+            <div style={{ paddingTop: '8px' }}>
+              <InlineStack gap="200" align="space-between">
+                <Button size="micro" tone="critical" icon={DeleteIcon} onClick={() => onDelete(item.id)}>{t('actions.delete')}</Button>
+                <Button size="micro" icon={EditIcon} onClick={() => onEdit(item)}>{t('actions.edit')}</Button>
+              </InlineStack>
+            </div>
+          </BlockStack>
+        </Box>
       </Card>
     </div>
   );
