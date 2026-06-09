@@ -15,6 +15,14 @@
     "QUARTERLY": "Trimestrielle",
     "MONTHLY": "Mensuelle"
   },
+  "report_kind": {
+    "ACTUAL": "Réel",
+    "FORECAST": "Prévisionnel"
+  },
+  "filters": {
+    "report_kind_label": "Type de rapport",
+    "report_kind_all": "Tous"
+  },
   "status": {
     "draft": "Brouillon",
     "generated": "Prêt",
@@ -57,9 +65,19 @@
     "primary": "Générer le rapport",
     "form": {
       "country_label": "Pays de destination",
-      "period_type_label": "Type de période",
       "start_date_label": "Date de début",
       "end_date_label": "Date de fin",
+      "report_kind_label": "Type de rapport",
+      "forecast_source_label": "Base du prévisionnel",
+      "forecast_source": {
+        "PRIOR_YEAR": "Quantités de l'année précédente",
+        "MANUAL": "Quantités manuelles par matériau"
+      },
+      "growth_label": "Augmentation par rapport à l'année précédente (facultatif)",
+      "growth_help": "Ex. 10 = +10 % par rapport aux quantités de l'an dernier. Laisse vide pour les conserver telles quelles.",
+      "manual_quantities_label": "Quantités prévues par matériau (kg)",
+      "manual_quantities_required": "Saisis au moins une quantité pour générer le prévisionnel.",
+      "forecast_note": "Le prévisionnel estime les quantités de la période sélectionnée. Sans quantités manuelles, l'année clôturée précédente sert de base.",
       "footer_note": "Les rapports sont générés automatiquement à la cadence configurée. N'utilise ce formulaire que pour des rattrapages, des tests ou des périodes personnalisées."
     }
   },

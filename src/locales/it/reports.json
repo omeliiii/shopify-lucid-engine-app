@@ -15,6 +15,14 @@
     "QUARTERLY": "Trimestrale",
     "MONTHLY": "Mensile"
   },
+  "report_kind": {
+    "ACTUAL": "Consuntivo",
+    "FORECAST": "Preventivo"
+  },
+  "filters": {
+    "report_kind_label": "Tipo di report",
+    "report_kind_all": "Tutti"
+  },
   "status": {
     "draft": "Bozza",
     "generated": "Pronto",
@@ -57,9 +65,19 @@
     "primary": "Genera report",
     "form": {
       "country_label": "Paese di destinazione",
-      "period_type_label": "Tipo di periodo",
       "start_date_label": "Data inizio",
       "end_date_label": "Data fine",
+      "report_kind_label": "Tipo di report",
+      "forecast_source_label": "Base del preventivo",
+      "forecast_source": {
+        "PRIOR_YEAR": "Quantità dell'anno precedente",
+        "MANUAL": "Quantità manuali per materiale"
+      },
+      "growth_label": "Incremento rispetto all'anno precedente (facoltativo)",
+      "growth_help": "Es. 10 = +10% rispetto alle quantità dell'anno precedente. Lascia vuoto per usarle invariate.",
+      "manual_quantities_label": "Quantità previste per materiale (kg)",
+      "manual_quantities_required": "Inserisci almeno una quantità per generare il preventivo.",
+      "forecast_note": "Il preventivo (Planmengenmeldung) stima le quantità del periodo selezionato. Senza quantità manuali, la base è l'anno chiuso precedente.",
       "footer_note": "Generiamo i report automaticamente alla cadenza configurata per ogni paese. Usa questo form solo per backfill, test o periodi personalizzati."
     }
   },

@@ -15,6 +15,14 @@
     "QUARTERLY": "Quartalsweise",
     "MONTHLY": "Monatlich"
   },
+  "report_kind": {
+    "ACTUAL": "Mengenmeldung",
+    "FORECAST": "Planmengenmeldung"
+  },
+  "filters": {
+    "report_kind_label": "Berichtsart",
+    "report_kind_all": "Alle"
+  },
   "status": {
     "draft": "Entwurf",
     "generated": "Bereit",
@@ -57,9 +65,19 @@
     "primary": "Bericht erstellen",
     "form": {
       "country_label": "Zielland",
-      "period_type_label": "Zeitraumtyp",
       "start_date_label": "Startdatum",
       "end_date_label": "Enddatum",
+      "report_kind_label": "Berichtsart",
+      "forecast_source_label": "Grundlage der Planmengenmeldung",
+      "forecast_source": {
+        "PRIOR_YEAR": "Mengen des Vorjahres",
+        "MANUAL": "Manuelle Mengen je Material"
+      },
+      "growth_label": "Steigerung gegenüber dem Vorjahr (optional)",
+      "growth_help": "Z. B. 10 = +10 % gegenüber den Vorjahresmengen. Leer lassen, um sie unverändert zu übernehmen.",
+      "manual_quantities_label": "Geplante Mengen je Material (kg)",
+      "manual_quantities_required": "Gib mindestens eine Menge ein, um die Planmengenmeldung zu erstellen.",
+      "forecast_note": "Die Planmengenmeldung schätzt die Mengen für den gewählten Zeitraum. Ohne manuelle Mengen dient das letzte abgeschlossene Jahr als Grundlage.",
       "footer_note": "Wir erstellen Berichte automatisch im konfigurierten Takt. Nutze dieses Formular nur für Nachträge, Tests oder eigene Zeiträume."
     }
   },

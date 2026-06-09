@@ -15,6 +15,14 @@
     "QUARTERLY": "Quarterly",
     "MONTHLY": "Monthly"
   },
+  "report_kind": {
+    "ACTUAL": "Actuals",
+    "FORECAST": "Forecast"
+  },
+  "filters": {
+    "report_kind_label": "Report type",
+    "report_kind_all": "All"
+  },
   "status": {
     "draft": "Draft",
     "generated": "Ready",
@@ -57,9 +65,19 @@
     "primary": "Generate report",
     "form": {
       "country_label": "Destination country",
-      "period_type_label": "Period type",
       "start_date_label": "Start date",
       "end_date_label": "End date",
+      "report_kind_label": "Report type",
+      "forecast_source_label": "Forecast basis",
+      "forecast_source": {
+        "PRIOR_YEAR": "Prior year quantities",
+        "MANUAL": "Manual quantities per material"
+      },
+      "growth_label": "Increase vs. prior year (optional)",
+      "growth_help": "E.g. 10 = +10% over last year's quantities. Leave empty to keep them unchanged.",
+      "manual_quantities_label": "Forecast quantities per material (kg)",
+      "manual_quantities_required": "Enter at least one quantity to generate the forecast.",
+      "forecast_note": "The forecast (Planmengenmeldung) estimates quantities for the selected period. Without manual quantities, the prior closed year is used as the basis.",
       "footer_note": "We generate reports automatically at the cadence set for each country. Use this form only for backfills, tests or custom periods."
     }
   },

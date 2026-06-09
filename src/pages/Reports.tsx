@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Page, Layout, Card, DataTable, Badge, Button, Text, InlineStack, BlockStack,
-  Modal, Form, FormLayout, EmptyState, Tooltip, Icon,
+  Modal, Form, FormLayout, EmptyState, Tooltip, Icon, TextField,
 } from '@shopify/polaris';
 import { ExportIcon, LockIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from 'react-i18next';
@@ -29,6 +29,16 @@ interface ReportExport {
 //   SUBMITTED → merchant confirmed all exports were filed with the registries
 type ReportStatus = 'DRAFT' | 'GENERATED' | 'SUBMITTED';
 
+// ACTUAL = consuntivo (aggregato dagli ordini), FORECAST = preventivo / Planmengenmeldung
+type ReportKind = 'ACTUAL' | 'FORECAST';
+
+// How a FORECAST is seeded: from the prior closed year × growth factor, or from manual input.
+type ForecastSource = 'PRIOR_YEAR' | 'MANUAL';
+
+// Material-agnostic categories accepted by the backend for manual forecast quantities.
+const AGNOSTIC_MATERIALS = ['PAPER', 'PLASTIC', 'GLASS', 'METAL', 'ALUMINIUM', 'COMPOSITE', 'OTHER'] as const;
+type AgnosticMaterial = typeof AGNOSTIC_MATERIALS[number];
+
 interface Report {
   id: string;
   countryCode: string;
@@ -43,7 +53,19 @@ interface Report {
   lockedReason?: LockedReason | null;
   /** Backend lifecycle of the report. Defaults to GENERATED when missing. */
   status?: ReportStatus;
+  /** ACTUAL (consuntivo) or FORECAST (preventivo). Defaults to ACTUAL when missing. */
+  reportKind?: ReportKind;
 }
+
+// The backend keeps periodType as an existing required field, but the manual modal
+// no longer asks for it explicitly — the chosen date range already defines the period,
+// so we derive a sensible label from its span.
+const inferPeriodType = (start: string, end: string): string => {
+  const days = (new Date(end).getTime() - new Date(start).getTime()) / 86_400_000;
+  if (days >= 200) return 'ANNUAL';
+  if (days >= 60) return 'QUARTERLY';
+  return 'MONTHLY';
+};
 
 interface ReportListResponse {
   data: Report[];
@@ -90,12 +112,20 @@ export default function Reports() {
   const [filterCountry, setFilterCountry] = useState('ALL');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
+  const [filterReportKind, setFilterReportKind] = useState<'ALL' | ReportKind>('ALL');
 
   // Form State (manual generation — kept for backfills / testing)
   const [country, setCountry] = useState('DE');
-  const [periodType, setPeriodType] = useState('QUARTERLY');
   const [startDate, setStartDate] = useState('2026-01-01');
   const [endDate, setEndDate] = useState('2026-03-31');
+  const [reportKind, setReportKind] = useState<ReportKind>('ACTUAL');
+  const [forecastSource, setForecastSource] = useState<ForecastSource>('PRIOR_YEAR');
+  // Percent increase vs. the prior year (e.g. "10" → growthFactor 1.1). Empty = no change.
+  const [growthPercent, setGrowthPercent] = useState('');
+  // Manual forecast weights keyed by agnostic material; empty string means "not provided".
+  const [manualQty, setManualQty] = useState<Record<AgnosticMaterial, string>>(
+    () => Object.fromEntries(AGNOSTIC_MATERIALS.map((m) => [m, ''])) as Record<AgnosticMaterial, string>,
+  );
 
   // Add-on modal for COUNTRY_NOT_INCLUDED
   const [addonModalOpen, setAddonModalOpen] = useState(false);
@@ -113,6 +143,7 @@ export default function Reports() {
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: '10' });
       if (filterCountry !== 'ALL') params.append('countryCode', filterCountry);
+      if (filterReportKind !== 'ALL') params.append('reportKind', filterReportKind);
       if (filterStartDate) params.append('periodStart', filterStartDate);
       if (filterEndDate) params.append('periodEnd', filterEndDate);
 
@@ -128,7 +159,7 @@ export default function Reports() {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterCountry, filterStartDate, filterEndDate, t]);
+  }, [page, filterCountry, filterReportKind, filterStartDate, filterEndDate, t]);
 
   useEffect(() => {
     loadData();
@@ -138,18 +169,41 @@ export default function Reports() {
     apiFetch('/notifications/readAll', { method: 'POST' }).catch(() => { });
   }, []);
 
+  // Manual forecast quantities the user actually filled in (weightKg >= 0).
+  const manualEntries = AGNOSTIC_MATERIALS
+    .map((m) => ({ agnosticMaterial: m, weightKg: Number.parseFloat(manualQty[m]) }))
+    .filter((q) => q.weightKg >= 0 && !Number.isNaN(q.weightKg));
+
+  // Block submission only in the one case the backend rejects outright:
+  // a FORECAST sourced from manual quantities must carry at least one entry.
+  const canSubmit = reportKind !== 'FORECAST'
+    || forecastSource !== 'MANUAL'
+    || manualEntries.length > 0;
+
   const handleGenerate = async () => {
+    if (!canSubmit) return;
     setSubmitting(true);
     try {
-      await apiFetch('/reports', {
-        method: 'POST',
-        body: JSON.stringify({
-          countryCode: country,
-          periodType,
-          periodStart: startDate,
-          periodEnd: endDate,
-        }),
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const body: Record<string, any> = {
+        countryCode: country,
+        periodType: inferPeriodType(startDate, endDate),
+        periodStart: startDate,
+        periodEnd: endDate,
+        reportKind,
+      };
+
+      if (reportKind === 'FORECAST') {
+        if (forecastSource === 'MANUAL') {
+          body.manualQuantities = manualEntries;
+        } else {
+          // PRIOR_YEAR: optional percent increase → growth factor (e.g. 10 → 1.1).
+          const pct = Number.parseFloat(growthPercent);
+          if (!Number.isNaN(pct) && pct !== 0) body.forecastGrowthFactor = 1 + pct / 100;
+        }
+      }
+
+      await apiFetch('/reports', { method: 'POST', body: JSON.stringify(body) });
       loadData();
     } catch (e) {
       console.error('Failed to generate report', e);
@@ -295,6 +349,7 @@ export default function Reports() {
     return [
       <InlineStack gap="200" align="start" blockAlign="center">
         <FlagBadge countryCode={report.countryCode} />
+        {report.reportKind === 'FORECAST' && <Badge tone="attention">{t('report_kind.FORECAST')}</Badge>}
         {isNew && <Badge tone="info">{t('status.new_badge')}</Badge>}
         {!canDownload && lockedReason === 'TRIAL' && status !== 'DRAFT' && (
           <Icon source={LockIcon} tone="subdued" />
@@ -346,12 +401,23 @@ export default function Reports() {
               <CountryDateFilters
                 countryFilter={filterCountry}
                 onCountryChange={(val) => { setFilterCountry(val); setPage(1); }}
+                extraSelect={{
+                  label: t('filters.report_kind_label'),
+                  options: [
+                    { label: t('filters.report_kind_all'), value: 'ALL' },
+                    { label: t('report_kind.ACTUAL'), value: 'ACTUAL' },
+                    { label: t('report_kind.FORECAST'), value: 'FORECAST' },
+                  ],
+                  value: filterReportKind,
+                  onChange: (val) => { setFilterReportKind(val as 'ALL' | ReportKind); setPage(1); },
+                }}
                 startDate={filterStartDate}
                 onStartDateChange={(val) => { setFilterStartDate(val); setPage(1); }}
                 endDate={filterEndDate}
                 onEndDateChange={(val) => { setFilterEndDate(val); setPage(1); }}
                 onReset={() => {
                   setFilterCountry('ALL');
+                  setFilterReportKind('ALL');
                   setFilterStartDate('');
                   setFilterEndDate('');
                   setPage(1);
@@ -423,7 +489,7 @@ export default function Reports() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         title={t('manual_modal.title')}
-        primaryAction={{ content: t('manual_modal.primary'), onAction: handleGenerate, loading: submitting }}
+        primaryAction={{ content: t('manual_modal.primary'), onAction: handleGenerate, loading: submitting, disabled: !canSubmit }}
         secondaryActions={[{ content: tCommon('actions.cancel'), onAction: () => setModalOpen(false) }]}
       >
         <Modal.Section>
@@ -440,21 +506,73 @@ export default function Reports() {
                 onChange={setCountry}
               />
               <PolarisSelect
-                label={t('manual_modal.form.period_type_label')}
+                label={t('manual_modal.form.report_kind_label')}
                 options={[
-                  { label: t('period_types.ANNUAL'), value: 'ANNUAL' },
-                  { label: t('period_types.QUARTERLY'), value: 'QUARTERLY' },
-                  { label: t('period_types.MONTHLY'), value: 'MONTHLY' },
+                  { label: t('report_kind.ACTUAL'), value: 'ACTUAL' },
+                  { label: t('report_kind.FORECAST'), value: 'FORECAST' },
                 ]}
-                value={periodType}
-                onChange={setPeriodType}
+                value={reportKind}
+                onChange={(val) => setReportKind(val as ReportKind)}
               />
               <FormLayout.Group>
                 <PolarisDatePicker label={t('manual_modal.form.start_date_label')} value={startDate} onChange={setStartDate} />
                 <PolarisDatePicker label={t('manual_modal.form.end_date_label')} value={endDate} onChange={setEndDate} />
               </FormLayout.Group>
+
+              {reportKind === 'FORECAST' && (
+                <>
+                  <PolarisSelect
+                    label={t('manual_modal.form.forecast_source_label')}
+                    options={[
+                      { label: t('manual_modal.form.forecast_source.PRIOR_YEAR'), value: 'PRIOR_YEAR' },
+                      { label: t('manual_modal.form.forecast_source.MANUAL'), value: 'MANUAL' },
+                    ]}
+                    value={forecastSource}
+                    onChange={(val) => setForecastSource(val as ForecastSource)}
+                  />
+
+                  {forecastSource === 'PRIOR_YEAR' ? (
+                    <TextField
+                      label={t('manual_modal.form.growth_label')}
+                      type="number"
+                      value={growthPercent}
+                      onChange={setGrowthPercent}
+                      autoComplete="off"
+                      suffix="%"
+                      placeholder="0"
+                      helpText={t('manual_modal.form.growth_help')}
+                    />
+                  ) : (
+                    <BlockStack gap="200">
+                      <Text as="p" variant="bodyMd">{t('manual_modal.form.manual_quantities_label')}</Text>
+                      {AGNOSTIC_MATERIALS.map((m) => (
+                        <TextField
+                          key={m}
+                          label={tCommon(`materials.${m}` as 'materials.PAPER')}
+                          labelHidden={false}
+                          type="number"
+                          min={0}
+                          step={0.1}
+                          suffix="kg"
+                          autoComplete="off"
+                          value={manualQty[m]}
+                          onChange={(val) => setManualQty((prev) => ({ ...prev, [m]: val }))}
+                        />
+                      ))}
+                      {manualEntries.length === 0 && (
+                        <Text as="p" tone="critical" variant="bodySm">
+                          {t('manual_modal.form.manual_quantities_required')}
+                        </Text>
+                      )}
+                    </BlockStack>
+                  )}
+                </>
+              )}
+
               <Text as="p" tone="subdued" variant="bodySm">
-                {t('manual_modal.form.footer_note')}
+                {reportKind === 'FORECAST'
+                  ? t('manual_modal.form.forecast_note')
+                  : t('manual_modal.form.footer_note')}
               </Text>
             </FormLayout>
           </Form>
