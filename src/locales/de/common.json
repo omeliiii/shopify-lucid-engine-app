@@ -298,6 +298,9 @@
     }
   },
   "settings_page": {
-    "title": "Einstellungen"
+    "title": "Einstellungen",
+    "privacy_link_title": "Datenschutz und Datensicherheit",
+    "privacy_link_desc": "Wie wir die personenbezogenen Daten deines Shops verarbeiten und schützen.",
+    "privacy_link_cta": "Öffnen"
   }
 }

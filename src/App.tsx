@@ -15,6 +15,7 @@ import ShippingRules from './pages/ShippingRules';
 import Reports from './pages/Reports';
 import BillingStart from './pages/BillingStart';
 import Settings from './pages/Settings';
+import Privacy from './pages/Privacy';
 import { BillingProvider, useBilling } from './contexts/BillingProvider';
 import { BillingReturnHandler } from './components/BillingReturnHandler';
 import { TourProvider } from './contexts/TourProvider';
@@ -109,6 +110,12 @@ function App() {
               path="/settings"
               element={
                 <PaywallGate><Settings /></PaywallGate>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <PaywallGate><Privacy /></PaywallGate>
               }
             />
             {/* Legacy route — keep old links working */}

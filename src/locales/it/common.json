@@ -298,6 +298,9 @@
     }
   },
   "settings_page": {
-    "title": "Impostazioni"
+    "title": "Impostazioni",
+    "privacy_link_title": "Privacy e protezione dei dati",
+    "privacy_link_desc": "Come trattiamo e proteggiamo i dati personali del tuo negozio.",
+    "privacy_link_cta": "Apri"
   }
 }

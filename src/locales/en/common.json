@@ -298,6 +298,9 @@
     }
   },
   "settings_page": {
-    "title": "Settings"
+    "title": "Settings",
+    "privacy_link_title": "Privacy & data protection",
+    "privacy_link_desc": "How we process and protect your store’s personal data.",
+    "privacy_link_cta": "Open"
   }
 }

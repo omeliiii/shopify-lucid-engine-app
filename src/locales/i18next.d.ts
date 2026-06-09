@@ -7,6 +7,7 @@ import type product_mapping from './it/product_mapping.json';
 import type shipping_rules from './it/shipping_rules.json';
 import type reports from './it/reports.json';
 import type tour from './it/tour.json';
+import type privacy from './it/privacy.json';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -19,6 +20,7 @@ declare module 'i18next' {
       shipping_rules: typeof shipping_rules;
       reports: typeof reports;
       tour: typeof tour;
+      privacy: typeof privacy;
     };
   }
 }

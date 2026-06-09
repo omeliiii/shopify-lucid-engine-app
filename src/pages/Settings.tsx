@@ -19,6 +19,8 @@ import {
   SkeletonPage,
   SkeletonBodyText,
 } from '@shopify/polaris';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRightIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from 'react-i18next';
 import { useBilling } from '../contexts/BillingProvider';
 import { countryDisplay, countryFlag, countryLabel, countryOptions } from '../utils/countries';
@@ -64,6 +66,7 @@ export default function Settings() {
     refreshSubscription,
   } = useBilling();
   const { t, i18n } = useTranslation('common');
+  const navigate = useNavigate();
   const dateLocale = i18n.language?.startsWith('en') ? 'en-GB' : `${i18n.language || 'it'}-${(i18n.language || 'it').toUpperCase()}`;
 
   const formatDate = (iso: string | null | undefined): string => {
@@ -488,6 +491,25 @@ export default function Settings() {
                 </BlockStack>
               )}
             </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        {/* ── Privacy & Data Protection ── */}
+        <Layout.Section>
+          <Card>
+            <InlineStack align="space-between" blockAlign="center" gap="400" wrap={false}>
+              <BlockStack gap="100">
+                <Text as="h2" variant="headingMd">
+                  {t('settings_page.privacy_link_title')}
+                </Text>
+                <Text as="p" tone="subdued">
+                  {t('settings_page.privacy_link_desc')}
+                </Text>
+              </BlockStack>
+              <Button icon={ChevronRightIcon} onClick={() => navigate('/privacy')}>
+                {t('settings_page.privacy_link_cta')}
+              </Button>
+            </InlineStack>
           </Card>
         </Layout.Section>
 

@@ -1,0 +1,95 @@
+{
+  "title": "Datenschutz und Datensicherheit",
+  "subtitle": "Wie EPR Pack Report personenbezogene Daten im Auftrag deines Shops verarbeitet und schützt.",
+  "last_updated_label": "Zuletzt aktualisiert",
+  "last_updated": "9. Juni 2026",
+  "intro": "Diese Seite fasst die Verpflichtungen zusammen, die wir dir gegenüber als Händler und gegenüber Shopify in Bezug auf die Verarbeitung und den Schutz personenbezogener Daten eingehen. Wir verarbeiten Daten ausschließlich als Auftragsverarbeiter, in deinem Auftrag und nach deinen Weisungen.",
+  "status": {
+    "compliant": "Konform",
+    "not_applicable": "Nicht anwendbar"
+  },
+  "sections": {
+    "data_purpose": {
+      "title": "Verarbeitete personenbezogene Daten und Zwecke",
+      "items": {
+        "what": {
+          "q": "Wir legen offen, welche personenbezogenen Daten wir verarbeiten und zu welchen Zwecken",
+          "a": "Über die Shopify-Berechtigungen read_orders und read_products greifen wir nur lesend auf Bestellungen (Datum, Lieferland, Positionen und Mengen) sowie auf die Produkte des Shops zu. Diese Daten dienen ausschließlich dazu, die anwendbare EPR-Zuständigkeit zu bestimmen und die zu meldenden Verpackungsvolumen und -gewichte zu berechnen. Wir erfassen weder Namen, vollständige Adressen, E-Mail-Adressen noch Zahlungsdaten der Endkunden."
+        },
+        "purpose_limit": {
+          "q": "Wir beschränken die Nutzung personenbezogener Daten auf diesen Zweck",
+          "a": "Die Daten werden ausschließlich zur Erstellung von EPR-Verpackungsberichten und -Meldungen verwendet. Sie werden niemals verkauft, zu Marketingzwecken an Dritte weitergegeben oder für andere als die angegebenen Zwecke genutzt."
+        }
+      }
+    },
+    "agreements": {
+      "title": "Datenschutzvereinbarungen mit Händlern",
+      "items": {
+        "dpa": {
+          "q": "Wir haben Datenschutz- und Datensicherheitsvereinbarungen mit Händlern getroffen",
+          "a": "Wir stellen einen Auftragsverarbeitungsvertrag (AVV) sowie eine Datenschutzerklärung bereit, die die Verarbeitung personenbezogener Daten in deinem Auftrag gemäß DSGVO regeln. Diese Dokumente sind bei der Installation der App einsehbar und werden akzeptiert."
+        }
+      }
+    },
+    "consent": {
+      "title": "Einwilligung und Präferenzen der Kunden",
+      "items": {
+        "consent": {
+          "q": "Wir respektieren und setzen die Einwilligungsentscheidungen der Kunden um",
+          "a": "Wir berücksichtigen die über Shopifys Customer Privacy API verwalteten Einwilligungseinstellungen. Verweigert ein Kunde die Einwilligung, werden seine Daten nicht für nicht wesentliche Zwecke verarbeitet."
+        },
+        "opt_out_sale": {
+          "q": "Wir respektieren und setzen die Entscheidung der Kunden um, dem Verkauf ihrer Daten zu widersprechen",
+          "a": "Wir verkaufen oder teilen keine personenbezogenen Daten der Kunden. Der „Do Not Sell\"-Widerspruch wird daher standardmäßig respektiert."
+        },
+        "automated": {
+          "q": "Automatisierte Entscheidungsfindung mit rechtlichen oder erheblichen Auswirkungen — Widerspruchsmöglichkeit",
+          "a": "Die App führt keine automatisierte Entscheidungsfindung durch, die rechtliche oder ähnlich erhebliche Auswirkungen auf Kunden hat. Diese Anforderung ist nicht anwendbar."
+        }
+      }
+    },
+    "retention": {
+      "title": "Aufbewahrung der Daten",
+      "items": {
+        "retention": {
+          "q": "Aufbewahrungsfristen stellen sicher, dass personenbezogene Daten nicht länger als nötig gespeichert werden",
+          "a": "Wir bewahren Bestelldaten nur so lange auf, wie es für die Erstellung der EPR-Meldungen und aufgrund gesetzlicher Pflichten erforderlich ist. Bei Deinstallation der App werden die Daten innerhalb der von Shopifys Compliance-Webhooks vorgegebenen Fristen gelöscht (innerhalb von 48 Stunden nach Löschanfragen)."
+        }
+      }
+    },
+    "security": {
+      "title": "Datensicherheit",
+      "items": {
+        "encryption": {
+          "q": "Wir schützen Daten bei der Übertragung und im Ruhezustand durch Verschlüsselung",
+          "a": "Die gesamte Kommunikation erfolgt über TLS (HTTPS). Ruhende Daten werden mit AES-256 verschlüsselt."
+        },
+        "backups": {
+          "q": "Wir schützen Datensicherungen durch Verschlüsselung",
+          "a": "Backups sind verschlüsselt und werden in zugriffsbeschränkten Umgebungen gespeichert."
+        },
+        "test_prod": {
+          "q": "Wir trennen Testdaten von Produktionsdaten",
+          "a": "Entwicklungs- und Testumgebungen sind von der Produktion isoliert und verwenden keine echten Händlerdaten."
+        },
+        "dlp": {
+          "q": "Wir verfügen über eine Strategie zur Verhinderung von Datenverlust",
+          "a": "Wir setzen regelmäßige Backups, Redundanz und Zugriffskontrollen ein, um Datenverlust und -abfluss zu verhindern."
+        },
+        "access_log": {
+          "q": "Wir protokollieren den Zugriff auf personenbezogene Daten",
+          "a": "Jeder Zugriff auf personenbezogene Daten wird über Audit-Logs protokolliert und überwacht."
+        },
+        "incident": {
+          "q": "Wir verfügen über eine Richtlinie zur Reaktion auf Sicherheitsvorfälle",
+          "a": "Wir verfügen über ein dokumentiertes Verfahren zur Reaktion auf Vorfälle, das Eindämmung, Bewertung und zeitnahe Benachrichtigung von Händlern und zuständigen Behörden gemäß unseren gesetzlichen Pflichten umfasst."
+        }
+      }
+    }
+  },
+  "contact": {
+    "title": "Fragen zum Datenschutz?",
+    "body": "Für Anfragen zum Datenschutz kannst du uns unter <a>{{email}}</a> kontaktieren.",
+    "email": "privacy@eprpackreport.com"
+  }
+}

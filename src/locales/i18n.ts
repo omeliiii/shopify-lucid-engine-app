@@ -10,6 +10,7 @@ import itProductMapping from './it/product_mapping.json';
 import itShippingRules from './it/shipping_rules.json';
 import itReports from './it/reports.json';
 import itTour from './it/tour.json';
+import itPrivacy from './it/privacy.json';
 
 // ── EN ─────────────────────────────────────────────────────────────────────────
 import enCommon from './en/common.json';
@@ -19,6 +20,7 @@ import enProductMapping from './en/product_mapping.json';
 import enShippingRules from './en/shipping_rules.json';
 import enReports from './en/reports.json';
 import enTour from './en/tour.json';
+import enPrivacy from './en/privacy.json';
 
 // ── DE ─────────────────────────────────────────────────────────────────────────
 import deCommon from './de/common.json';
@@ -28,6 +30,7 @@ import deProductMapping from './de/product_mapping.json';
 import deShippingRules from './de/shipping_rules.json';
 import deReports from './de/reports.json';
 import deTour from './de/tour.json';
+import dePrivacy from './de/privacy.json';
 
 // ── FR ─────────────────────────────────────────────────────────────────────────
 import frCommon from './fr/common.json';
@@ -37,6 +40,7 @@ import frProductMapping from './fr/product_mapping.json';
 import frShippingRules from './fr/shipping_rules.json';
 import frReports from './fr/reports.json';
 import frTour from './fr/tour.json';
+import frPrivacy from './fr/privacy.json';
 
 export const SUPPORTED_LOCALES = ['it', 'en', 'de', 'fr'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -49,6 +53,7 @@ export const NAMESPACES = [
   'shipping_rules',
   'reports',
   'tour',
+  'privacy',
 ] as const;
 
 const resources = {
@@ -60,6 +65,7 @@ const resources = {
     shipping_rules: itShippingRules,
     reports: itReports,
     tour: itTour,
+    privacy: itPrivacy,
   },
   en: {
     common: enCommon,
@@ -69,6 +75,7 @@ const resources = {
     shipping_rules: enShippingRules,
     reports: enReports,
     tour: enTour,
+    privacy: enPrivacy,
   },
   de: {
     common: deCommon,
@@ -78,6 +85,7 @@ const resources = {
     shipping_rules: deShippingRules,
     reports: deReports,
     tour: deTour,
+    privacy: dePrivacy,
   },
   fr: {
     common: frCommon,
@@ -87,6 +95,7 @@ const resources = {
     shipping_rules: frShippingRules,
     reports: frReports,
     tour: frTour,
+    privacy: frPrivacy,
   },
 } as const;
 

@@ -298,6 +298,9 @@
     }
   },
   "settings_page": {
-    "title": "Paramètres"
+    "title": "Paramètres",
+    "privacy_link_title": "Confidentialité et protection des données",
+    "privacy_link_desc": "Comment nous traitons et protégeons les données personnelles de votre boutique.",
+    "privacy_link_cta": "Ouvrir"
   }
 }

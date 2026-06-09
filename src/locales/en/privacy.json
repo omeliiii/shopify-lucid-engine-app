@@ -1,0 +1,95 @@
+{
+  "title": "Privacy & data protection",
+  "subtitle": "How EPR Pack Report processes and protects personal data on behalf of your store.",
+  "last_updated_label": "Last updated",
+  "last_updated": "9 June 2026",
+  "intro": "This page summarises the commitments we make to you as a merchant and to Shopify regarding the processing and protection of personal data. We process data solely as a data processor, on your behalf and according to your instructions.",
+  "status": {
+    "compliant": "Compliant",
+    "not_applicable": "Not applicable"
+  },
+  "sections": {
+    "data_purpose": {
+      "title": "Personal data processed and purposes",
+      "items": {
+        "what": {
+          "q": "We disclose which personal data we process and the purposes of processing",
+          "a": "We access orders (date, delivery country, line items and quantities) and store products in read-only mode through the Shopify read_orders and read_products scopes. This data is used only to determine the applicable EPR jurisdiction and to calculate the packaging volumes and weights to be declared. We do not collect customers' names, full addresses, emails or payment data."
+        },
+        "purpose_limit": {
+          "q": "We limit the use of personal data to that purpose",
+          "a": "Data is used exclusively to generate EPR packaging reports and declarations. It is never sold, shared with third parties for marketing, or used for any purpose other than those disclosed."
+        }
+      }
+    },
+    "agreements": {
+      "title": "Privacy agreements with merchants",
+      "items": {
+        "dpa": {
+          "q": "We have privacy and data protection agreements in place with merchants",
+          "a": "We provide a Data Processing Agreement (DPA) and a Privacy Policy that govern the processing of personal data on your behalf, in compliance with the GDPR. These documents are available and accepted at the time the app is installed."
+        }
+      }
+    },
+    "consent": {
+      "title": "Customer consent and preferences",
+      "items": {
+        "consent": {
+          "q": "We respect and enforce customers' consent decisions",
+          "a": "We honour the consent settings managed through Shopify's Customer Privacy API. If a customer withholds consent, their data is not processed for non-essential purposes."
+        },
+        "opt_out_sale": {
+          "q": "We respect and enforce customers' decisions to opt out of the sale of their data",
+          "a": "We do not sell or share customers' personal data. The \"Do Not Sell\" opt-out is therefore respected by default."
+        },
+        "automated": {
+          "q": "Automated decision-making with legal or significant effects — ability to opt out",
+          "a": "The app performs no automated decision-making that produces legal or similarly significant effects on customers. This requirement is not applicable."
+        }
+      }
+    },
+    "retention": {
+      "title": "Data retention",
+      "items": {
+        "retention": {
+          "q": "Retention periods ensure that personal data is not kept longer than necessary",
+          "a": "We retain order data only for as long as needed to generate EPR declarations and for the period required by legal obligations. When the app is uninstalled, data is deleted within the timeframes set by Shopify's compliance webhooks (within 48 hours of erasure requests)."
+        }
+      }
+    },
+    "security": {
+      "title": "Data security",
+      "items": {
+        "encryption": {
+          "q": "We protect data in transit and at rest with encryption",
+          "a": "All communications use TLS (HTTPS). Data at rest is encrypted with AES-256."
+        },
+        "backups": {
+          "q": "We protect data backups with encryption",
+          "a": "Backups are encrypted and stored in access-restricted environments."
+        },
+        "test_prod": {
+          "q": "We separate test data from production data",
+          "a": "Development and test environments are isolated from production and do not use real merchant data."
+        },
+        "dlp": {
+          "q": "We have a data loss prevention strategy",
+          "a": "We use regular backups, redundancy and access controls to prevent data loss and exfiltration."
+        },
+        "access_log": {
+          "q": "We log access to personal data",
+          "a": "All access to personal data is logged and monitored through audit logs."
+        },
+        "incident": {
+          "q": "We have a security incident response policy",
+          "a": "We maintain a documented incident response procedure covering containment, assessment and prompt notification to merchants and the relevant authorities, in line with our legal obligations."
+        }
+      }
+    }
+  },
+  "contact": {
+    "title": "Questions about privacy?",
+    "body": "For data protection requests you can contact us at <a>{{email}}</a>.",
+    "email": "privacy@eprpackreport.com"
+  }
+}

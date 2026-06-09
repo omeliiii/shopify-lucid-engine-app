@@ -1,0 +1,95 @@
+{
+  "title": "Confidentialité et protection des données",
+  "subtitle": "Comment EPR Pack Report traite et protège les données personnelles pour le compte de votre boutique.",
+  "last_updated_label": "Dernière mise à jour",
+  "last_updated": "9 juin 2026",
+  "intro": "Cette page résume les engagements que nous prenons envers vous en tant que marchand et envers Shopify concernant le traitement et la protection des données personnelles. Nous traitons les données uniquement en qualité de sous-traitant, pour votre compte et selon vos instructions.",
+  "status": {
+    "compliant": "Conforme",
+    "not_applicable": "Non applicable"
+  },
+  "sections": {
+    "data_purpose": {
+      "title": "Données personnelles traitées et finalités",
+      "items": {
+        "what": {
+          "q": "Nous indiquons quelles données personnelles nous traitons et les finalités du traitement",
+          "a": "Nous accédons en lecture seule aux commandes (date, pays de livraison, articles et quantités) et aux produits de la boutique via les autorisations Shopify read_orders et read_products. Ces données servent uniquement à déterminer la juridiction EPR applicable et à calculer les volumes et poids d'emballages à déclarer. Nous ne collectons ni les noms, ni les adresses complètes, ni les e-mails, ni les données de paiement des clients finaux."
+        },
+        "purpose_limit": {
+          "q": "Nous limitons l'utilisation des données personnelles à cette finalité",
+          "a": "Les données sont utilisées exclusivement pour générer des rapports et déclarations EPR sur les emballages. Elles ne sont jamais vendues, cédées à des tiers à des fins de marketing ni employées à d'autres fins que celles indiquées."
+        }
+      }
+    },
+    "agreements": {
+      "title": "Accords de confidentialité avec les marchands",
+      "items": {
+        "dpa": {
+          "q": "Nous avons défini des accords de confidentialité et de protection des données avec les marchands",
+          "a": "Nous mettons à disposition un Accord de traitement des données (DPA) et une Politique de confidentialité qui régissent le traitement des données personnelles pour votre compte, conformément au RGPD. Ces documents sont consultables et acceptés au moment de l'installation de l'application."
+        }
+      }
+    },
+    "consent": {
+      "title": "Consentement et préférences des clients",
+      "items": {
+        "consent": {
+          "q": "Nous respectons et appliquons les décisions des clients en matière de consentement",
+          "a": "Nous honorons les paramètres de consentement gérés via la Customer Privacy API de Shopify. Si un client refuse son consentement, ses données ne sont pas traitées à des fins non essentielles."
+        },
+        "opt_out_sale": {
+          "q": "Nous respectons et appliquons la décision des clients de refuser la vente de leurs données",
+          "a": "Nous ne vendons ni ne partageons les données personnelles des clients. La demande d'exclusion (« Do Not Sell ») est donc respectée par défaut."
+        },
+        "automated": {
+          "q": "Prise de décision automatisée avec effets juridiques ou importants — possibilité de refus",
+          "a": "L'application n'effectue aucune prise de décision automatisée produisant des effets juridiques ou des effets significatifs similaires sur les clients. Cette exigence n'est pas applicable."
+        }
+      }
+    },
+    "retention": {
+      "title": "Conservation des données",
+      "items": {
+        "retention": {
+          "q": "Des durées de conservation garantissent que les données personnelles ne sont pas conservées plus longtemps que nécessaire",
+          "a": "Nous conservons les données de commande uniquement le temps nécessaire à la génération des déclarations EPR et pour la durée requise par les obligations légales. À la désinstallation de l'application, les données sont supprimées dans les délais fixés par les webhooks de conformité de Shopify (sous 48 heures à compter des demandes d'effacement)."
+        }
+      }
+    },
+    "security": {
+      "title": "Sécurité des données",
+      "items": {
+        "encryption": {
+          "q": "Nous protégeons les données en transit et au repos par chiffrement",
+          "a": "Toutes les communications utilisent TLS (HTTPS). Les données au repos sont chiffrées avec AES-256."
+        },
+        "backups": {
+          "q": "Nous protégeons les sauvegardes de données par chiffrement",
+          "a": "Les sauvegardes sont chiffrées et conservées dans des environnements à accès restreint."
+        },
+        "test_prod": {
+          "q": "Nous séparons les données de test des données de production",
+          "a": "Les environnements de développement et de test sont isolés de la production et n'utilisent pas de données réelles des marchands."
+        },
+        "dlp": {
+          "q": "Nous avons une stratégie de prévention de la perte de données",
+          "a": "Nous utilisons des sauvegardes régulières, de la redondance et des contrôles d'accès pour prévenir la perte et l'exfiltration des données."
+        },
+        "access_log": {
+          "q": "Nous enregistrons l'accès aux données personnelles",
+          "a": "Tous les accès aux données personnelles sont enregistrés et surveillés au moyen de journaux d'audit."
+        },
+        "incident": {
+          "q": "Nous avons une politique de réponse aux incidents de sécurité",
+          "a": "Nous disposons d'une procédure documentée de réponse aux incidents couvrant le confinement, l'évaluation et la notification rapide aux marchands et aux autorités compétentes, conformément à nos obligations légales."
+        }
+      }
+    }
+  },
+  "contact": {
+    "title": "Des questions sur la confidentialité ?",
+    "body": "Pour toute demande relative à la protection des données, vous pouvez nous contacter à l'adresse <a>{{email}}</a>.",
+    "email": "privacy@eprpackreport.com"
+  }
+}
