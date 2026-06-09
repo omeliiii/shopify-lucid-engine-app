@@ -135,7 +135,7 @@ export default function Reports() {
   }, [loadData]);
 
   useEffect(() => {
-    apiFetch('/notifications/all/read', { method: 'POST' }).catch(() => {});
+    apiFetch('/notifications/readAll', { method: 'POST' }).catch(() => { });
   }, []);
 
   const handleGenerate = async () => {
