@@ -137,6 +137,18 @@ export default function BillingStart() {
     setCouponError(null);
   };
 
+  const couponDurationNote = (coupon: ValidCoupon): string => {
+    if (coupon.durationLimitIntervals === null) {
+      return t('billing.plan_selection.coupon_duration_forever');
+    }
+    if (coupon.durationLimitIntervals === 1) {
+      return t('billing.plan_selection.coupon_duration_once');
+    }
+    return t('billing.plan_selection.coupon_duration_years', {
+      years: coupon.durationLimitIntervals,
+    });
+  };
+
   const renderPrice = (base: number, discounted: number | undefined, unit: string) => (
     <InlineStack gap="200" blockAlign="baseline">
       {discounted !== undefined ? (
@@ -215,10 +227,17 @@ export default function BillingStart() {
             />
             {appliedCoupon !== null && (
               <Banner tone="success">
-                {t('billing.plan_selection.coupon_applied', {
-                  code: appliedCoupon.code,
-                  percent: appliedCoupon.discountPercent,
-                })}
+                <BlockStack gap="050">
+                  <Text as="span">
+                    {t('billing.plan_selection.coupon_applied', {
+                      code: appliedCoupon.code,
+                      percent: appliedCoupon.discountPercent,
+                    })}
+                  </Text>
+                  <Text as="span" tone="subdued" variant="bodySm">
+                    {couponDurationNote(appliedCoupon)}
+                  </Text>
+                </BlockStack>
               </Banner>
             )}
           </BlockStack>

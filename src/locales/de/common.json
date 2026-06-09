@@ -182,7 +182,10 @@
       "coupon_apply": "Anwenden",
       "coupon_remove": "Entfernen",
       "coupon_applied": "Gutschein {{code}} angewendet — {{percent}}% Rabatt.",
-      "coupon_invalid": "Dieser Gutscheincode ist ungültig."
+      "coupon_invalid": "Dieser Gutscheincode ist ungültig.",
+      "coupon_duration_once": "Der Rabatt gilt nur für deine erste Zahlung.",
+      "coupon_duration_forever": "Der Rabatt gilt für jede Verlängerung.",
+      "coupon_duration_years": "Der Rabatt gilt für die ersten {{years}} Jahre."
     },
     "plans": {
       "one_country": {

@@ -182,7 +182,10 @@
       "coupon_apply": "Apply",
       "coupon_remove": "Remove",
       "coupon_applied": "Coupon {{code}} applied — {{percent}}% off.",
-      "coupon_invalid": "This coupon code isn't valid."
+      "coupon_invalid": "This coupon code isn't valid.",
+      "coupon_duration_once": "Discount applies to your first payment only.",
+      "coupon_duration_forever": "Discount applies to every renewal.",
+      "coupon_duration_years": "Discount applies for the first {{years}} years."
     },
     "plans": {
       "one_country": {

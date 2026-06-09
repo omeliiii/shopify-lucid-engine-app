@@ -82,6 +82,12 @@ export interface ValidCoupon {
   currency: string;
   plans: Record<PlanType, CouponPricing>;
   addon: CouponPricing;
+  /**
+   * How many annual intervals the discount applies for:
+   * `1` → this payment only, `null` → forever (every renewal),
+   * `5` → this payment plus 4 renewals (5 years total).
+   */
+  durationLimitIntervals: number | null;
 }
 
 export interface InvalidCoupon {
