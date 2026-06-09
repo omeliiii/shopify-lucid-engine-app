@@ -176,7 +176,13 @@
       "country_picker_tooltip": "Wähle zuerst ein Land.",
       "checkout_failed": "Etwas ist schiefgelaufen. Bitte gleich noch einmal versuchen.",
       "no_trial_note": "Deine kostenlose Testphase wurde bereits verwendet – du wirst sofort belastet.",
-      "trial_badge": "{{days}}-tägige Testphase"
+      "trial_badge": "{{days}}-tägige Testphase",
+      "coupon_label": "Hast du einen Gutscheincode?",
+      "coupon_placeholder": "Code eingeben",
+      "coupon_apply": "Anwenden",
+      "coupon_remove": "Entfernen",
+      "coupon_applied": "Gutschein {{code}} angewendet — {{percent}}% Rabatt.",
+      "coupon_invalid": "Dieser Gutscheincode ist ungültig."
     },
     "plans": {
       "one_country": {

@@ -4,6 +4,7 @@ import type {
   BillingSubscription,
   CheckoutResponse,
   ChangeCountryResponse,
+  CouponResponse,
   PlanType,
 } from '../types/billingTypes';
 
@@ -22,15 +23,26 @@ export async function fetchSubscription(): Promise<BillingSubscription> {
 /**
  * POST /billing/checkout — start a new subscription.
  * `selectedCountry` is REQUIRED when `plan === 'ONE_COUNTRY'`.
+ * `couponCode` is optional and applies a discount when valid.
  */
 export async function checkout(
   plan: PlanType,
   selectedCountry?: string,
+  couponCode?: string,
 ): Promise<CheckoutResponse> {
   return apiFetch('/billing/checkout', {
     method: 'POST',
-    body: JSON.stringify({ plan, ...(selectedCountry ? { selectedCountry } : {}) }),
+    body: JSON.stringify({
+      plan,
+      ...(selectedCountry ? { selectedCountry } : {}),
+      ...(couponCode ? { couponCode } : {}),
+    }),
   });
+}
+
+/** GET /billing/coupon?code=XXX — validate a coupon and get discounted pricing. */
+export async function fetchCoupon(code: string): Promise<CouponResponse> {
+  return apiFetch(`/billing/coupon?code=${encodeURIComponent(code)}`);
 }
 
 /** POST /billing/upgrade — upgrade One Country → Multi Country. */

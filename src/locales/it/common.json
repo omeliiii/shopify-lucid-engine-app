@@ -176,7 +176,13 @@
       "country_picker_tooltip": "Scegli prima un paese.",
       "checkout_failed": "Si è verificato un errore. Riprova tra poco.",
       "no_trial_note": "La tua prova gratuita è già stata utilizzata: l'addebito sarà immediato.",
-      "trial_badge": "Prova di {{days}} giorni"
+      "trial_badge": "Prova di {{days}} giorni",
+      "coupon_label": "Hai un codice coupon?",
+      "coupon_placeholder": "Inserisci il codice",
+      "coupon_apply": "Applica",
+      "coupon_remove": "Rimuovi",
+      "coupon_applied": "Coupon {{code}} applicato — {{percent}}% di sconto.",
+      "coupon_invalid": "Questo codice coupon non è valido."
     },
     "plans": {
       "one_country": {

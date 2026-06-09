@@ -5,6 +5,7 @@ import type {
   BillingSubscription,
   PlanType,
   CatalogPlan,
+  CouponResponse,
 } from '../types/billingTypes';
 import {
   fetchCatalog,
@@ -15,6 +16,7 @@ import {
   changeSelectedCountry,
   cancelSubscription,
   endTrial,
+  fetchCoupon,
 } from '../utils/billingApi';
 
 // ── Helpers: App Bridge redirect ───────────────────────────────────────────────
@@ -50,7 +52,14 @@ interface BillingContextValue {
   refreshSubscription: () => Promise<void>;
 
   /** Start checkout flow → redirect to Shopify. */
-  redirectToCheckout: (plan: PlanType, selectedCountry?: string) => Promise<void>;
+  redirectToCheckout: (
+    plan: PlanType,
+    selectedCountry?: string,
+    couponCode?: string,
+  ) => Promise<void>;
+
+  /** Validate a coupon code and return its discounted pricing. */
+  validateCoupon: (code: string) => Promise<CouponResponse>;
 
   /** Upgrade One → Multi → redirect to Shopify. */
   redirectToUpgrade: () => Promise<void>;
@@ -124,10 +133,15 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Actions ──
-  const redirectToCheckout = useCallback(async (plan: PlanType, selectedCountry?: string) => {
-    const { confirmationUrl } = await checkout(plan, selectedCountry);
-    redirectTopLevel(confirmationUrl);
-  }, []);
+  const redirectToCheckout = useCallback(
+    async (plan: PlanType, selectedCountry?: string, couponCode?: string) => {
+      const { confirmationUrl } = await checkout(plan, selectedCountry, couponCode);
+      redirectTopLevel(confirmationUrl);
+    },
+    [],
+  );
+
+  const validateCoupon = useCallback((code: string) => fetchCoupon(code), []);
 
   const redirectToUpgrade = useCallback(async () => {
     const { confirmationUrl } = await upgrade();
@@ -177,6 +191,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       isPaywallRequired,
       refreshSubscription,
       redirectToCheckout,
+      validateCoupon,
       redirectToUpgrade,
       redirectToAddon,
       changeCountry,
@@ -186,7 +201,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     }),
     [
       catalog, subscription, loading, error, isPaywallRequired,
-      refreshSubscription, redirectToCheckout, redirectToUpgrade,
+      refreshSubscription, redirectToCheckout, validateCoupon, redirectToUpgrade,
       redirectToAddon, changeCountry, cancel, redirectToEndTrial, getPlan,
     ],
   );

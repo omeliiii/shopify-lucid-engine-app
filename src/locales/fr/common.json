@@ -176,7 +176,13 @@
       "country_picker_tooltip": "Choisis d'abord un pays.",
       "checkout_failed": "Une erreur est survenue. Réessaie dans un instant.",
       "no_trial_note": "Ton essai gratuit a déjà été utilisé — le paiement sera immédiat.",
-      "trial_badge": "Essai de {{days}} jours"
+      "trial_badge": "Essai de {{days}} jours",
+      "coupon_label": "Vous avez un code promo ?",
+      "coupon_placeholder": "Saisir le code",
+      "coupon_apply": "Appliquer",
+      "coupon_remove": "Retirer",
+      "coupon_applied": "Code promo {{code}} appliqué — {{percent}} % de réduction.",
+      "coupon_invalid": "Ce code promo n'est pas valide."
     },
     "plans": {
       "one_country": {

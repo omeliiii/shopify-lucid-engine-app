@@ -68,6 +68,30 @@ export interface CheckoutResponse {
   confirmationUrl: string;
 }
 
+// ── Coupons ──────────────────────────────────────────────────────────────────
+
+export interface CouponPricing {
+  amount: number;
+  discountedAmount: number;
+}
+
+export interface ValidCoupon {
+  code: string;
+  valid: true;
+  discountPercent: number;
+  currency: string;
+  plans: Record<PlanType, CouponPricing>;
+  addon: CouponPricing;
+}
+
+export interface InvalidCoupon {
+  code: string;
+  valid: false;
+  reason?: string;
+}
+
+export type CouponResponse = ValidCoupon | InvalidCoupon;
+
 export interface ChangeCountryResponse {
   selectedCountry: string;
   selectedCountryLockedAt: string | null;

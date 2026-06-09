@@ -12,6 +12,7 @@ import {
   Banner,
   Box,
   Tooltip,
+  TextField,
   SkeletonPage,
   SkeletonBodyText,
   Layout,
@@ -19,7 +20,7 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 import { useBilling } from '../contexts/BillingProvider';
 import { countryOptions } from '../utils/countries';
-import type { PlanType } from '../types/billingTypes';
+import type { PlanType, ValidCoupon } from '../types/billingTypes';
 
 // ── Shared card box style ──────────────────────────────────────────────────────
 
@@ -48,12 +49,17 @@ const cardStyle = (gradient: boolean): React.CSSProperties => ({
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function BillingStart() {
-  const { catalog, subscription, loading, redirectToCheckout } = useBilling();
+  const { catalog, subscription, loading, redirectToCheckout, validateCoupon } = useBilling();
   const { t } = useTranslation('common');
 
   const [selectedCountry, setSelectedCountry] = useState('');
   const [submitting, setSubmitting] = useState<PlanType | null>(null);
   const [countryPopoverActive, setCountryPopoverActive] = useState(false);
+
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<ValidCoupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   if (loading || !catalog) {
     return (
@@ -75,12 +81,22 @@ export default function BillingStart() {
   const multiCountryPlan = catalog.plans.find((p) => p.plan === 'MULTI_COUNTRY');
   const countries = countryOptions(subscription?.availableCountries ?? ['DE', 'IT', 'FR']);
   const currency = catalog.currency === 'USD' ? '$' : catalog.currency;
-  const addonAmount = catalog.addon.amount;
+
+  // Coupon-aware pricing — fall back to catalog amounts when no coupon applied.
+  const oneCountryBase = oneCountryPlan?.amount ?? 179;
+  const multiCountryBase = multiCountryPlan?.amount ?? 329;
+  const oneCountryDiscounted = appliedCoupon?.plans.ONE_COUNTRY.discountedAmount;
+  const multiCountryDiscounted = appliedCoupon?.plans.MULTI_COUNTRY.discountedAmount;
+  const addonAmount = appliedCoupon ? appliedCoupon.addon.discountedAmount : catalog.addon.amount;
 
   const handleCheckout = async (plan: PlanType) => {
     setSubmitting(plan);
     try {
-      await redirectToCheckout(plan, plan === 'ONE_COUNTRY' ? selectedCountry : undefined);
+      await redirectToCheckout(
+        plan,
+        plan === 'ONE_COUNTRY' ? selectedCountry : undefined,
+        appliedCoupon?.code,
+      );
     } catch (e) {
       console.error('[BillingStart] checkout failed', e);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,6 +108,50 @@ export default function BillingStart() {
       setSubmitting(null);
     }
   };
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const res = await validateCoupon(code);
+      if (res.valid) {
+        setAppliedCoupon(res);
+      } else {
+        setAppliedCoupon(null);
+        setCouponError(res.reason ?? t('billing.plan_selection.coupon_invalid'));
+      }
+    } catch (e) {
+      console.error('[BillingStart] coupon validation failed', e);
+      setAppliedCoupon(null);
+      setCouponError(t('billing.plan_selection.coupon_invalid'));
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError(null);
+  };
+
+  const renderPrice = (base: number, discounted: number | undefined, unit: string) => (
+    <InlineStack gap="200" blockAlign="baseline">
+      {discounted !== undefined ? (
+        <>
+          <Text as="span" variant="heading2xl">{`${currency}${discounted}`}</Text>
+          <Text as="span" tone="subdued" textDecorationLine="line-through">
+            {`${currency}${base}`}
+          </Text>
+        </>
+      ) : (
+        <Text as="span" variant="heading2xl">{`${currency}${base}`}</Text>
+      )}
+      <Text as="span" tone="subdued">{unit}</Text>
+    </InlineStack>
+  );
 
   const ctaLabel = showTrialBadge
     ? t('billing.plan_selection.cta_start_trial', { days: trialDays })
@@ -123,6 +183,47 @@ export default function BillingStart() {
           </Banner>
         )}
 
+        {/* ── Coupon code (optional) ── */}
+        <Box maxWidth="420px">
+          <BlockStack gap="200">
+            <TextField
+              label={t('billing.plan_selection.coupon_label')}
+              value={couponInput}
+              onChange={(v) => {
+                setCouponInput(v);
+                if (couponError) setCouponError(null);
+              }}
+              placeholder={t('billing.plan_selection.coupon_placeholder')}
+              autoComplete="off"
+              disabled={appliedCoupon !== null || couponLoading}
+              error={couponError ?? undefined}
+              connectedRight={
+                appliedCoupon !== null ? (
+                  <Button onClick={handleRemoveCoupon}>
+                    {t('billing.plan_selection.coupon_remove')}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleApplyCoupon}
+                    loading={couponLoading}
+                    disabled={!couponInput.trim()}
+                  >
+                    {t('billing.plan_selection.coupon_apply')}
+                  </Button>
+                )
+              }
+            />
+            {appliedCoupon !== null && (
+              <Banner tone="success">
+                {t('billing.plan_selection.coupon_applied', {
+                  code: appliedCoupon.code,
+                  percent: appliedCoupon.discountPercent,
+                })}
+              </Banner>
+            )}
+          </BlockStack>
+        </Box>
+
         {/* Equal-height two-column grid */}
         <div
           style={{
@@ -142,12 +243,11 @@ export default function BillingStart() {
                 </div>
               </BlockStack>
 
-              <InlineStack gap="100" blockAlign="baseline">
-                <Text as="span" variant="heading2xl">
-                  {`${currency}${oneCountryPlan?.amount ?? 179}`}
-                </Text>
-                <Text as="span" tone="subdued">{t('billing.plans.one_country.amount_unit')}</Text>
-              </InlineStack>
+              {renderPrice(
+                oneCountryBase,
+                oneCountryDiscounted,
+                t('billing.plans.one_country.amount_unit'),
+              )}
 
               <Divider />
 
@@ -231,12 +331,11 @@ export default function BillingStart() {
                 </div>
               </BlockStack>
 
-              <InlineStack gap="100" blockAlign="baseline">
-                <Text as="span" variant="heading2xl">
-                  {`${currency}${multiCountryPlan?.amount ?? 329}`}
-                </Text>
-                <Text as="span" tone="subdued">{t('billing.plans.multi_country.amount_unit')}</Text>
-              </InlineStack>
+              {renderPrice(
+                multiCountryBase,
+                multiCountryDiscounted,
+                t('billing.plans.multi_country.amount_unit'),
+              )}
 
               <Divider />
 

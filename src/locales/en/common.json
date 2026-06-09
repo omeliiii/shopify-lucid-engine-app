@@ -176,7 +176,13 @@
       "country_picker_tooltip": "Pick a country first.",
       "checkout_failed": "Something went wrong. Please try again in a moment.",
       "no_trial_note": "Your free trial has already been used — you'll be charged right away.",
-      "trial_badge": "{{days}}-day trial"
+      "trial_badge": "{{days}}-day trial",
+      "coupon_label": "Have a coupon code?",
+      "coupon_placeholder": "Enter code",
+      "coupon_apply": "Apply",
+      "coupon_remove": "Remove",
+      "coupon_applied": "Coupon {{code}} applied — {{percent}}% off.",
+      "coupon_invalid": "This coupon code isn't valid."
     },
     "plans": {
       "one_country": {
