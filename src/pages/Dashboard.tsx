@@ -545,7 +545,7 @@ export default function Dashboard() {
         {/* KPI Section */}
         <DashboardCard
           title={t('kpis.weight_by_country.title')}
-          value={<>{kpis?.totalWeightKg} {t('kpis.weight_by_country.value_unit')}</>}
+          value={<>{kpis?.totalWeightKg.toFixed(2)} {t('kpis.weight_by_country.value_unit')}</>}
         >
           {kpis?.weightByCountry ? (
             <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 100, height: 200 }}>
