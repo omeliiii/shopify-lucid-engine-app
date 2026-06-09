@@ -174,11 +174,27 @@ export default function Reports() {
     .map((m) => ({ agnosticMaterial: m, weightKg: Number.parseFloat(manualQty[m]) }))
     .filter((q) => q.weightKg >= 0 && !Number.isNaN(q.weightKg));
 
-  // Block submission only in the one case the backend rejects outright:
-  // a FORECAST sourced from manual quantities must carry at least one entry.
-  const canSubmit = reportKind !== 'FORECAST'
-    || forecastSource !== 'MANUAL'
-    || manualEntries.length > 0;
+  // A FORECAST (preventivo) estimates an upcoming period, so its range must be in the future.
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const forecastDatesInFuture = reportKind !== 'FORECAST' || new Date(startDate) >= startOfToday;
+
+  // Switching to FORECAST: if the current range is in the past, default to the next full year
+  // (a clean Planmengenmeldung period) so the picker doesn't open on disabled dates.
+  const handleReportKindChange = (kind: ReportKind) => {
+    setReportKind(kind);
+    if (kind === 'FORECAST' && new Date(startDate) < startOfToday) {
+      const nextYear = new Date().getFullYear() + 1;
+      setStartDate(`${nextYear}-01-01`);
+      setEndDate(`${nextYear}-12-31`);
+    }
+  };
+
+  // Block submission when the backend would reject outright:
+  //  - a manual-sourced FORECAST must carry at least one quantity;
+  //  - a FORECAST must target a future period.
+  const canSubmit = forecastDatesInFuture
+    && (reportKind !== 'FORECAST' || forecastSource !== 'MANUAL' || manualEntries.length > 0);
 
   const handleGenerate = async () => {
     if (!canSubmit) return;
@@ -512,12 +528,27 @@ export default function Reports() {
                   { label: t('report_kind.FORECAST'), value: 'FORECAST' },
                 ]}
                 value={reportKind}
-                onChange={(val) => setReportKind(val as ReportKind)}
+                onChange={(val) => handleReportKindChange(val as ReportKind)}
               />
               <FormLayout.Group>
-                <PolarisDatePicker label={t('manual_modal.form.start_date_label')} value={startDate} onChange={setStartDate} />
-                <PolarisDatePicker label={t('manual_modal.form.end_date_label')} value={endDate} onChange={setEndDate} />
+                <PolarisDatePicker
+                  label={t('manual_modal.form.start_date_label')}
+                  value={startDate}
+                  onChange={setStartDate}
+                  disableBefore={reportKind === 'FORECAST' ? startOfToday : undefined}
+                />
+                <PolarisDatePicker
+                  label={t('manual_modal.form.end_date_label')}
+                  value={endDate}
+                  onChange={setEndDate}
+                  disableBefore={reportKind === 'FORECAST' ? startOfToday : undefined}
+                />
               </FormLayout.Group>
+              {!forecastDatesInFuture && (
+                <Text as="p" tone="critical" variant="bodySm">
+                  {t('manual_modal.form.forecast_dates_future')}
+                </Text>
+              )}
 
               {reportKind === 'FORECAST' && (
                 <>

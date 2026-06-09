@@ -77,6 +77,7 @@
       "growth_help": "Es. 10 = +10% rispetto alle quantità dell'anno precedente. Lascia vuoto per usarle invariate.",
       "manual_quantities_label": "Quantità previste per materiale (kg)",
       "manual_quantities_required": "Inserisci almeno una quantità per generare il preventivo.",
+      "forecast_dates_future": "Per un preventivo le date devono essere nel futuro.",
       "forecast_note": "Il preventivo (Planmengenmeldung) stima le quantità del periodo selezionato. Senza quantità manuali, la base è l'anno chiuso precedente.",
       "footer_note": "Generiamo i report automaticamente alla cadenza configurata per ogni paese. Usa questo form solo per backfill, test o periodi personalizzati."
     }

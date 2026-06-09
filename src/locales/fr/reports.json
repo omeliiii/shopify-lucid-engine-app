@@ -77,6 +77,7 @@
       "growth_help": "Ex. 10 = +10 % par rapport aux quantités de l'an dernier. Laisse vide pour les conserver telles quelles.",
       "manual_quantities_label": "Quantités prévues par matériau (kg)",
       "manual_quantities_required": "Saisis au moins une quantité pour générer le prévisionnel.",
+      "forecast_dates_future": "Un prévisionnel doit porter sur des dates dans le futur.",
       "forecast_note": "Le prévisionnel estime les quantités de la période sélectionnée. Sans quantités manuelles, l'année clôturée précédente sert de base.",
       "footer_note": "Les rapports sont générés automatiquement à la cadence configurée. N'utilise ce formulaire que pour des rattrapages, des tests ou des périodes personnalisées."
     }

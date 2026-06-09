@@ -14,9 +14,11 @@ interface PolarisDatePickerProps {
   label: string;
   value: string;
   onChange: (val: string) => void;
+  /** When set, dates before this day are greyed out and unselectable (e.g. to force future-only ranges). */
+  disableBefore?: Date;
 }
 
-export function PolarisDatePicker({ label, value, onChange }: PolarisDatePickerProps) {
+export function PolarisDatePicker({ label, value, onChange, disableBefore }: PolarisDatePickerProps) {
   const [popoverActive, setPopoverActive] = useState(false);
   const { t, i18n } = useTranslation('common');
   const [date, setDate] = useState({
@@ -70,6 +72,7 @@ export function PolarisDatePicker({ label, value, onChange }: PolarisDatePickerP
             onChange={handleDateSelection}
             onMonthChange={(month, year) => setDate({ month, year })}
             selected={value ? new Date(value) : undefined}
+            disableDatesBefore={disableBefore}
           />
         </Box>
       </Popover>

@@ -77,6 +77,7 @@
       "growth_help": "Z. B. 10 = +10 % gegenüber den Vorjahresmengen. Leer lassen, um sie unverändert zu übernehmen.",
       "manual_quantities_label": "Geplante Mengen je Material (kg)",
       "manual_quantities_required": "Gib mindestens eine Menge ein, um die Planmengenmeldung zu erstellen.",
+      "forecast_dates_future": "Eine Planmengenmeldung muss einen Zeitraum in der Zukunft betreffen.",
       "forecast_note": "Die Planmengenmeldung schätzt die Mengen für den gewählten Zeitraum. Ohne manuelle Mengen dient das letzte abgeschlossene Jahr als Grundlage.",
       "footer_note": "Wir erstellen Berichte automatisch im konfigurierten Takt. Nutze dieses Formular nur für Nachträge, Tests oder eigene Zeiträume."
     }
