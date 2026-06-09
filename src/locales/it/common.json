@@ -183,6 +183,11 @@
       "coupon_remove": "Rimuovi",
       "coupon_applied": "Coupon {{code}} applicato — {{percent}}% di sconto.",
       "coupon_invalid": "Questo codice coupon non è valido.",
+      "coupon_error_not_found": "Codice coupon non trovato.",
+      "coupon_error_not_yet_valid": "Questo coupon non è ancora valido.",
+      "coupon_error_expired": "Questo coupon è scaduto.",
+      "coupon_error_wrong_merchant": "Questo coupon non è valido per il tuo negozio.",
+      "coupon_error_usage_limit": "Questo coupon ha raggiunto il limite di utilizzi.",
       "coupon_duration_once": "Lo sconto si applica solo al primo pagamento.",
       "coupon_duration_forever": "Lo sconto si applica a ogni rinnovo.",
       "coupon_duration_years": "Lo sconto si applica per i primi {{years}} anni."

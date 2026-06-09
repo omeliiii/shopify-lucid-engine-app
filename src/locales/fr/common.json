@@ -183,6 +183,11 @@
       "coupon_remove": "Retirer",
       "coupon_applied": "Code promo {{code}} appliqué — {{percent}} % de réduction.",
       "coupon_invalid": "Ce code promo n'est pas valide.",
+      "coupon_error_not_found": "Code promo introuvable.",
+      "coupon_error_not_yet_valid": "Ce code promo n'est pas encore valide.",
+      "coupon_error_expired": "Ce code promo a expiré.",
+      "coupon_error_wrong_merchant": "Ce code promo n'est pas valide pour votre boutique.",
+      "coupon_error_usage_limit": "Ce code promo a atteint sa limite d'utilisation.",
       "coupon_duration_once": "La réduction s'applique uniquement à votre premier paiement.",
       "coupon_duration_forever": "La réduction s'applique à chaque renouvellement.",
       "coupon_duration_years": "La réduction s'applique pendant les {{years}} premières années."

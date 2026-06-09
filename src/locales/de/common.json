@@ -183,6 +183,11 @@
       "coupon_remove": "Entfernen",
       "coupon_applied": "Gutschein {{code}} angewendet — {{percent}}% Rabatt.",
       "coupon_invalid": "Dieser Gutscheincode ist ungültig.",
+      "coupon_error_not_found": "Gutscheincode nicht gefunden.",
+      "coupon_error_not_yet_valid": "Dieser Gutschein ist noch nicht gültig.",
+      "coupon_error_expired": "Dieser Gutschein ist abgelaufen.",
+      "coupon_error_wrong_merchant": "Dieser Gutschein ist für deinen Shop nicht gültig.",
+      "coupon_error_usage_limit": "Dieser Gutschein hat sein Nutzungslimit erreicht.",
       "coupon_duration_once": "Der Rabatt gilt nur für deine erste Zahlung.",
       "coupon_duration_forever": "Der Rabatt gilt für jede Verlängerung.",
       "coupon_duration_years": "Der Rabatt gilt für die ersten {{years}} Jahre."

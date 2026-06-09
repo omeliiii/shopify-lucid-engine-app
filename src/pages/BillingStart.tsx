@@ -109,6 +109,24 @@ export default function BillingStart() {
     }
   };
 
+  // Maps the backend's English reason strings to localized messages.
+  const couponErrorMessage = (reason?: string): string => {
+    switch (reason) {
+      case 'Coupon code not found':
+        return t('billing.plan_selection.coupon_error_not_found');
+      case 'Coupon is not yet valid':
+        return t('billing.plan_selection.coupon_error_not_yet_valid');
+      case 'Coupon has expired':
+        return t('billing.plan_selection.coupon_error_expired');
+      case 'Coupon is not valid for this merchant':
+        return t('billing.plan_selection.coupon_error_wrong_merchant');
+      case 'Coupon usage limit reached':
+        return t('billing.plan_selection.coupon_error_usage_limit');
+      default:
+        return t('billing.plan_selection.coupon_invalid');
+    }
+  };
+
   const handleApplyCoupon = async () => {
     const code = couponInput.trim();
     if (!code) return;
@@ -120,7 +138,7 @@ export default function BillingStart() {
         setAppliedCoupon(res);
       } else {
         setAppliedCoupon(null);
-        setCouponError(res.reason ?? t('billing.plan_selection.coupon_invalid'));
+        setCouponError(couponErrorMessage(res.reason));
       }
     } catch (e) {
       console.error('[BillingStart] coupon validation failed', e);
