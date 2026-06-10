@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { EVENTS, ORIGIN, useJoyride, type Step } from 'react-joyride';
+import { EVENTS, ORIGIN, useJoyride, type Step, type Controls } from 'react-joyride';
 import { Modal, Text, BlockStack, Button, InlineStack } from '@shopify/polaris';
 import { useTour, nextStage } from '../contexts/TourProvider';
 import type { TourStage } from '../utils/tourApi';
@@ -408,6 +408,14 @@ export default function Tour() {
 
   const [confirmDismiss, setConfirmDismiss] = useState(false);
 
+  // The Joyride overlay/tooltip sit at a very high z-index (see options below),
+  // well above the Polaris Modal cap. If we left the tour running, the
+  // confirmation Modal would render *behind* the overlay — invisible and
+  // unclickable. So we pause the tour while confirming and resume it (at the
+  // same step) if the user cancels.
+  const controlsRef = useRef<Controls | null>(null);
+  const dismissResumeIndexRef = useRef(0);
+
   const todayLabel = useMemo(() => {
     const locale = i18n.language || 'it';
     return new Date().toLocaleDateString(locale, {
@@ -416,6 +424,11 @@ export default function Tour() {
   }, [i18n.language]);
 
   const handleDismissForever = useCallback(() => {
+    const c = controlsRef.current;
+    if (c) {
+      dismissResumeIndexRef.current = c.info().index;
+      c.stop();
+    }
     setConfirmDismiss(true);
   }, []);
 
@@ -426,6 +439,7 @@ export default function Tour() {
 
   const handleCancelDismiss = useCallback(() => {
     setConfirmDismiss(false);
+    controlsRef.current?.start(dismissResumeIndexRef.current);
   }, []);
 
   // Build steps for the current stage
@@ -465,6 +479,9 @@ export default function Tour() {
       disableFocusTrap: true,
     },
   });
+
+  // Expose controls to the dismiss handlers (defined before useJoyride).
+  controlsRef.current = controls;
 
   // Navigate to the stage's route before showing the tour
   useEffect(() => {
