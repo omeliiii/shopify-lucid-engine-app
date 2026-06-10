@@ -66,8 +66,15 @@ function App() {
         <Tour />
         <MainLayout>
           <Routes>
-            {/* Billing pages — always accessible */}
+            {/* Billing and privacy pages — always accessible */}
             <Route path="/billing/start" element={<BillingStart />} />
+
+            <Route
+              path="/privacy"
+              element={
+                <Privacy />
+              }
+            />
 
             {/* Protected pages — require active subscription */}
             <Route
@@ -112,14 +119,6 @@ function App() {
                 <PaywallGate><Settings /></PaywallGate>
               }
             />
-            <Route
-              path="/privacy"
-              element={
-                <PaywallGate><Privacy /></PaywallGate>
-              }
-            />
-            {/* Legacy route — keep old links working */}
-            <Route path="/subscription" element={<Navigate to="/settings" replace />} />
           </Routes>
         </MainLayout>
       </TourProvider>
