@@ -506,7 +506,7 @@ export default function Dashboard() {
         {/* Manual re-sync entry point once setup is complete — lets merchants recover
             orders missed while the app was uninstalled (backfill is idempotent). */}
         {setupComplete && backfillState === 'idle' && (
-          <Layout.Section>
+          <Layout.Section variant="fullWidth">
             <Banner
               tone="info"
               title={t('backfill.banners.resync_title')}
