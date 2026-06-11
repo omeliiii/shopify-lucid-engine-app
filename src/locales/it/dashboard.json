@@ -76,7 +76,10 @@
       "completed_title": "Importazione completata",
       "failed_title": "Importazione non riuscita",
       "failed_body": "L'importazione non è andata a buon fine: {{error}}. Riprova quando vuoi.",
-      "network_warning": "Connessione persa, riprovo automaticamente…"
+      "network_warning": "Connessione persa, riprovo automaticamente…",
+      "resync_title": "Sincronizza ordini recenti",
+      "resync_body": "Hai reinstallato l'app o ricevuto ordini mentre era disattivata? Rilancia l'importazione per recuperare gli ordini mancanti — quelli già salvati vengono saltati automaticamente.",
+      "resync_cta": "Sincronizza ordini"
     },
     "toasts": {
       "already_running": "L'importazione è già in corso, segui l'avanzamento qui sotto.",

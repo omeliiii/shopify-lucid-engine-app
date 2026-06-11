@@ -76,7 +76,10 @@
       "completed_title": "Import terminé",
       "failed_title": "Import non abouti",
       "failed_body": "L'import ne s'est pas terminé : {{error}}. Tu peux réessayer quand tu veux.",
-      "network_warning": "Connexion perdue, nouvelle tentative en cours…"
+      "network_warning": "Connexion perdue, nouvelle tentative en cours…",
+      "resync_title": "Synchroniser les commandes récentes",
+      "resync_body": "Vous avez réinstallé l'app ou reçu des commandes pendant qu'elle était désactivée ? Relancez l'import pour récupérer les commandes manquées — les commandes déjà enregistrées sont ignorées automatiquement.",
+      "resync_cta": "Synchroniser les commandes"
     },
     "toasts": {
       "already_running": "L'import est déjà en cours — suis l'avancement ci-dessous.",

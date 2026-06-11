@@ -503,6 +503,24 @@ export default function Dashboard() {
           </Layout.Section>
         )}
 
+        {/* Manual re-sync entry point once setup is complete — lets merchants recover
+            orders missed while the app was uninstalled (backfill is idempotent). */}
+        {setupComplete && backfillState === 'idle' && (
+          <Layout.Section>
+            <Banner
+              tone="info"
+              title={t('backfill.banners.resync_title')}
+              action={{
+                content: t('backfill.banners.resync_cta'),
+                onAction: handleStartBackfill,
+                loading: backfillStarting,
+              }}
+            >
+              <p>{t('backfill.banners.resync_body')}</p>
+            </Banner>
+          </Layout.Section>
+        )}
+
         {/* Compact "in progress" banner when backfill is running and checklist is hidden */}
         {setupComplete && backfillState === 'running' && (
           <Layout.Section>

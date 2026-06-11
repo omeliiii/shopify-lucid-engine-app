@@ -76,7 +76,10 @@
       "completed_title": "Import complete",
       "failed_title": "Import didn't finish",
       "failed_body": "The import didn't complete: {{error}}. You can try again whenever you like.",
-      "network_warning": "Connection lost, retrying automatically…"
+      "network_warning": "Connection lost, retrying automatically…",
+      "resync_title": "Sync recent orders",
+      "resync_body": "Reinstalled the app or received orders while it was off? Re-run the import to pull in any orders that were missed — orders already saved are skipped automatically.",
+      "resync_cta": "Sync orders"
     },
     "toasts": {
       "already_running": "Import is already running — track the progress below.",

@@ -76,7 +76,10 @@
       "completed_title": "Import abgeschlossen",
       "failed_title": "Import nicht erfolgreich",
       "failed_body": "Der Import konnte nicht abgeschlossen werden: {{error}}. Du kannst es jederzeit erneut versuchen.",
-      "network_warning": "Verbindung verloren, wir versuchen es erneut…"
+      "network_warning": "Verbindung verloren, wir versuchen es erneut…",
+      "resync_title": "Aktuelle Bestellungen synchronisieren",
+      "resync_body": "App neu installiert oder Bestellungen erhalten, während sie deaktiviert war? Starte den Import erneut, um fehlende Bestellungen nachzuladen — bereits gespeicherte Bestellungen werden automatisch übersprungen.",
+      "resync_cta": "Bestellungen synchronisieren"
     },
     "toasts": {
       "already_running": "Der Import läuft bereits – den Fortschritt siehst du unten.",
