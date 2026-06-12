@@ -18,6 +18,7 @@ import {
   TextField,
   SkeletonPage,
   SkeletonBodyText,
+  ContextualSaveBar,
 } from '@shopify/polaris';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRightIcon } from '@shopify/polaris-icons';
@@ -264,6 +265,10 @@ export default function Settings() {
     }
   };
 
+  const handleDiscardCompliance = () => {
+    setComplianceForm(complianceOriginal);
+  };
+
   const handleSaveCompliance = async () => {
     if (!complianceForm || !complianceOriginal) return;
     // Only send fields whose trimmed value actually changed.
@@ -310,6 +315,14 @@ export default function Settings() {
   };
 
   return (
+    <>
+    {complianceDirty && !complianceLoading && (
+      <ContextualSaveBar
+        message={t('actions.save_changes')}
+        saveAction={{ onAction: handleSaveCompliance, loading: savingCompliance }}
+        discardAction={{ onAction: handleDiscardCompliance }}
+      />
+    )}
     <Page title={t('settings_page.title')} narrowWidth>
       <Layout>
         {/* ── Header: Plan + Status ── */}
@@ -478,16 +491,6 @@ export default function Settings() {
                       })}
                     />
                   ))}
-                  <Box>
-                    <Button
-                      variant="primary"
-                      loading={savingCompliance}
-                      disabled={!complianceDirty}
-                      onClick={handleSaveCompliance}
-                    >
-                      {t('billing.compliance.save')}
-                    </Button>
-                  </Box>
                 </BlockStack>
               )}
             </BlockStack>
@@ -643,5 +646,6 @@ export default function Settings() {
         </Modal.Section>
       </Modal>
     </Page>
+    </>
   );
 }
