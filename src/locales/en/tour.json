@@ -20,7 +20,8 @@
     },
     "reports": {
       "title": "Your reports, ready to go",
-      "body": "See this \"Reports\" item? Once your setup is done, the app will automatically generate EPR reports ready to upload to each country's portal. You'll also get an email every time a new one is ready."
+      "body": "See this \"Reports\" item? Once your setup is done, the app will automatically generate EPR reports ready to upload to each country's portal. You'll also get an email every time a new one is ready.",
+      "body_mobile": "Tap the menu icon at the top to open the navigation — that's where you'll find \"Reports\". Once your setup is done, the app automatically generates EPR reports ready to upload to each country's portal, and emails you whenever a new one is ready."
     },
     "checklist": {
       "title": "Your mini-checklist",

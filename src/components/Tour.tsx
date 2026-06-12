@@ -52,9 +52,11 @@ interface BuildStepsCtx {
   t: TFn;
   onDismissForever: () => void;
   todayLabel: string;
+  /** On mobile the nav sidebar is collapsed behind the TopBar hamburger. */
+  isMobile: boolean;
 }
 
-function buildWelcomeSteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
+function buildWelcomeSteps({ t, onDismissForever, isMobile }: BuildStepsCtx): Step[] {
   const dismissLabel = t('buttons.dismiss_forever');
   return [
     {
@@ -71,12 +73,16 @@ function buildWelcomeSteps({ t, onDismissForever }: BuildStepsCtx): Step[] {
       skipBeacon: true,
     },
     {
-      target: 'a[href="/reports"]',
-      placement: 'auto',
+      // On desktop the Reports link sits in the always-visible sidebar. On
+      // mobile that sidebar is collapsed off-canvas behind the TopBar
+      // hamburger, so highlight the hamburger instead and tell the user to
+      // open the menu.
+      target: isMobile ? '.Polaris-TopBar__NavigationIcon' : 'a[href="/reports"]',
+      placement: isMobile ? 'bottom' : 'auto',
       content: (
         <StepBody
           title={t('welcome.reports.title')}
-          body={t('welcome.reports.body')}
+          body={t(isMobile ? 'welcome.reports.body_mobile' : 'welcome.reports.body')}
           onDismissForever={onDismissForever}
           dismissLabel={dismissLabel}
         />
@@ -423,6 +429,19 @@ export default function Tour() {
     });
   }, [i18n.language]);
 
+  // Track whether we're below Polaris' navigation breakpoint (md = 48em), the
+  // point at which the Frame collapses the sidebar behind the TopBar hamburger.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 47.9975em)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 47.9975em)');
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   const handleDismissForever = useCallback(() => {
     const c = controlsRef.current;
     if (c) {
@@ -448,8 +467,9 @@ export default function Tour() {
       t: t as TFn,
       onDismissForever: handleDismissForever,
       todayLabel,
+      isMobile,
     }),
-    [stage, t, handleDismissForever, todayLabel],
+    [stage, t, handleDismissForever, todayLabel, isMobile],
   );
 
   // Joyride setup

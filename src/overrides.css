@@ -1,0 +1,11 @@
+/* App-level overrides for Polaris components.
+   Loaded after the Polaris stylesheet in main.tsx so single-class rules win. */
+
+/* Vertically center the mobile nav toggle (hamburger) in the TopBar.
+   Polaris gives __LeftContent `display:flex` but no height, so it collapses
+   to the 36px icon and sits flush to the top of the 56px bar. Stretching it
+   to the full bar height and centering its content fixes the alignment. */
+.Polaris-TopBar__LeftContent {
+  height: var(--pg-top-bar-height);
+  align-items: center;
+}

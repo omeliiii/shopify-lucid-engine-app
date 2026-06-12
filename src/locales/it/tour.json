@@ -20,7 +20,8 @@
     },
     "reports": {
       "title": "I tuoi report, già pronti",
-      "body": "Vedi questa voce \"Report\"? Una volta finita la configurazione, quando sarà il momento, l'app genererà in automatico i report EPR già pronti da caricare sui portali dei vari paesi. Riceverai anche un'email ogni volta che un nuovo report è disponibile."
+      "body": "Vedi questa voce \"Report\"? Una volta finita la configurazione, quando sarà il momento, l'app genererà in automatico i report EPR già pronti da caricare sui portali dei vari paesi. Riceverai anche un'email ogni volta che un nuovo report è disponibile.",
+      "body_mobile": "Tocca l'icona del menu in alto per aprire la navigazione — è lì che trovi la voce \"Report\". Una volta finita la configurazione, l'app genera in automatico i report EPR pronti da caricare sui portali dei vari paesi e ti invia un'email ogni volta che un nuovo report è disponibile."
     },
     "checklist": {
       "title": "La tua mini-checklist",

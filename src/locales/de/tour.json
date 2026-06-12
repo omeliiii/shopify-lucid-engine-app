@@ -20,7 +20,8 @@
     },
     "reports": {
       "title": "Deine Berichte, bereit zum Loslegen",
-      "body": "Siehst du den Punkt \"Berichte\"? Sobald die Einrichtung steht, erstellt die App automatisch EPR-Berichte, die du auf den Portalen der Länder hochladen kannst. Du bekommst auch eine E-Mail, sobald ein neuer Bericht fertig ist."
+      "body": "Siehst du den Punkt \"Berichte\"? Sobald die Einrichtung steht, erstellt die App automatisch EPR-Berichte, die du auf den Portalen der Länder hochladen kannst. Du bekommst auch eine E-Mail, sobald ein neuer Bericht fertig ist.",
+      "body_mobile": "Tippe oben auf das Menü-Symbol, um die Navigation zu öffnen — dort findest du den Punkt \"Berichte\". Sobald die Einrichtung steht, erstellt die App automatisch EPR-Berichte zum Hochladen auf den Länderportalen und schickt dir eine E-Mail, sobald ein neuer Bericht fertig ist."
     },
     "checklist": {
       "title": "Deine Mini-Checkliste",

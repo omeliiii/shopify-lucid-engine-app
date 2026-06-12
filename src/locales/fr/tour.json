@@ -20,7 +20,8 @@
     },
     "reports": {
       "title": "Tes rapports, prêts à partir",
-      "body": "Tu vois cet onglet \"Rapports\" ? Une fois la configuration finie, l'app génère automatiquement les rapports REP prêts à téléverser sur les portails de chaque pays. Tu reçois aussi un e-mail à chaque nouveau rapport disponible."
+      "body": "Tu vois cet onglet \"Rapports\" ? Une fois la configuration finie, l'app génère automatiquement les rapports REP prêts à téléverser sur les portails de chaque pays. Tu reçois aussi un e-mail à chaque nouveau rapport disponible.",
+      "body_mobile": "Touche l'icône de menu en haut pour ouvrir la navigation — c'est là que se trouve l'onglet \"Rapports\". Une fois la configuration finie, l'app génère automatiquement les rapports REP prêts à téléverser sur les portails de chaque pays et t'envoie un e-mail à chaque nouveau rapport disponible."
     },
     "checklist": {
       "title": "Ta mini check-list",
