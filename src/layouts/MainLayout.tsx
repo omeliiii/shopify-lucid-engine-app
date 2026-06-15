@@ -16,6 +16,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const toggleMobileNav = useCallback(() => setMobileNavActive((active) => !active), []);
 
+  // Below Polaris' navigation breakpoint (md = 48em) the Frame collapses the
+  // sidebar and needs the TopBar hamburger. Above it, the sidebar is always
+  // visible — so we drop the TopBar entirely, otherwise an empty dark bar
+  // would sit at the top of every desktop page.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 47.9975em)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 47.9975em)');
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   // Navigate and close the mobile nav overlay so it doesn't linger after
   // tapping a destination.
   const handleNavigate = useCallback(
@@ -103,9 +118,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     </Navigation>
   );
 
-  const topBarMarkup = (
+  // Only mount the TopBar on mobile — on desktop it would render as an empty
+  // dark bar since the hamburger is its only content.
+  const topBarMarkup = isMobile ? (
     <TopBar showNavigationToggle onNavigationToggle={toggleMobileNav} />
-  );
+  ) : undefined;
 
   return (
     <Frame
