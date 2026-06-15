@@ -223,6 +223,8 @@
       "title": "Your subscription",
       "no_plan": "No active plan",
       "renews_on": "Renews on {{date}}",
+      "renews_on_amount": "Renews on {{date}} at {{currency}}{{amount}}/year",
+      "discount_badge": "-{{percent}}%",
       "trial_banner_body": "You're on a free trial until <strong>{{date}}</strong>. Report downloads kick in after the trial ends.",
       "end_trial_cta": "End trial and activate billing",
       "selected_country_title": "Primary country",

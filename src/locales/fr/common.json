@@ -223,6 +223,8 @@
       "title": "Ton abonnement",
       "no_plan": "Aucune offre active",
       "renews_on": "Se renouvelle le {{date}}",
+      "renews_on_amount": "Se renouvelle le {{date}} à {{currency}}{{amount}}/an",
+      "discount_badge": "-{{percent}}%",
       "trial_banner_body": "Tu es en période d'essai jusqu'au <strong>{{date}}</strong>. Les téléchargements de rapports s'activeront à la fin de l'essai.",
       "end_trial_cta": "Terminer l'essai et activer le paiement",
       "selected_country_title": "Pays principal",

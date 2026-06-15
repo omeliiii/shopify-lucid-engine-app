@@ -50,6 +50,8 @@ export interface BillingSubscription {
   addonCountries: string[];
   accessibleCountries: string[];
   availableCountries: string[];
+  /** Active coupon discount, or `null` when no coupon was applied. */
+  discount: SubscriptionDiscount | null;
 }
 
 export interface BillingErrorDetails {
@@ -97,6 +99,32 @@ export interface InvalidCoupon {
 }
 
 export type CouponResponse = ValidCoupon | InvalidCoupon;
+
+/**
+ * Coupon discount currently applied to a subscription. Present on
+ * {@link BillingSubscription.discount} only when the merchant subscribed with a
+ * valid coupon. Field names mirror {@link ValidCoupon}/{@link CouponPricing}:
+ * `amount` is the full plan price (struck-through) and `discountedAmount` the
+ * amount charged for the current period.
+ */
+export interface SubscriptionDiscount extends CouponPricing {
+  /** Coupon code that produced this discount. */
+  code: string;
+  /** Percentage off the plan price (e.g. `25` → 25% off). */
+  discountPercent: number;
+  /**
+   * How many annual intervals the discount applies for:
+   * `1` → this payment only, `null` → forever (every renewal),
+   * `5` → this payment plus 4 renewals (5 years total).
+   */
+  durationLimitIntervals: number | null;
+  /**
+   * Amount that will be charged at the next renewal. Equals
+   * {@link CouponPricing.discountedAmount} while the discount still covers the
+   * next period, otherwise reverts to {@link CouponPricing.amount}.
+   */
+  renewalAmount: number;
+}
 
 export interface ChangeCountryResponse {
   selectedCountry: string;

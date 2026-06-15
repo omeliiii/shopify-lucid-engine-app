@@ -223,6 +223,8 @@
       "title": "Dein Abonnement",
       "no_plan": "Kein aktiver Tarif",
       "renews_on": "Verlängert am {{date}}",
+      "renews_on_amount": "Verlängert am {{date}} für {{currency}}{{amount}}/Jahr",
+      "discount_badge": "-{{percent}}%",
       "trial_banner_body": "Du bist in der Testphase bis <strong>{{date}}</strong>. Berichts-Downloads werden nach Ende der Testphase freigeschaltet.",
       "end_trial_cta": "Testphase beenden und Zahlung aktivieren",
       "selected_country_title": "Hauptland",

@@ -295,6 +295,14 @@ export const MOCKS: Record<string, any> = {
     addonCountries: ['IT'],
     accessibleCountries: ['DE', 'IT'],
     availableCountries: ['DE', 'IT', 'FR'],
+    discount: {
+      code: 'WELCOME25',
+      discountPercent: 25,
+      amount: 179,
+      discountedAmount: 134,
+      durationLimitIntervals: 3,
+      renewalAmount: 134,
+    },
   },
 
   '/reports': {

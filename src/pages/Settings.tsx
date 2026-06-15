@@ -172,6 +172,13 @@ export default function Settings() {
   // ── Derived ──
   const isOneCountry = sub?.plan === 'ONE_COUNTRY';
   const planInfo = sub?.plan ? getPlan(sub.plan) : null;
+  const discount = sub?.discount ?? null;
+
+  const discountDurationNote = (intervals: number | null): string => {
+    if (intervals === null) return t('billing.plan_selection.coupon_duration_forever');
+    if (intervals === 1) return t('billing.plan_selection.coupon_duration_once');
+    return t('billing.plan_selection.coupon_duration_years', { years: intervals });
+  };
 
   // Available countries for add-on (exclude already selected + already added)
   const addonAvailable = useMemo(() => {
@@ -336,12 +343,29 @@ export default function Settings() {
                 {renderStatusBadge(sub.status, sub.isInTrial, sub.trialEndsAt, sub.currentPeriodEnd)}
               </InlineStack>
 
-              <InlineStack gap="100" blockAlign="baseline">
-                <Text as="span" variant="headingXl">
-                  {`${currency}${planInfo?.amount ?? '—'}`}
-                </Text>
-                <Text as="span" tone="subdued">{t('billing.plans.one_country.amount_unit')}</Text>
-              </InlineStack>
+              <BlockStack gap="100">
+                <InlineStack gap="200" blockAlign="baseline">
+                  <Text as="span" variant="headingXl">
+                    {`${currency}${discount ? discount.discountedAmount : (planInfo?.amount ?? '—')}`}
+                  </Text>
+                  {discount && (
+                    <Text as="span" tone="subdued" textDecorationLine="line-through">
+                      {`${currency}${discount.amount}`}
+                    </Text>
+                  )}
+                  <Text as="span" tone="subdued">{t('billing.plans.one_country.amount_unit')}</Text>
+                  {discount && (
+                    <Badge tone="success">
+                      {t('billing.subscription_page.discount_badge', { percent: discount.discountPercent })}
+                    </Badge>
+                  )}
+                </InlineStack>
+                {discount && (
+                  <Text as="span" tone="subdued" variant="bodySm">
+                    {discountDurationNote(discount.durationLimitIntervals)}
+                  </Text>
+                )}
+              </BlockStack>
 
               {sub.isInTrial && sub.trialEndsAt && (
                 <Banner tone="info">
@@ -369,7 +393,13 @@ export default function Settings() {
 
               {sub.currentPeriodEnd && sub.status !== 'CANCELLED' && (
                 <Text as="p" tone="subdued">
-                  {t('billing.subscription_page.renews_on', { date: formatDate(sub.currentPeriodEnd) })}
+                  {discount
+                    ? t('billing.subscription_page.renews_on_amount', {
+                        date: formatDate(sub.currentPeriodEnd),
+                        currency,
+                        amount: discount.renewalAmount,
+                      })
+                    : t('billing.subscription_page.renews_on', { date: formatDate(sub.currentPeriodEnd) })}
                 </Text>
               )}
             </BlockStack>

@@ -223,6 +223,8 @@
       "title": "Il tuo abbonamento",
       "no_plan": "Nessun piano attivo",
       "renews_on": "Si rinnova il {{date}}",
+      "renews_on_amount": "Si rinnova il {{date}} a {{currency}}{{amount}}/anno",
+      "discount_badge": "-{{percent}}%",
       "trial_banner_body": "Sei in prova gratuita fino al <strong>{{date}}</strong>. I download dei report saranno disponibili al termine della prova.",
       "end_trial_cta": "Termina la prova e attiva il pagamento",
       "selected_country_title": "Paese principale",
