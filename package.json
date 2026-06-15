@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "shopify:dev": "shopify app dev --config dev",
+    "deploy:dev": "shopify app deploy --config dev",
+    "deploy:prod": "shopify app deploy --config shopify.app.toml"
   },
   "dependencies": {
     "@shopify/app-bridge-react": "^4.2.10",
