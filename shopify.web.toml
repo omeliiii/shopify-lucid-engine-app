@@ -1,7 +1,7 @@
 roles = ["frontend"]
 
 [commands]
-# $SHOPIFY_API_KEY e $PORT sono iniettati da `shopify app dev`.
-# Passare il client_id della config attiva ad App Bridge garantisce che l'api-key
-# combaci sempre con l'app (dev o prod) selezionata, indipendentemente da .env.
-dev = "VITE_SHOPIFY_API_KEY=$SHOPIFY_API_KEY npm run dev -- --port $PORT"
+# La CLI esegue questo comando SENZA shell (niente espansione di $VAR né prefissi VAR=val).
+# La porta assegnata dalla CLI arriva via env FRONTEND_PORT/PORT ed è letta in vite.config.ts.
+# L'api-key di App Bridge arriva da VITE_SHOPIFY_API_KEY in .env.development.
+dev = "npm run dev"
