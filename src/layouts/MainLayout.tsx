@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Frame, Navigation, TopBar, Select } from '@shopify/polaris';
-import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, DeliveryIcon, CollectionIcon, GlobeIcon } from '@shopify/polaris-icons';
+import { Frame, Navigation, TopBar } from '@shopify/polaris';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, DeliveryIcon, CollectionIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../locales/i18n';
+import { PolarisSelect } from '../components/PolarisSelect';
 
 /** Human-readable labels for each supported locale (language-native names). */
 const LOCALE_LABELS: Record<SupportedLocale, string> = {
@@ -141,9 +142,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         items={[]}
       />
       <div style={{ padding: 'var(--p-space-300) var(--p-space-400)' }}>
-        <Select
+        <PolarisSelect
           label={t('navigation.language')}
-          labelInline
           options={languageOptions}
           value={i18n.resolvedLanguage ?? i18n.language}
           onChange={handleLanguageChange}
