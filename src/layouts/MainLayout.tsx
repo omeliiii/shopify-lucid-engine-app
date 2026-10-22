@@ -1,14 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Frame, Navigation, TopBar } from '@shopify/polaris';
-import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, DeliveryIcon, CollectionIcon } from '@shopify/polaris-icons';
+import { Frame, Navigation, TopBar, Select } from '@shopify/polaris';
+import { HomeIcon, InventoryIcon, ProductIcon, SettingsIcon, FileIcon, DeliveryIcon, CollectionIcon, GlobeIcon } from '@shopify/polaris-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from '../utils/api';
+import { SUPPORTED_LOCALES, type SupportedLocale } from '../locales/i18n';
+
+/** Human-readable labels for each supported locale (language-native names). */
+const LOCALE_LABELS: Record<SupportedLocale, string> = {
+  it: '🇮🇹 Italiano',
+  en: '🇬🇧 English',
+  de: '🇩🇪 Deutsch',
+  fr: '🇫🇷 Français',
+};
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const [unreadReports, setUnreadReports] = useState<number>(0);
 
   // Mobile navigation: Polaris hides the sidebar on small screens behind a
@@ -55,6 +64,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       cancelled = true;
     };
   }, []);
+
+  const handleLanguageChange = useCallback(
+    (value: string) => {
+      i18n.changeLanguage(value);
+    },
+    [i18n],
+  );
+
+  const languageOptions = SUPPORTED_LOCALES.map((locale) => ({
+    label: LOCALE_LABELS[locale],
+    value: locale,
+  }));
 
   const navigationMarkup = (
     <Navigation location={location.pathname}>
@@ -115,6 +136,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           },
         ]}
       />
+      <Navigation.Section
+        fill
+        items={[]}
+      />
+      <div style={{ padding: 'var(--p-space-300) var(--p-space-400)' }}>
+        <Select
+          label={t('navigation.language')}
+          labelInline
+          options={languageOptions}
+          value={i18n.resolvedLanguage ?? i18n.language}
+          onChange={handleLanguageChange}
+        />
+      </div>
     </Navigation>
   );
 

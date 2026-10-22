@@ -75,7 +75,8 @@
     "shipping_rules": "Règles d'expédition",
     "reports": "Rapports et déclarations",
     "subscription": "Abonnement",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "language": "Langue"
   },
   "countries": {
     "all": "Tous les pays",

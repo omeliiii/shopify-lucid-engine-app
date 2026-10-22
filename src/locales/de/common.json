@@ -75,7 +75,8 @@
     "shipping_rules": "Versandregeln",
     "reports": "Berichte & Meldungen",
     "subscription": "Abonnement",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "language": "Sprache"
   },
   "countries": {
     "all": "Alle Länder",
